@@ -1,0 +1,19 @@
+/* =====================================================================
+ * Copyright (c) 2011 - 2012, Freescale Semiconductor, Inc.
+ * All rights reserved.
+ *
+ * This file contains copyrighted material. Use of this file is restricted
+ * by the provisions of a Freescale Software License Agreement, which has
+ * either accompanied the delivery of this software in shrink wrap
+ * form or been expressly executed between the parties.
+ *
+ * ===================================================================*/
+
+Manual installation for FM library:
+   - copy binary (libfm-xxx.a) to /usr/lib folder on your target root filesystem
+   - copy headers (include/fmd/ dir.) to /usr/include/fmd/ dir. on target
+
+An application that uses this package will have to link with the static
+library and include the necessary headers.
+
+
