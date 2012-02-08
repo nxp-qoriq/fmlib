@@ -10,6 +10,10 @@
  * ===================================================================*/
 
 Manual installation for FM library:
+   - set the environment variable KERNEL_SOURCE which points to the kernel
+	involved in your build process (and CROSS_COMPILE as well)
+   - make all: will create the binaries for all platforms
+   - male archive: will create the tarball containing all fmlib binaries
    - copy binary (libfm-xxx.a) to /usr/lib folder on your target root filesystem
    - copy headers (include/fmd/ dir.) to /usr/include/fmd/ dir. on target
 
