@@ -43,7 +43,7 @@ CC=$(CROSS_COMPILE)gcc
 AR=$(CROSS_COMPILE)ar rcsv
 
 %.a: %.o
-	@($(AR) $(@))
+	@($(AR) $@ $^)
 	@(echo "(AR) $(@)")
 
 all: libfm-ppc32e5500.a libfm-ppc64e5500.a libfm-ppce500mc.a libfm-ppce500v2.a
