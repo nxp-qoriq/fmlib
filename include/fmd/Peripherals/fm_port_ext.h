@@ -137,7 +137,6 @@ typedef uint32_t    fmPortFrameErrSelect_t;                         /**< typedef
 *//***************************************************************************/
 typedef struct t_FmPortParams {
     t_Handle                    h_Fm;               /**< A handle to the FM object this port belongs to */
-    t_Handle                    h_FmPcd;            /**< A handle to the FM PCD object used by this port */
 
     e_FmPortType                portType;           /**< Port type */
     uint8_t                     portId;             /**< Port Id - relative to type */
