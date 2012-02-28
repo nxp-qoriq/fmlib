@@ -17,20 +17,23 @@
 # one at a time, by invoking only the corresponding libfm-<arch>.a, then
 # install-<arch> targets for each platform that it's currently configured for.
 
-# Set this as appropriate for local builds.
-TARGET_PREFIX?=powerpc-linux-gnu-
+# Set this as appropriate for local builds
+CROSS_COMPILE?=powerpc-linux-gnu-
 
-# You must set KERNEL_SOURCE before invoking this Makefile
-# (Yocto doesn't set this either!)
-KERNEL_SOURCE?=/mnt/opt/sdk-devel/linux
+# You must set KERNEL_SRC or the <DESTDIR, PREFIX> pair
+# before invoking this Makefile as standalone
+KERNEL_SRC?=$(DESTDIR)$(PREFIX)
 
 # This is inherited from the environment with which Yocto invokes us
-# (if not, then uncomment this line):
-#CC=$(TARGET_PREFIX)gcc
+ifeq ($(CC),cc)
+CC=$(CROSS_COMPILE)gcc
+endif
 
-# The Yocto environment contains no var. named AR, so we have no choice but
-# to set it here:
-AR=$(TARGET_PREFIX)ar rcsv
+# The Yocto environment contains no var. named AR,
+# so we have no choice but to set it here:
+ifeq ($(AR),ar)
+AR=$(CROSS_COMPILE)ar rcsv
+endif
 
 INSTALL?=install
 
@@ -41,7 +44,7 @@ FM_LIB_VERSION:=$(shell cat .version)
 FM_LIB_DOCFILES=COPYING INSTALL README 
 
 # Don't touch these!
-FM_IOCTL_INC?=$(KERNEL_SOURCE)/include/linux/fmd
+FM_IOCTL_INC?=$(KERNEL_SRC)/include/linux/fmd
 FM_LIB_INC?=./include/fmd
 FM_LIB_SRCDIR=./src
 FM_LIB_INCLUDE:=$(FM_IOCTL_INC) \
@@ -57,16 +60,14 @@ EXTRA_CFLAGS=-DNCSW_LINUX
 
 # CFLAGS to use during out-of-Yocto (i.e. "local") build:
 LOCAL_CFLAGS=-O2 -g0 -Wall \
-	  -fexpensive-optimizations -frename-registers \
-	  -fomit-frame-pointer -maix-struct-return \
-	  -D__STDC_LIMIT_MACROS $(EXTRA_CFLAGS)
+	     -fexpensive-optimizations -frename-registers \
+	     -fomit-frame-pointer -maix-struct-return \
+	     -D__STDC_LIMIT_MACROS $(EXTRA_CFLAGS)
 
 
 %.a: %.o
 	@(echo "(AR) $(@)")
 	@($(AR) $@ $^)
-
-all: libfm-ppc32e5500.a libfm-ppc64e5500.a libfm-ppce500mc.a libfm-ppce500v2.a
 
 libfm-ppce500mc.o libfm-ppc32e5500.o libfm-ppc64e5500.o: EXTRA_CFLAGS+=-DP4080
 libfm-ppce500v2.o:  EXTRA_CFLAGS+=-DP1023
@@ -76,9 +77,13 @@ libfm-ppc32e5500.o: CFLAGS?=-m32 -mhard-float -mcpu=e5500  $(LOCAL_CFLAGS)
 libfm-ppc64e5500.o: CFLAGS?=-m64 -mhard-float -mcpu=e5500  $(LOCAL_CFLAGS) 
 libfm-ppce500v2.o:  CFLAGS?=-m32 -msoft-float -mcpu=8548   $(LOCAL_CFLAGS) 
 
-CFLAGS+=$(EXTRA_CFLAGS)
+CFLAGS+=$(EXTRA_CFLAGS) -isystem $(KERNEL_SRC)/include
 
-libfm-%.o: $(FM_LIB_SRCDIR)/fm_lib.c $(addsuffix /*.h,$(FM_LIB_INCLUDE))
+
+all: libfm-ppc32e5500.a libfm-ppc64e5500.a libfm-ppce500mc.a libfm-ppce500v2.a
+
+libfm-ppc32e5500.o libfm-ppc64e5500.o libfm-ppce500mc.o libfm-ppce500v2.o: \
+		$(FM_LIB_SRCDIR)/fm_lib.c $(addsuffix /*.h,$(FM_LIB_INCLUDE))
 	@(echo "(CC)  $@")
 	@(echo $(CC) $(CFLAGS) $(addprefix -I,$(FM_LIB_INCLUDE)) -c -o $@ $< > .$@.cmd)
 	@($(CC) $(CFLAGS) $(addprefix -I,$(FM_LIB_INCLUDE)) -c -o $@ $<)
@@ -99,15 +104,22 @@ install-%: %.a
 	@($(INSTALL) $(FM_LIB_DOCFILES) $(DESTDIR)$(PREFIX)/share/doc/fm-lib-$(FM_LIB_VERSION))
 
 targets:
+	@(echo)
 	@(echo "make all: build libraries for all platforms (local build)")
+	@(echo)
 	@(echo "make archive: build tarball with fm libraries")
-	@(echo "make libfm-<arch>.a: build tarball with fm libraries")
-	@(echo "make install-<arch>: install the library and headers to the location specified by DESTDIR, PREFIX")
+	@(echo)
+	@(echo "make libfm-<arch>.a (e.g. libfm-ppce500mc.a):")
+	@(echo "	build library for specific platform <arch>")
+	@(echo)
+	@(echo "make install-<arch> (e.g. install-ppce500mc):")
+	@(echo "	install the library and headers to the location specified by DESTDIR, PREFIX")
+	@(echo)
 	@(echo "The available <arch> options are:")
-	@(echo "    ppce500mc:	P3, P4")
-	@(echo "    ppc32e5500:	P5(32b)")
-	@(echo "    ppc64e5500:	P5(64b)")
-	@(echo "    ppce500v2:	P1")
+	@(echo "	ppce500mc:	P3, P4")
+	@(echo "	ppc32e5500:	P5(32b)")
+	@(echo "	ppc64e5500:	P5(64b)")
+	@(echo "	ppce500v2:	P1")
 
 clean:
 	@(echo "Cleaning...")
