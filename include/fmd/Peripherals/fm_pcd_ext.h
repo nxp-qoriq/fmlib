@@ -1174,7 +1174,7 @@ typedef struct t_FmPcdCcKeyParams {
  @Description   A structure for defining CC Keys parameters
 *//***************************************************************************/
 typedef struct t_KeysParams {
-    uint8_t                     numOfKeys;      /**< Number Of relevant Keys;
+    uint16_t                     numOfKeys;      /**< Number Of relevant Keys;
                                                      Note that in case of action = e_FM_PCD_ACTION_INDEXED_LOOKUP,
                                                      this field should be power-of-2 of the number of bits that are
                                                      set in 'icIndxMask'. */
@@ -1425,10 +1425,11 @@ typedef struct t_IpReassemblyParams {
                                                                  relativeSchemeId[0] -  Relative scheme ID for IPV4 Reassembly manipulation.
                                                                  relativeSchemeId[1] -  Relative scheme ID for IPV6 Reassembly manipulation.
                                                                  Relative scheme ID for IPv4/IPv6 Reassembly manipulation must be smaller than
-                                                                 the user schemes id to ensure that the reassembly’s schemes will be first match.
+                                                                 the user schemes id to ensure that the reassemble's schemes will be first match.
                                                                  Rest schemes, if defined, should have higher relative scheme ID */
-    uint16_t                        liodnOffset;            /**< LIODN offset. */
+    uint8_t                         sgBpid;                 /**< Buffer pool id for the S/G frame created by the reassembly process */
     uint8_t                         dataMemId;              /**< Memory partition ID for data buffers */
+    uint16_t                        dataLiodnOffset;        /**< LIODN offset for access the IPR's external tables structure. */
     uint16_t                        minFragSize[2];         /**< Minimum frag size.
                                                                  minFragSize[0] - for ipv4
                                                                  minFragSize[1] - for ipv6 */
