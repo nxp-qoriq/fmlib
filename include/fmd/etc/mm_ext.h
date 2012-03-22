@@ -268,7 +268,7 @@ uint64_t    MM_GetMemBlock(t_Handle h_MM, int index);
  @Param[in]     h_MM    - Handle to the MM object.
  @Param[in]     addr    - The address to be checked.
 
- @Return        TRUE if the address is in the address range of the block,FALSE otherwise.
+ @Return        TRUE if the address is in the address range of the block, FALSE otherwise.
 *//***************************************************************************/
 bool        MM_InRange(t_Handle h_MM, uint64_t addr);
 

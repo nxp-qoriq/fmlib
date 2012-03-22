@@ -71,7 +71,7 @@ typedef uint32_t fmPcdEngines_t; /**< options as defined below: */
                                                                              register size (32), - reserved bits for
                                                                              private headers. */
 
-#define FM_PCD_MAX_NUM_OF_INTERCHANGEABLE_HDRS       4                   /**< Maximum number of interchangeable headers in a distinction unit */
+#define FM_PCD_MAX_NUM_OF_INTERCHANGEABLE_HDRS      4                   /**< Maximum number of interchangeable headers in a distinction unit */
 #define FM_PCD_KG_NUM_OF_GENERIC_REGS               8                   /**< Total number of generic KG registers */
 #define FM_PCD_KG_MAX_NUM_OF_EXTRACTS_PER_KEY       35                  /**< Max number allowed on any configuration.
                                                                              For reason of HW implementation, in most
@@ -753,7 +753,7 @@ typedef enum e_FmPcdStatsType {
 
 #ifdef FM_IP_FRAG_N_REASSEM_SUPPORT
 /**************************************************************************//**
- @Description   An enum for Don’t Fragment Action. If an IP packet is larger
+ @Description   An enum for Don't Fragment Action. If an IP packet is larger
                 than MTU and its DF bit is set, then this enum determine
                 the action to be taken.
 *//***************************************************************************/
@@ -1174,7 +1174,7 @@ typedef struct t_FmPcdCcKeyParams {
  @Description   A structure for defining CC Keys parameters
 *//***************************************************************************/
 typedef struct t_KeysParams {
-    uint16_t                     numOfKeys;      /**< Number Of relevant Keys;
+    uint16_t                    numOfKeys;      /**< Number Of relevant Keys;
                                                      Note that in case of action = e_FM_PCD_ACTION_INDEXED_LOOKUP,
                                                      this field should be power-of-2 of the number of bits that are
                                                      set in 'icIndxMask'. */
@@ -1408,7 +1408,7 @@ typedef struct t_IpFragmentationParams {
     uint16_t                    sizeForFragmentation;   /**< if length of the frame is greater than this value,
                                                              IP fragmentation will be executed.*/
     uint8_t                     scratchBpid;            /**< Absolute buffer pool id according to BM configuration.*/
-    e_FmPcdManipDontFragAction  dontFragAction;         /**< Don’t Fragment Action - If an IP packet is larger
+    e_FmPcdManipDontFragAction  dontFragAction;         /**< Don't Fragment Action - If an IP packet is larger
                                                              than MTU and its DF bit is set, then this field will
                                                              determine the action to be taken.*/
 } t_IpFragmentationParams;
@@ -1425,7 +1425,7 @@ typedef struct t_IpReassemblyParams {
                                                                  relativeSchemeId[0] -  Relative scheme ID for IPV4 Reassembly manipulation.
                                                                  relativeSchemeId[1] -  Relative scheme ID for IPV6 Reassembly manipulation.
                                                                  Relative scheme ID for IPv4/IPv6 Reassembly manipulation must be smaller than
-                                                                 the user schemes id to ensure that the reassemble's schemes will be first match.
+                                                                 the user schemes id to ensure that the reassembly's schemes will be first match.
                                                                  Rest schemes, if defined, should have higher relative scheme ID */
     uint8_t                         sgBpid;                 /**< Buffer pool id for the S/G frame created by the reassembly process */
     uint8_t                         dataMemId;              /**< Memory partition ID for data buffers */
@@ -1722,7 +1722,11 @@ t_Error FM_PCD_CcDeleteNode(t_Handle h_FmPcd, t_Handle h_CcNode);
 
  @Cautions      Allowed only following FM_PCD_CcBuildTree().
 *//***************************************************************************/
-t_Error FM_PCD_CcTreeModifyNextEngine(t_Handle h_FmPcd, t_Handle h_CcTree, uint8_t grpId, uint8_t index, t_FmPcdCcNextEngineParams *p_FmPcdCcNextEngineParams);
+t_Error FM_PCD_CcTreeModifyNextEngine(t_Handle                  h_FmPcd,
+                                      t_Handle                  h_CcTree,
+                                      uint8_t                   grpId,
+                                      uint8_t                   index,
+                                      t_FmPcdCcNextEngineParams *p_FmPcdCcNextEngineParams);
 
 /**************************************************************************//**
  @Function      FM_PCD_CcNodeModifyNextEngine
@@ -1738,7 +1742,10 @@ t_Error FM_PCD_CcTreeModifyNextEngine(t_Handle h_FmPcd, t_Handle h_CcTree, uint8
 
  @Cautions      Allowed only following FM_PCD_CcSetNode().
 *//***************************************************************************/
-t_Error FM_PCD_CcNodeModifyNextEngine(t_Handle h_FmPcd, t_Handle h_CcNode, uint8_t keyIndex, t_FmPcdCcNextEngineParams *p_FmPcdCcNextEngineParams);
+t_Error FM_PCD_CcNodeModifyNextEngine(t_Handle                  h_FmPcd,
+                                      t_Handle                  h_CcNode,
+                                      uint16_t                  keyIndex,
+                                      t_FmPcdCcNextEngineParams *p_FmPcdCcNextEngineParams);
 
 /**************************************************************************//**
  @Function      FM_PCD_CcNodeModifyMissNextEngine
@@ -1753,7 +1760,9 @@ t_Error FM_PCD_CcNodeModifyNextEngine(t_Handle h_FmPcd, t_Handle h_CcNode, uint8
 
  @Cautions      Allowed only following FM_PCD_CcSetNode().
 *//***************************************************************************/
-t_Error FM_PCD_CcNodeModifyMissNextEngine(t_Handle h_FmPcd, t_Handle h_CcNode, t_FmPcdCcNextEngineParams *p_FmPcdCcNextEngineParams);
+t_Error FM_PCD_CcNodeModifyMissNextEngine(t_Handle                  h_FmPcd,
+                                          t_Handle                  h_CcNode,
+                                          t_FmPcdCcNextEngineParams *p_FmPcdCcNextEngineParams);
 
 /**************************************************************************//**
  @Function      FM_PCD_CcNodeRemoveKey
@@ -1789,7 +1798,11 @@ t_Error FM_PCD_CcNodeRemoveKey(t_Handle h_FmPcd, t_Handle h_CcNode, uint16_t key
  @Cautions      Allowed only following FM_PCD_CcSetNode() not only of the
                 relevant node but also the node that points to this node
 *//***************************************************************************/
-t_Error FM_PCD_CcNodeAddKey(t_Handle h_FmPcd, t_Handle h_CcNode, uint8_t keyIndex, uint8_t keySize, t_FmPcdCcKeyParams  *p_KeyParams);
+t_Error FM_PCD_CcNodeAddKey(t_Handle            h_FmPcd,
+                            t_Handle            h_CcNode,
+                            uint16_t            keyIndex,
+                            uint8_t             keySize,
+                            t_FmPcdCcKeyParams  *p_KeyParams);
 
 /**************************************************************************//**
  @Function      FM_PCD_CcNodeModifyKeyAndNextEngine
@@ -1809,7 +1822,11 @@ t_Error FM_PCD_CcNodeAddKey(t_Handle h_FmPcd, t_Handle h_CcNode, uint8_t keyInde
  @Cautions      Allowed only following FM_PCD_CcSetNode() not only of the
                 relevant node but also the node that points to this node
 *//***************************************************************************/
-t_Error FM_PCD_CcNodeModifyKeyAndNextEngine(t_Handle h_FmPcd, t_Handle h_CcNode, uint8_t keyIndex, uint8_t keySize, t_FmPcdCcKeyParams  *p_KeyParams);
+t_Error FM_PCD_CcNodeModifyKeyAndNextEngine(t_Handle            h_FmPcd,
+                                            t_Handle            h_CcNode,
+                                            uint16_t            keyIndex,
+                                            uint8_t             keySize,
+                                            t_FmPcdCcKeyParams  *p_KeyParams);
 
 /**************************************************************************//**
  @Function      FM_PCD_CcNodeModifyKey
@@ -1821,14 +1838,20 @@ t_Error FM_PCD_CcNodeModifyKeyAndNextEngine(t_Handle h_FmPcd, t_Handle h_CcNode,
  @Param[in]     keyIndex                    Key index for adding
  @Param[in]     keySize                     Key size of added key
  @Param[in]     p_Key                       A pointer to the new key
- @Param[in]     p_Mask                      A pointer to the new mask if relevant, otherwise pointer to NULL
+ @Param[in]     p_Mask                      A pointer to the new mask if relevant,
+                                            otherwise pointer to NULL
 
  @Return        E_OK on success; Error code otherwise.
 
  @Cautions      Allowed only following FM_PCD_CcSetNode() not only of the
                 relevant node but also the node that points to this node
 *//***************************************************************************/
-t_Error FM_PCD_CcNodeModifyKey(t_Handle h_FmPcd, t_Handle h_CcNode, uint8_t keyIndex, uint8_t keySize, uint8_t  *p_Key, uint8_t *p_Mask);
+t_Error FM_PCD_CcNodeModifyKey(t_Handle h_FmPcd,
+                               t_Handle h_CcNode,
+                               uint16_t keyIndex,
+                               uint8_t  keySize,
+                               uint8_t  *p_Key,
+                               uint8_t  *p_Mask);
 
 /**************************************************************************//**
  @Function      FM_PCD_PlcrSetProfile
@@ -1868,15 +1891,17 @@ t_Error FM_PCD_PlcrDeleteProfile(t_Handle h_FmPcd, t_Handle h_Profile);
  @Description   Sets an entry in the classification plan.
                 The routine overrides any existing value.
 
- @Param[in]     h_FmPcd             A handle to an FM PCD Module.
+ @Param[in]     h_FmPcd         A handle to an FM PCD Module.
  @Param[in]     h_Profile       A handle to the profile.
- @Param[in]     counter             Counter selector.
+ @Param[in]     counter         Counter selector.
 
  @Return        specific counter value.
 
  @Cautions      Allowed only following FM_PCD_Init().
 *//***************************************************************************/
-uint32_t FM_PCD_PlcrGetProfileCounter(t_Handle h_FmPcd, t_Handle h_Profile, e_FmPcdPlcrProfileCounters counter);
+uint32_t FM_PCD_PlcrGetProfileCounter(t_Handle                      h_FmPcd,
+                                      t_Handle                      h_Profile,
+                                      e_FmPcdPlcrProfileCounters    counter);
 
 /**************************************************************************//**
  @Function      FM_PCD_PlcrSetProfileCounter
@@ -1893,7 +1918,10 @@ uint32_t FM_PCD_PlcrGetProfileCounter(t_Handle h_FmPcd, t_Handle h_Profile, e_Fm
 
  @Cautions      Allowed only following FM_PCD_Init().
 *//***************************************************************************/
-t_Error FM_PCD_PlcrSetProfileCounter(t_Handle h_FmPcd, t_Handle h_Profile, e_FmPcdPlcrProfileCounters counter, uint32_t value);
+t_Error FM_PCD_PlcrSetProfileCounter(t_Handle                   h_FmPcd,
+                                     t_Handle                   h_Profile,
+                                     e_FmPcdPlcrProfileCounters counter,
+                                     uint32_t                   value);
 
 #if defined(FM_CAPWAP_SUPPORT) || defined(FM_IP_FRAG_N_REASSEM_SUPPORT)
 /**************************************************************************//**
@@ -1949,6 +1977,7 @@ t_Handle FM_PCD_StatisticsSetNode(t_Handle h_FmPcd, t_FmPcdStatsParams *p_FmPcds
 /** @} */ /* end of lnx_usr_FM_PCD_Runtime_grp group */
 /** @} */ /* end of lnx_usr_FM_PCD_grp group */
 /** @} */ /* end of lnx_usr_FM_grp group */
+
 
 
 #endif /* __FM_PCD_EXT */

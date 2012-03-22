@@ -237,7 +237,7 @@ uint32_t MEM_ComputePartitionSize(uint32_t num,
                                   uint16_t alignment);
 
 #ifdef DEBUG_MEM_LEAKS
-#if !(defined(__MWERKS__) && (__dest_os == __ppc_eabi))
+#if !((defined(__MWERKS__) || defined(__GNUC__)) && (__dest_os == __ppc_eabi))
 #error  "Memory-Leaks-Debug option is supported only for freescale CodeWarrior"
 #endif /* !(defined(__MWERKS__) && ... */
 

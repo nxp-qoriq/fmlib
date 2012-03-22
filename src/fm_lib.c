@@ -464,7 +464,7 @@ t_Error FM_PCD_CcTreeModifyNextEngine(t_Handle h_FmPcd, t_Handle h_CcTree, uint8
     return E_OK;
 }
 
-t_Error FM_PCD_CcNodeModifyNextEngine(t_Handle h_FmPcd, t_Handle h_CcNode, uint8_t keyIndex, t_FmPcdCcNextEngineParams *p_FmPcdCcNextEngineParams)
+t_Error FM_PCD_CcNodeModifyNextEngine(t_Handle h_FmPcd, t_Handle h_CcNode, uint16_t keyIndex, t_FmPcdCcNextEngineParams *p_FmPcdCcNextEngineParams)
 {
     t_Device    *p_Dev = (t_Device*) h_FmPcd;
     ioc_fm_pcd_cc_node_modify_next_engine_params_t  params;
@@ -515,7 +515,7 @@ t_Error FM_PCD_CcNodeRemoveKey(t_Handle h_FmPcd, t_Handle h_CcNode, uint16_t key
     return E_OK;
 }
 
-t_Error FM_PCD_CcNodeAddKey(t_Handle h_FmPcd, t_Handle h_CcNode, uint8_t keyIndex, uint8_t keySize, t_FmPcdCcKeyParams  *p_KeyParams)
+t_Error FM_PCD_CcNodeAddKey(t_Handle h_FmPcd, t_Handle h_CcNode, uint16_t keyIndex, uint8_t keySize, t_FmPcdCcKeyParams  *p_KeyParams)
 {
     t_Device    *p_Dev = (t_Device*) h_FmPcd;
     ioc_fm_pcd_cc_node_modify_key_and_next_engine_params_t  params;
@@ -534,7 +534,7 @@ t_Error FM_PCD_CcNodeAddKey(t_Handle h_FmPcd, t_Handle h_CcNode, uint8_t keyInde
     return E_OK;
 }
 
-t_Error FM_PCD_CcNodeModifyKeyAndNextEngine(t_Handle h_FmPcd, t_Handle h_CcNode, uint8_t keyIndex, uint8_t keySize, t_FmPcdCcKeyParams *p_KeyParams)
+t_Error FM_PCD_CcNodeModifyKeyAndNextEngine(t_Handle h_FmPcd, t_Handle h_CcNode, uint16_t keyIndex, uint8_t keySize, t_FmPcdCcKeyParams *p_KeyParams)
 {
     t_Device    *p_Dev = (t_Device*) h_FmPcd;
     ioc_fm_pcd_cc_node_modify_key_and_next_engine_params_t  params;
@@ -553,7 +553,7 @@ t_Error FM_PCD_CcNodeModifyKeyAndNextEngine(t_Handle h_FmPcd, t_Handle h_CcNode,
     return E_OK;
 }
 
-t_Error FM_PCD_CcNodeModifyKey(t_Handle h_FmPcd, t_Handle h_CcNode, uint8_t keyIndex, uint8_t keySize, uint8_t  *p_Key, uint8_t *p_Mask)
+t_Error FM_PCD_CcNodeModifyKey(t_Handle h_FmPcd, t_Handle h_CcNode, uint16_t keyIndex, uint8_t keySize, uint8_t  *p_Key, uint8_t *p_Mask)
 {
     t_Device    *p_Dev = (t_Device*) h_FmPcd;
     ioc_fm_pcd_cc_node_modify_key_params_t  params;
