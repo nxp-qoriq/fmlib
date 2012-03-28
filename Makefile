@@ -24,15 +24,15 @@ CROSS_COMPILE?=powerpc-linux-gnu-
 # before invoking this Makefile as standalone
 KERNEL_SRC?=$(DESTDIR)$(PREFIX)
 
-# This is inherited from the environment with which Yocto invokes us
+# These should be inherited from the environment with which Yocto invokes us,
+# but in case not, then here we're making sure that we're actually using
+# the cross-tools, and NOT the native ones:
 ifeq ($(CC),cc)
 CC=$(CROSS_COMPILE)gcc
 endif
 
-# The Yocto environment contains no var. named AR,
-# so we have no choice but to set it here:
 ifeq ($(AR),ar)
-AR=$(CROSS_COMPILE)ar rcsv
+AR=$(CROSS_COMPILE)ar
 endif
 
 INSTALL?=install
@@ -67,7 +67,7 @@ LOCAL_CFLAGS=-O2 -g0 -Wall \
 
 %.a: %.o
 	@(echo "(AR) $(@)")
-	@($(AR) $@ $^)
+	@($(AR) rcsv $@ $^)
 
 libfm-ppce500mc.o libfm-ppc32e5500.o libfm-ppc64e5500.o: EXTRA_CFLAGS+=-DP4080
 libfm-ppce500v2.o:  EXTRA_CFLAGS+=-DP1023
