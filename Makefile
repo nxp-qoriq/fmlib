@@ -112,7 +112,7 @@ targets:
 	@(echo "make libfm-<arch>.a (e.g. libfm-ppce500mc.a):")
 	@(echo "	build library for specific platform <arch>")
 	@(echo)
-	@(echo "make install-<arch> (e.g. install-ppce500mc):")
+	@(echo "make install-libfm-<arch> (e.g. install-libfm-ppce500mc):")
 	@(echo "	install the library and headers to the location specified by DESTDIR, PREFIX")
 	@(echo)
 	@(echo "The available <arch> options are:")
