@@ -25,9 +25,6 @@
 #include "std_ext.h"
 #include "part_ext.h"
 
-#if defined(__MWERKS__) && defined(OPTIMIZED_FOR_SPEED)
-#include "xx_integration_ext.h"
-#endif /* defined(__MWERKS__) && defined(OPTIMIZED_FOR_SPEED) */
 
 
 /**************************************************************************//**
@@ -38,27 +35,6 @@
 
  @{
 *//***************************************************************************/
-
-#if (defined(REPORT_EVENTS) && (REPORT_EVENTS > 0))
-/**************************************************************************//**
- @Function      XX_EventById
-
- @Description   Event reporting routine - executed only when REPORT_EVENTS=1.
-
- @Param[in]     event - Event code (e_Event).
- @Param[in]     appId - Application identifier.
- @Param[in]     flags - Event flags.
- @Param[in]     msg   - Event message.
-
- @Return        None
-*//***************************************************************************/
-void XX_EventById(uint32_t event, t_Handle appId, uint16_t flags, char *msg);
-
-#else  /* not REPORT_EVENTS */
-#define XX_EventById(event, appId, flags, msg)
-#endif /* REPORT_EVENTS */
-
-
 
 #ifdef DEBUG_XX_MALLOC
 void * XX_MallocDebug(uint32_t size, char *fname, int line);
@@ -514,7 +490,7 @@ int XX_TimerIsActive(t_Handle h_Timer);
 
  @Cautions      This routine enables interrupts during its wait time.
 *//***************************************************************************/
-uint32_t XX_Sleep(uint32_t msecs);
+void XX_Sleep(uint32_t msecs);
 
 /**************************************************************************//**
  @Function      XX_UDelay

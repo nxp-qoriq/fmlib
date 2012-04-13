@@ -224,12 +224,11 @@ t_Error     MM_Add(t_Handle h_MM, uint64_t base, uint64_t size);
 /**************************************************************************//**
  @Function      MM_Dump
 
- @Description   Prints results of free and busy lists into the file.
+ @Description   Prints results of free and busy lists.
 
  @Param[in]     h_MM        - Handle to the MM object.
- @Param[in]     buff        - A pointer to a buffer
 *//***************************************************************************/
-void        MM_Dump(t_Handle h_MM, void *buff);
+void        MM_Dump(t_Handle h_MM);
 
 /**************************************************************************//**
  @Function      MM_Free
@@ -271,6 +270,17 @@ uint64_t    MM_GetMemBlock(t_Handle h_MM, int index);
  @Return        TRUE if the address is in the address range of the block, FALSE otherwise.
 *//***************************************************************************/
 bool        MM_InRange(t_Handle h_MM, uint64_t addr);
+
+/**************************************************************************//**
+ @Function      MM_GetFreeMemSize
+
+ @Description   Returns the size (in bytes) of free memory.
+
+ @Param[in]     h_MM    - Handle to the MM object.
+ 
+ @Return        Free memory size in bytes.
+*//***************************************************************************/
+uint64_t MM_GetFreeMemSize(t_Handle h_MM);
 
 
 /** @} */ /* end of mm_grp group */

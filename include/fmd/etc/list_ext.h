@@ -208,7 +208,7 @@ static __inline__ void LIST_Add(t_List *p_New, t_List *p_Head)
                 This is useful for implementing queues.
 
  @Param[in]     p_New  - A pointer to a new list entry to be added.
- @Param[in]     p_Head - A pointer to a list head to add it after.
+ @Param[in]     p_Head - A pointer to a list head to add it before.
 
  @Return        none.
 *//***************************************************************************/

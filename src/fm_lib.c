@@ -145,7 +145,8 @@ t_Error FM_ForceIntr(t_Handle h_Fm, e_FmExceptions exception)
 
     return E_OK;
 }
-
+/* TODO:FMD16 FM Control Monito export functions */
+/* TODO:FMD16 FM_GetSpecialOperationCoding */
 /********************************************************************************************/
 /*  FM_PCD FUNCTIONS                                                                        */
 /********************************************************************************************/
@@ -695,9 +696,12 @@ t_Handle FM_PORT_Open(t_FmPortParams *p_FmPortParams)
     memset(devName, 0, sizeof(devName));
     switch (p_FmPortParams->portType)
     {
+        /*TODO:FMD16 OH parsing port breaks down  */
+#if 0
         case e_FM_PORT_TYPE_OH_HOST_COMMAND:
             sprintf(devName, "%s%s%d-port-oh", "/dev/", DEV_FM_NAME, ((t_Device*)p_FmPortParams->h_Fm)->id);
             break;
+#endif
         case e_FM_PORT_TYPE_OH_OFFLINE_PARSING:
             sprintf(devName, "%s%s%d-port-oh%d", "/dev/", DEV_FM_NAME,
                     ((t_Device*)p_FmPortParams->h_Fm)->id, p_FmPortParams->portId);
@@ -1005,21 +1009,6 @@ t_Error FM_PORT_PcdModifyPrsStart (t_Handle h_FmPort, t_FmPcdPrsStart *p_FmPcdPr
 
     return E_OK;
 }
-
-#if defined(FM_IPSEC_SUPPORT) || defined(FM_IP_FRAG_N_REASSEM_SUPPORT)
-t_Error FM_PORT_SetOpWorkarounds(t_Handle h_FmPort, fmOpPortWorkaroundsSelect_t workarounds)
-{
-    t_Device    *p_Dev = (t_Device*) h_FmPort;
-
-    SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
-
-    /*fmOpPortWorkaroundsSelect_t is a uint32_t -  if LLD will change, make sure this is in sync */
-    if (ioctl(p_Dev->fd, FM_PORT_SET_OP_WORKAROUNDS, &workarounds))
-        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
-
-    return E_OK;
-}
-#endif
 
 #ifdef P1023
 void Platform_is_P1023()
