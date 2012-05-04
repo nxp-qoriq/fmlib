@@ -60,6 +60,132 @@ typedef enum e_FmPortType {
 } e_FmPortType;
 
 /**************************************************************************//**
+ @Description   Parse results memory layout
+*//***************************************************************************/
+typedef _Packed struct t_FmPrsResult {
+    volatile uint8_t     lpid;               /**< Logical port id */
+    volatile uint8_t     shimr;              /**< Shim header result  */
+    volatile uint16_t    l2r;                /**< Layer 2 result */
+    volatile uint16_t    l3r;                /**< Layer 3 result */
+    volatile uint8_t     l4r;                /**< Layer 4 result */
+    volatile uint8_t     cplan;              /**< Classification plan id */
+    volatile uint16_t    nxthdr;             /**< Next Header  */
+    volatile uint16_t    cksum;              /**< Checksum */
+    volatile uint16_t    flags_frag_off;     /**< Flags & fragment-offset field of the last IP-header */
+    volatile uint8_t     route_type;         /**< Routing type field of a IPv6 routing extension header */
+    volatile uint8_t     rhp_ip_valid;       /**< Routing Extension Header Present; last bit is IP valid */
+    volatile uint8_t     shim_off[2];        /**< Shim offset */
+    volatile uint8_t     ip_pid_off;         /**< IP PID (last IP-proto) offset */
+    volatile uint8_t     eth_off;            /**< ETH offset */
+    volatile uint8_t     llc_snap_off;       /**< LLC_SNAP offset */
+    volatile uint8_t     vlan_off[2];        /**< VLAN offset */
+    volatile uint8_t     etype_off;          /**< ETYPE offset */
+    volatile uint8_t     pppoe_off;          /**< PPP offset */
+    volatile uint8_t     mpls_off[2];        /**< MPLS offset */
+    volatile uint8_t     ip_off[2];          /**< IP offset */
+    volatile uint8_t     gre_off;            /**< GRE offset */
+    volatile uint8_t     l4_off;             /**< Layer 4 offset */
+    volatile uint8_t     nxthdr_off;         /**< Parser end point */
+} _PackedType t_FmPrsResult;
+
+/**************************************************************************//**
+ @Collection   FM Parser results
+*//***************************************************************************/
+#define FM_PR_L2_VLAN_STACK         0x00000100  /**< Parse Result: VLAN stack */
+#define FM_PR_L2_ETHERNET           0x00008000  /**< Parse Result: Ethernet*/
+#define FM_PR_L2_VLAN               0x00004000  /**< Parse Result: VLAN */
+#define FM_PR_L2_LLC_SNAP           0x00002000  /**< Parse Result: LLC_SNAP */
+#define FM_PR_L2_MPLS               0x00001000  /**< Parse Result: MPLS */
+#define FM_PR_L2_PPPoE              0x00000800  /**< Parse Result: PPPoE */
+/* @} */
+
+/**************************************************************************//**
+ @Collection   FM Frame descriptor macros
+*//***************************************************************************/
+#define FM_FD_CMD_FCO               0x80000000  /**< Frame queue Context Override */
+#define FM_FD_CMD_RPD               0x40000000  /**< Read Prepended Data */
+#define FM_FD_CMD_UPD               0x20000000  /**< Update Prepended Data */
+#define FM_FD_CMD_DTC               0x10000000  /**< Do L4 Checksum */
+#define FM_FD_CMD_DCL4C             0x10000000  /**< Didn't calculate L4 Checksum */
+#define FM_FD_CMD_CFQ               0x00ffffff  /**< Confirmation Frame Queue */
+
+#define FM_FD_TX_STATUS_ERR_MASK    0x07000000  /**< TX Error FD bits */
+#define FM_FD_RX_STATUS_ERR_MASK    0x073ee3f8  /**< RX Error FD bits */
+#define FM_FD_RX_STATUS_ERR_NON_FM  0x00400000  /**< non Frame-Manager error */
+/* @} */
+
+/**************************************************************************//**
+ @Description   Context A
+*//***************************************************************************/
+typedef _Packed struct t_FmContextA {
+    volatile uint32_t    command;   /**< ContextA Command */
+    volatile uint8_t     res0[4];   /**< ContextA Reserved bits */
+} _PackedType t_FmContextA;
+
+/**************************************************************************//**
+ @Description   Context B
+*//***************************************************************************/
+typedef uint32_t t_FmContextB;
+
+/**************************************************************************//**
+ @Collection   Special Operation options
+*//***************************************************************************/
+typedef uint32_t fmSpecialOperations_t;                 /**< typedef for defining Special Operation options */
+
+#define  FM_SP_OP_IPSEC                     0x80000000  /**< activate features that related to IPSec (e.g fix Eth-type) */
+#define  FM_SP_OP_IPSEC_UPDATE_UDP_LEN      0x40000000  /**< update the UDP-Len after Encryption */
+#define  FM_SP_OP_IPSEC_MANIP               0x20000000  /**< handle the IPSec-manip options */
+#define  FM_SP_OP_RPD                       0x10000000  /**< Set the RPD bit */
+#define  FM_SP_OP_DCL4C                     0x08000000  /**< Set the DCL4C bit */
+#define  FM_SP_OP_CHECK_SEC_ERRORS          0x04000000  /**< Check SEC errors */
+/* @} */
+
+/**************************************************************************//**
+ @Collection   Context A macros
+*//***************************************************************************/
+#define FM_CONTEXTA_OVERRIDE_MASK       0x80000000
+#define FM_CONTEXTA_ICMD_MASK           0x40000000
+#define FM_CONTEXTA_A1_VALID_MASK       0x20000000
+#define FM_CONTEXTA_MACCMD_MASK         0x00ff0000
+#define FM_CONTEXTA_MACCMD_VALID_MASK   0x00800000
+#define FM_CONTEXTA_MACCMD_SECURED_MASK 0x00100000
+#define FM_CONTEXTA_MACCMD_SC_MASK      0x000f0000
+#define FM_CONTEXTA_A1_MASK             0x0000ffff
+
+#define FM_CONTEXTA_GET_OVERRIDE(contextA)                 ((((t_FmContextA *)contextA)->command & FM_CONTEXTA_OVERRIDE_MASK) >> (31-0))
+#define FM_CONTEXTA_GET_ICMD(contextA)                     ((((t_FmContextA *)contextA)->command & FM_CONTEXTA_ICMD_MASK) >> (31-1))
+#define FM_CONTEXTA_GET_A1_VALID(contextA)                 ((((t_FmContextA *)contextA)->command & FM_CONTEXTA_A1_VALID_MASK) >> (31-2))
+#define FM_CONTEXTA_GET_A1(contextA)                       ((((t_FmContextA *)contextA)->command & FM_CONTEXTA_A1_MASK) >> (31-31))
+#define FM_CONTEXTA_GET_MACCMD(contextA)                   ((((t_FmContextA *)contextA)->command & FM_CONTEXTA_MACCMD_MASK) >> (31-15))
+#define FM_CONTEXTA_GET_MACCMD_VALID(contextA)             ((((t_FmContextA *)contextA)->command & FM_CONTEXTA_MACCMD_VALID_MASK) >> (31-8))
+#define FM_CONTEXTA_GET_MACCMD_SECURED(contextA)           ((((t_FmContextA *)contextA)->command & FM_CONTEXTA_MACCMD_SECURED_MASK) >> (31-11))
+#define FM_CONTEXTA_GET_MACCMD_SECURE_CHANNEL(contextA)    ((((t_FmContextA *)contextA)->command & FM_CONTEXTA_MACCMD_SC_MASK) >> (31-15))
+
+#define FM_CONTEXTA_SET_OVERRIDE(contextA,val)              (((t_FmContextA *)contextA)->command = (uint32_t)((((t_FmContextA *)contextA)->command & ~FM_CONTEXTA_OVERRIDE_MASK) | (((uint32_t)(val) << (31-0)) & FM_CONTEXTA_OVERRIDE_MASK) ))
+#define FM_CONTEXTA_SET_ICMD(contextA,val)                  (((t_FmContextA *)contextA)->command = (uint32_t)((((t_FmContextA *)contextA)->command & ~FM_CONTEXTA_ICMD_MASK) | (((val) << (31-1)) & FM_CONTEXTA_ICMD_MASK) ))
+#define FM_CONTEXTA_SET_A1_VALID(contextA,val)              (((t_FmContextA *)contextA)->command = (uint32_t)((((t_FmContextA *)contextA)->command & ~FM_CONTEXTA_A1_VALID_MASK) | (((val) << (31-2)) & FM_CONTEXTA_A1_VALID_MASK) ))
+#define FM_CONTEXTA_SET_A1(contextA,val)                    (((t_FmContextA *)contextA)->command = (uint32_t)((((t_FmContextA *)contextA)->command & ~FM_CONTEXTA_A1_MASK) | (((val) << (31-31)) & FM_CONTEXTA_A1_MASK) ))
+#define FM_CONTEXTA_SET_MACCMD(contextA,val)                (((t_FmContextA *)contextA)->command = (uint32_t)((((t_FmContextA *)contextA)->command & ~FM_CONTEXTA_MACCMD_MASK) | (((val) << (31-15)) & FM_CONTEXTA_MACCMD_MASK) ))
+#define FM_CONTEXTA_SET_MACCMD_VALID(contextA,val)          (((t_FmContextA *)contextA)->command = (uint32_t)((((t_FmContextA *)contextA)->command & ~FM_CONTEXTA_MACCMD_VALID_MASK) | (((val) << (31-8)) & FM_CONTEXTA_MACCMD_VALID_MASK) ))
+#define FM_CONTEXTA_SET_MACCMD_SECURED(contextA,val)        (((t_FmContextA *)contextA)->command = (uint32_t)((((t_FmContextA *)contextA)->command & ~FM_CONTEXTA_MACCMD_SECURED_MASK) | (((val) << (31-11)) & FM_CONTEXTA_MACCMD_SECURED_MASK) ))
+#define FM_CONTEXTA_SET_MACCMD_SECURE_CHANNEL(contextA,val) (((t_FmContextA *)contextA)->command = (uint32_t)((((t_FmContextA *)contextA)->command & ~FM_CONTEXTA_MACCMD_SC_MASK) | (((val) << (31-15)) & FM_CONTEXTA_MACCMD_SC_MASK) ))
+/* @} */
+
+/**************************************************************************//**
+ @Collection   Context B macros
+*//***************************************************************************/
+#define FM_CONTEXTB_FQID_MASK               0x00ffffff
+
+#define FM_CONTEXTB_GET_FQID(contextB)      (*((t_FmContextB *)contextB) & FM_CONTEXTB_FQID_MASK)
+#define FM_CONTEXTB_SET_FQID(contextB,val)  (*((t_FmContextB *)contextB) = ((*((t_FmContextB *)contextB) & ~FM_CONTEXTB_FQID_MASK) | ((val) & FM_CONTEXTB_FQID_MASK)))
+/* @} */
+
+#if defined(__MWERKS__) && !defined(__GNUC__)
+#pragma pack(pop)
+#endif /* defined(__MWERKS__) && ... */
+
+
+/**************************************************************************//**
  @Description   FM Exceptions
 *//***************************************************************************/
 typedef enum e_FmExceptions {

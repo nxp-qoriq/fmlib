@@ -32,6 +32,11 @@
 
 #define __ERR_MODULE__      MODULE_FM
 
+#define DEV_TO_ID(p) \
+    do { \
+        t_Device *p_Dev = (t_Device *)p; \
+        p = UINT_TO_PTR(p_Dev->id); \
+    } while(0)
 
 /*******************************************************************************
 *  FM FUNCTIONS                                                                *
@@ -145,8 +150,7 @@ t_Error FM_ForceIntr(t_Handle h_Fm, e_FmExceptions exception)
 
     return E_OK;
 }
-/* TODO:FMD16 FM Control Monito export functions */
-/* TODO:FMD16 FM_GetSpecialOperationCoding */
+
 /********************************************************************************************/
 /*  FM_PCD FUNCTIONS                                                                        */
 /********************************************************************************************/
@@ -188,6 +192,13 @@ void FM_PCD_Close(t_Handle h_FmPcd)
     SANITY_CHECK_RETURN(p_Dev, E_INVALID_HANDLE);
 
     close(p_Dev->fd);
+
+    if(p_Dev->owners != 0){
+        XX_Print("Trying to delete a pcd handler that has modules bound to (owners:%u)!!!", 
+            p_Dev->owners);
+        return;
+    }
+
     free(p_Dev);
 }
 
@@ -287,6 +298,8 @@ uint32_t FM_PCD_GetCounter(t_Handle h_FmPcd, e_FmPcdCounters counter)
     return params.val;
 }
 
+#if 0
+TODO: To be removed.
 t_Error FM_PCD_SetCounter(t_Handle h_FmPcd, e_FmPcdCounters counter, uint32_t value)
 {
     t_Device                        *p_Dev = (t_Device*) h_FmPcd;
@@ -302,6 +315,7 @@ t_Error FM_PCD_SetCounter(t_Handle h_FmPcd, e_FmPcdCounters counter, uint32_t va
 
     return E_OK;
 }
+#endif
 
 t_Error FM_PCD_ForceIntr (t_Handle h_FmPcd, e_FmPcdExceptions exception)
 {
@@ -316,145 +330,267 @@ t_Error FM_PCD_ForceIntr (t_Handle h_FmPcd, e_FmPcdExceptions exception)
     return E_OK;
 }
 
-t_Handle FM_PCD_SetNetEnvCharacteristics(t_Handle h_FmPcd, t_FmPcdNetEnvParams *p_NetEnvParams)
+t_Handle FM_PCD_NetEnvCharacteristicsSet(t_Handle h_FmPcd, t_FmPcdNetEnvParams *p_NetEnvParams)
 {
-    t_Device                    *p_Dev = (t_Device*) h_FmPcd;
+    t_Device *p_PcdDev = (t_Device*) h_FmPcd;
+    t_Device *p_Dev = NULL;
     ioc_fm_pcd_net_env_params_t params;
 
-    SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, NULL);
+    SANITY_CHECK_RETURN_VALUE(p_PcdDev, E_INVALID_HANDLE, NULL);
 
     memcpy(&params, p_NetEnvParams, sizeof(t_FmPcdNetEnvParams));
-    if (ioctl(p_Dev->fd, FM_PCD_IOC_SET_NET_ENV_CHARACTERISTICS, &params))
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_SET_NET_ENV_CHARACTERISTICS, &params))
     {
         REPORT_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
         return NULL;
     }
 
-    return (t_Handle) params.id;
+    p_Dev = (t_Device *)malloc(sizeof(t_Device));
+    if (!p_Dev)
+    {
+        REPORT_ERROR(MAJOR, E_NO_MEMORY, ("FM KG scheme device!!"));
+        return NULL;
+    }
+    memset(p_Dev, 0, sizeof(t_Device));
+    p_Dev->h_UserPriv = (t_Handle)p_PcdDev;
+    p_PcdDev->owners++;
+    p_Dev->id = PTR_TO_UINT(params.id);
+
+    return (t_Handle) p_Dev;;
 }
 
-t_Error FM_PCD_DeleteNetEnvCharacteristics(t_Handle h_FmPcd, t_Handle h_NetEnv)
+t_Error FM_PCD_NetEnvCharacteristicsDelete(t_Handle h_NetEnv)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPcd;
+    t_Device *p_Dev = (t_Device*) h_NetEnv;
+    t_Device *p_PcdDev = NULL;
     ioc_fm_obj_t id;
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
-    id.obj = h_NetEnv;
+    p_PcdDev = (t_Device *)p_Dev->h_UserPriv;
+    id.obj = UINT_TO_PTR(p_Dev->id);
 
-    if (ioctl(p_Dev->fd, FM_PCD_IOC_DELETE_NET_ENV_CHARACTERISTICS, &id))
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_DELETE_NET_ENV_CHARACTERISTICS, &id)){
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+    }
 
+    p_PcdDev->owners--;
+    free(p_Dev);
     return E_OK;
 }
 
-t_Handle FM_PCD_KgSetScheme (t_Handle h_FmPcd, t_FmPcdKgSchemeParams *p_Scheme)
+t_Handle FM_PCD_KgSchemeSet (t_Handle h_FmPcd, t_FmPcdKgSchemeParams *p_Scheme)
 {
-    t_Device                      *p_Dev = (t_Device*) h_FmPcd;
+    t_Device *p_PcdDev = (t_Device*) h_FmPcd;
+    t_Device *p_Dev = NULL;
     ioc_fm_pcd_kg_scheme_params_t params;
 
-    SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, NULL);
+    SANITY_CHECK_RETURN_VALUE(p_PcdDev, E_INVALID_HANDLE, NULL);
 
     memcpy(&params, p_Scheme, sizeof(t_FmPcdKgSchemeParams));
-    if (ioctl(p_Dev->fd, FM_PCD_IOC_KG_SET_SCHEME, &params))
+
+    /* correct h_NetEnv param from scheme */
+    if (params.netEnvParams.net_env_id)
+        DEV_TO_ID(params.netEnvParams.net_env_id);
+
+    /* correct next engine params handlers: cc*/
+    if (params.next_engine == e_IOC_FM_PCD_CC && 
+        params.kg_next_engine_params.cc.tree_id)
+            DEV_TO_ID(params.kg_next_engine_params.cc.tree_id);
+    
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_KG_SET_SCHEME, &params))
     {
         REPORT_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
         return NULL;
     }
 
-    return (t_Handle) params.id;
+    p_Dev = (t_Device *)malloc(sizeof(t_Device));
+    if (!p_Dev)
+    {
+        REPORT_ERROR(MAJOR, E_NO_MEMORY, ("FM KG scheme device!!"));
+        return NULL;
+    }
+
+    memset(p_Dev, 0, sizeof(t_Device));
+    p_Dev->h_UserPriv = (t_Handle)p_PcdDev;
+    p_PcdDev->owners++;
+    p_Dev->id = PTR_TO_UINT(params.id);
+    return (t_Handle) p_Dev;
 }
 
-t_Error FM_PCD_KgDeleteScheme(t_Handle h_FmPcd, t_Handle h_Scheme)
+t_Error FM_PCD_KgSchemeDelete(t_Handle h_Scheme)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPcd;
+    t_Device *p_Dev = (t_Device*) h_Scheme;
+    t_Device *p_PcdDev = NULL;
     ioc_fm_obj_t id;
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
-    id.obj = h_Scheme;
+    p_PcdDev =  (t_Device *)p_Dev->h_UserPriv;
+    id.obj = UINT_TO_PTR(p_Dev->id);
 
-    if (ioctl(p_Dev->fd, FM_PCD_IOC_KG_DEL_SCHEME, &id))
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_KG_DEL_SCHEME, &id)){
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+    }
 
+    p_PcdDev->owners--;
+    free(p_Dev);
     return E_OK;
 }
 
-t_Handle FM_PCD_CcBuildTree (t_Handle h_FmPcd, t_FmPcdCcTreeParams *p_PcdTreeParam)
+t_Handle FM_PCD_CcRootBuild(t_Handle h_FmPcd, t_FmPcdCcTreeParams *p_PcdTreeParam)
 {
-    t_Device                    *p_Dev = (t_Device*) h_FmPcd;
+    t_Device *p_PcdDev = (t_Device*) h_FmPcd;
+    t_Device *p_Dev = NULL;
     ioc_fm_pcd_cc_tree_params_t params;
+    uint32_t i, j;
 
-    SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, NULL);
+    SANITY_CHECK_RETURN_VALUE(p_PcdDev, E_INVALID_HANDLE, NULL);
 
     memcpy(&params, p_PcdTreeParam, sizeof(t_FmPcdCcTreeParams));
 
-    if (ioctl(p_Dev->fd, FM_PCD_IOC_CC_BUILD_TREE, &params))
+    /* correct net_env_id */
+    if (params.net_env_id)
+        DEV_TO_ID(params.net_env_id);
+
+    /* correct next engine kg and cc handlers: cc_node_id, p_direct_scheme */
+    for (i = 0; i < IOC_FM_PCD_MAX_NUM_OF_CC_GROUPS; i++)
+        for (j = 0; j < IOC_FM_PCD_MAX_NUM_OF_CC_ENTRIES_IN_GRP; j++){
+            if (params.fm_pcd_cc_group_params[i].next_engine_per_entries_in_grp[j].next_engine == e_IOC_FM_PCD_CC &&
+                params.fm_pcd_cc_group_params[i].next_engine_per_entries_in_grp[j].params.cc_params.cc_node_id)
+                    DEV_TO_ID(params.fm_pcd_cc_group_params[i].next_engine_per_entries_in_grp[j].params.cc_params.cc_node_id);
+
+            if (params.fm_pcd_cc_group_params[i].next_engine_per_entries_in_grp[j].next_engine == e_IOC_FM_PCD_KG &&
+                params.fm_pcd_cc_group_params[i].next_engine_per_entries_in_grp[j].params.kg_params.p_direct_scheme)
+                    DEV_TO_ID(params.fm_pcd_cc_group_params[i].next_engine_per_entries_in_grp[j].params.kg_params.p_direct_scheme);
+
+            /*TODO params.fm_pcd_cc_group_params[i].next_engine_per_entries_in_grp[j].manip_id*/
+        }
+    
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_CC_BUILD_TREE, &params))
     {
         REPORT_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
         return NULL;
     }
 
-    return (t_Handle) params.id;
+    p_Dev = (t_Device *)malloc(sizeof(t_Device));
+    if (!p_Dev)
+    {
+        REPORT_ERROR(MAJOR, E_NO_MEMORY, ("FM KG scheme device!!"));
+        return NULL;
+    }
+
+    memset(p_Dev, 0, sizeof(t_Device));
+    p_Dev->h_UserPriv = (t_Handle)p_PcdDev;
+    p_PcdDev->owners++;
+    p_Dev->id = PTR_TO_UINT(params.id);
+
+    return (t_Handle) p_Dev;
 }
 
-t_Error FM_PCD_CcDeleteTree(t_Handle h_FmPcd, t_Handle h_CcTree)
+t_Error FM_PCD_CcRootDelete(t_Handle h_CcTree)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPcd;
+    t_Device *p_Dev = (t_Device*) h_CcTree;
+    t_Device *p_PcdDev = NULL;
     ioc_fm_obj_t id;
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
-    id.obj = h_CcTree;
+    p_PcdDev = (t_Device *)p_Dev->h_UserPriv;
+    id.obj = UINT_TO_PTR(p_Dev->id);
 
-    if (ioctl(p_Dev->fd, FM_PCD_IOC_CC_DELETE_TREE, &id))
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_CC_DELETE_TREE, &id)){
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+    }
 
+    p_PcdDev->owners--;
+    free(p_Dev);
     return E_OK;
 }
 
-t_Handle FM_PCD_CcSetNode(t_Handle h_FmPcd, t_FmPcdCcNodeParams *p_CcNodeParam)
+t_Handle FM_PCD_MatchTableSet(t_Handle h_FmPcd, t_FmPcdCcNodeParams *p_CcNodeParam)
 {
-    t_Device                    *p_Dev = (t_Device*) h_FmPcd;
+    t_Device *p_PcdDev = (t_Device*) h_FmPcd;
+    t_Device *p_Dev = NULL;
     ioc_fm_pcd_cc_node_params_t params;
+    uint32_t i;
 
-    SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, NULL);
+    SANITY_CHECK_RETURN_VALUE(p_PcdDev, E_INVALID_HANDLE, NULL);
 
     memcpy(&params, p_CcNodeParam, sizeof(t_FmPcdCcNodeParams));
+    /*correct*/
 
-    if (ioctl(p_Dev->fd, FM_PCD_IOC_CC_SET_NODE, &params))
+    for(i = 0; i < params.keys_params.num_of_keys;i++){
+        if (params.keys_params.key_params[i].cc_next_engine_params.next_engine == e_IOC_FM_PCD_CC &&
+            params.keys_params.key_params[i].cc_next_engine_params.params.cc_params.cc_node_id)
+                DEV_TO_ID(params.keys_params.key_params[i].cc_next_engine_params.params.cc_params.cc_node_id);
+
+        if (params.keys_params.key_params[i].cc_next_engine_params.next_engine == e_IOC_FM_PCD_KG &&
+            params.keys_params.key_params[i].cc_next_engine_params.params.kg_params.p_direct_scheme)
+                DEV_TO_ID(params.keys_params.key_params[i].cc_next_engine_params.params.kg_params.p_direct_scheme);
+
+            /*TODO params.keys_params.key_params[i].cc_next_engine_params.manip_id*/
+    }
+
+    if (params.keys_params.cc_next_engine_params_for_miss.next_engine == e_IOC_FM_PCD_CC &&
+        params.keys_params.cc_next_engine_params_for_miss.params.cc_params.cc_node_id)
+            DEV_TO_ID(params.keys_params.cc_next_engine_params_for_miss.params.cc_params.cc_node_id);
+
+    if (params.keys_params.cc_next_engine_params_for_miss.next_engine == e_IOC_FM_PCD_KG &&
+        params.keys_params.cc_next_engine_params_for_miss.params.kg_params.p_direct_scheme)
+            DEV_TO_ID(params.keys_params.cc_next_engine_params_for_miss.params.kg_params.p_direct_scheme);
+
+    /*TODO params.keys_params.cc_next_engine_params.manip_id*/
+
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_CC_SET_NODE, &params))
     {
         REPORT_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
         return NULL;
     }
 
-    return (t_Handle) params.id;
+    p_Dev = (t_Device *)malloc(sizeof(t_Device));
+    if (!p_Dev)
+    {
+        REPORT_ERROR(MAJOR, E_NO_MEMORY, ("FM KG scheme device!!"));
+        return NULL;
+    }
+    memset(p_Dev, 0, sizeof(t_Device));
+    p_Dev->h_UserPriv = (t_Handle)p_PcdDev;
+    p_PcdDev->owners++;
+    p_Dev->id = PTR_TO_UINT(params.id);
+
+    return (t_Handle) p_Dev;
 }
 
-t_Error FM_PCD_CcDeleteNode(t_Handle h_FmPcd, t_Handle h_CcNode)
+t_Error FM_PCD_MatchTableDelete(t_Handle h_CcNode)
 {
-    t_Device    *p_Dev = (t_Device *)h_FmPcd;
+    t_Device *p_Dev = (t_Device *)h_CcNode;
+    t_Device *p_PcdDev = NULL;
     ioc_fm_obj_t id;
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
-    id.obj = h_CcNode;
+    p_PcdDev = (t_Device *)p_Dev->h_UserPriv;
+    id.obj = UINT_TO_PTR(p_Dev->id);
 
-    if (ioctl(p_Dev->fd, FM_PCD_IOC_CC_DELETE_NODE, &id))
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_CC_DELETE_NODE, &id)){
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+    }
 
+    p_PcdDev->owners--;
+    free(p_Dev);
     return E_OK;
 }
 
 t_Error FM_PCD_CcTreeModifyNextEngine(t_Handle h_FmPcd, t_Handle h_CcTree, uint8_t grpId, uint8_t index, t_FmPcdCcNextEngineParams *p_FmPcdCcNextEngineParams)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPcd;
+    t_Device *p_Dev = (t_Device*) h_FmPcd;
     ioc_fm_pcd_cc_tree_modify_next_engine_params_t  params;
 
     ASSERT_COND(sizeof(t_FmPcdCcNextEngineParams) == sizeof(ioc_fm_pcd_cc_next_engine_params_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
-    params.id = h_CcTree;
+    params.id = UINT_TO_PTR(((t_Device *)h_CcTree)->id);
     params.grp_indx = grpId;
     params.indx = index;
     memcpy(&params.cc_next_engine_params, p_FmPcdCcNextEngineParams, sizeof(t_FmPcdCcNextEngineParams));
@@ -467,13 +603,13 @@ t_Error FM_PCD_CcTreeModifyNextEngine(t_Handle h_FmPcd, t_Handle h_CcTree, uint8
 
 t_Error FM_PCD_CcNodeModifyNextEngine(t_Handle h_FmPcd, t_Handle h_CcNode, uint16_t keyIndex, t_FmPcdCcNextEngineParams *p_FmPcdCcNextEngineParams)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPcd;
+    t_Device *p_Dev = (t_Device*) h_FmPcd;
     ioc_fm_pcd_cc_node_modify_next_engine_params_t  params;
 
     ASSERT_COND(sizeof(t_FmPcdCcNextEngineParams) == sizeof(ioc_fm_pcd_cc_next_engine_params_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
-    params.id = h_CcNode;
+    params.id = UINT_TO_PTR(((t_Device *)h_CcNode)->id);
     params.key_indx = keyIndex;
     memcpy(&params.cc_next_engine_params, p_FmPcdCcNextEngineParams, sizeof(t_FmPcdCcNextEngineParams));
 
@@ -485,13 +621,13 @@ t_Error FM_PCD_CcNodeModifyNextEngine(t_Handle h_FmPcd, t_Handle h_CcNode, uint1
 
 t_Error FM_PCD_CcNodeModifyMissNextEngine(t_Handle h_FmPcd, t_Handle h_CcNode, t_FmPcdCcNextEngineParams *p_FmPcdCcNextEngineParams)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPcd;
+    t_Device *p_Dev = (t_Device*) h_FmPcd;
     ioc_fm_pcd_cc_node_modify_next_engine_params_t  params;
 
     ASSERT_COND(sizeof(t_FmPcdCcNextEngineParams) == sizeof(ioc_fm_pcd_cc_next_engine_params_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
-    params.id = h_CcNode;
+    params.id = UINT_TO_PTR(((t_Device *)h_CcNode)->id);
     memcpy(&params.cc_next_engine_params, p_FmPcdCcNextEngineParams, sizeof(t_FmPcdCcNextEngineParams));
 
     if (ioctl(p_Dev->fd, FM_PCD_IOC_CC_NODE_MODIFY_MISS_NEXT_ENGINE, &params))
@@ -500,36 +636,43 @@ t_Error FM_PCD_CcNodeModifyMissNextEngine(t_Handle h_FmPcd, t_Handle h_CcNode, t
     return E_OK;
 }
 
-t_Error FM_PCD_CcNodeRemoveKey(t_Handle h_FmPcd, t_Handle h_CcNode, uint16_t keyIndex)
+t_Error FM_PCD_MatchTableAddKey(t_Handle h_CcNode, uint16_t keyIndex, uint8_t keySize, t_FmPcdCcKeyParams  *p_KeyParams)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPcd;
-    ioc_fm_pcd_cc_node_remove_key_params_t  params;
+    t_Device *p_Dev = (t_Device*) h_CcNode;
+    t_Device *p_PcdDev = NULL;
+    ioc_fm_pcd_cc_node_modify_key_and_next_engine_params_t params;
 
+    ASSERT_COND(sizeof(t_FmPcdCcKeyParams) == sizeof(ioc_fm_pcd_cc_key_params_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
-    params.id = h_CcNode;
-    params.key_indx = keyIndex;
+    p_PcdDev = (t_Device *)p_Dev->h_UserPriv;
 
-    if (ioctl(p_Dev->fd, FM_PCD_IOC_CC_NODE_REMOVE_KEY, &params))
+    params.id = UINT_TO_PTR(p_Dev->id);
+    params.key_indx = keyIndex;
+    params.key_size = keySize;
+    memcpy(&params.key_params, p_KeyParams, sizeof(t_FmPcdCcKeyParams));
+
+    /* TODO: correct p_KeyParams */
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_CC_NODE_ADD_KEY, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
     return E_OK;
 }
 
-t_Error FM_PCD_CcNodeAddKey(t_Handle h_FmPcd, t_Handle h_CcNode, uint16_t keyIndex, uint8_t keySize, t_FmPcdCcKeyParams  *p_KeyParams)
+t_Error FM_PCD_MatchTableRemoveKey(t_Handle h_CcNode, uint16_t keyIndex)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPcd;
-    ioc_fm_pcd_cc_node_modify_key_and_next_engine_params_t  params;
+    t_Device *p_Dev = (t_Device*) h_CcNode;
+    t_Device *p_PcdDev = NULL;
+    ioc_fm_pcd_cc_node_remove_key_params_t  params;
 
-    ASSERT_COND(sizeof(t_FmPcdCcKeyParams) == sizeof(ioc_fm_pcd_cc_key_params_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
-    params.id = h_CcNode;
-    params.key_indx = keyIndex;
-    params.key_size = keySize;
-    memcpy(&params.key_params, p_KeyParams, sizeof(t_FmPcdCcKeyParams));
+    p_PcdDev = (t_Device *)p_Dev->h_UserPriv;
 
-    if (ioctl(p_Dev->fd, FM_PCD_IOC_CC_NODE_ADD_KEY, &params))
+    params.id = UINT_TO_PTR(p_Dev->id);
+    params.key_indx = keyIndex;
+
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_CC_NODE_REMOVE_KEY, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
     return E_OK;
@@ -537,13 +680,13 @@ t_Error FM_PCD_CcNodeAddKey(t_Handle h_FmPcd, t_Handle h_CcNode, uint16_t keyInd
 
 t_Error FM_PCD_CcNodeModifyKeyAndNextEngine(t_Handle h_FmPcd, t_Handle h_CcNode, uint16_t keyIndex, uint8_t keySize, t_FmPcdCcKeyParams *p_KeyParams)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPcd;
+    t_Device *p_Dev = (t_Device*) h_FmPcd;
     ioc_fm_pcd_cc_node_modify_key_and_next_engine_params_t  params;
 
     ASSERT_COND(sizeof(t_FmPcdCcKeyParams) == sizeof(ioc_fm_pcd_cc_key_params_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
-    params.id = h_CcNode;
+    params.id = UINT_TO_PTR(((t_Device *)h_CcNode)->id);
     params.key_indx = keyIndex;
     params.key_size = keySize;
     memcpy(&params.key_params, p_KeyParams, sizeof(t_FmPcdCcKeyParams));
@@ -556,14 +699,14 @@ t_Error FM_PCD_CcNodeModifyKeyAndNextEngine(t_Handle h_FmPcd, t_Handle h_CcNode,
 
 t_Error FM_PCD_CcNodeModifyKey(t_Handle h_FmPcd, t_Handle h_CcNode, uint16_t keyIndex, uint8_t keySize, uint8_t  *p_Key, uint8_t *p_Mask)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPcd;
-    ioc_fm_pcd_cc_node_modify_key_params_t  params;
-    uint8_t                                 key[IOC_FM_PCD_MAX_SIZE_OF_KEY];
-    uint8_t                                 mask[IOC_FM_PCD_MAX_SIZE_OF_KEY];
+    t_Device *p_Dev = (t_Device*) h_FmPcd;
+    ioc_fm_pcd_cc_node_modify_key_params_t params;
+    uint8_t                                key[IOC_FM_PCD_MAX_SIZE_OF_KEY];
+    uint8_t                                mask[IOC_FM_PCD_MAX_SIZE_OF_KEY];
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
-    params.id = h_CcNode;
+    params.id = UINT_TO_PTR(((t_Device *)h_CcNode)->id);
     params.key_indx = keyIndex;
     params.key_size = keySize;
     memcpy(key, p_Key, keySize);
@@ -578,49 +721,84 @@ t_Error FM_PCD_CcNodeModifyKey(t_Handle h_FmPcd, t_Handle h_CcNode, uint16_t key
     return E_OK;
 }
 
-t_Handle FM_PCD_PlcrSetProfile(t_Handle h_FmPcd, t_FmPcdPlcrProfileParams *p_Profile)
-{
-    t_Device                            *p_Dev = (t_Device*) h_FmPcd;
-    ioc_fm_pcd_plcr_profile_params_t    params;
 
-    SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, NULL);
+t_Handle FM_PCD_PlcrProfileSet(t_Handle h_FmPcd, t_FmPcdPlcrProfileParams *p_Profile)
+{
+    t_Device *p_PcdDev = (t_Device*) h_FmPcd;
+    t_Device *p_Dev = NULL;
+    ioc_fm_pcd_plcr_profile_params_t params;
+
+    SANITY_CHECK_RETURN_VALUE(p_PcdDev, E_INVALID_HANDLE, NULL);
 
     memcpy(&params, p_Profile, sizeof(t_FmPcdPlcrProfileParams));
 
     if (!params.modify &&
         (params.profile_select.new_params.profile_type
                 != (ioc_fm_pcd_profile_type_selection)e_FM_PCD_PLCR_SHARED))
+    {
         params.profile_select.new_params.p_port =
             (fm_pcd_port_params_t*) (((t_Device*) p_Profile->id.newParams.h_FmPort)->h_UserPriv);
+    }
 
-    if (ioctl(p_Dev->fd, FM_PCD_IOC_PLCR_SET_PROFILE, &params))
+    /* correct paramsOnGreen.h_Profile, paramsOnYellow.h_Profile, paramsOnRed.h_Profile 
+     * if next engine is policer... that means that FM_PCD_PlcrProfileSet was called */
+    if (params.next_engine_on_green == e_IOC_FM_PCD_PLCR && params.params_on_green.p_profile)
+        DEV_TO_ID(params.params_on_green.p_profile);
+    if (params.next_engine_on_yellow == e_IOC_FM_PCD_PLCR && params.params_on_yellow.p_profile)
+        DEV_TO_ID(params.params_on_yellow.p_profile);
+    if (params.next_engine_on_red == e_IOC_FM_PCD_PLCR && params.params_on_red.p_profile)
+        DEV_TO_ID(params.params_on_red.p_profile);
+
+    /* correct paramsOnGreen.h_Profile, paramsOnYellow.h_Profile, paramsOnRed.h_Profile
+     * if next engine is kg... that means that FM_PCD_KgSchemeSet was called */
+    if (params.next_engine_on_green == e_IOC_FM_PCD_KG && params.params_on_green.p_direct_scheme)
+        DEV_TO_ID(params.params_on_green.p_direct_scheme);
+    if (params.next_engine_on_yellow == e_IOC_FM_PCD_KG && params.params_on_yellow.p_direct_scheme)
+        DEV_TO_ID(params.params_on_yellow.p_direct_scheme);
+    if (params.next_engine_on_red == e_IOC_FM_PCD_KG && params.params_on_red.p_direct_scheme)
+        DEV_TO_ID(params.params_on_red.p_direct_scheme);
+
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_PLCR_SET_PROFILE, &params))
     {
         REPORT_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
         return NULL;
     }
 
-    return (t_Handle) params.id;
-	return NULL;
+    p_Dev = (t_Device *)malloc(sizeof(t_Device));
+    if (!p_Dev)
+    {
+        REPORT_ERROR(MAJOR, E_NO_MEMORY, ("FM KG scheme device!!"));
+        return NULL;
+    }
+
+    memset(p_Dev, 0, sizeof(t_Device));
+    p_Dev->h_UserPriv = (t_Handle)p_PcdDev;
+    p_PcdDev->owners++;
+    p_Dev->id = PTR_TO_UINT(params.id);
+    return (t_Handle) p_Dev;
 }
 
-t_Error FM_PCD_PlcrDeleteProfile(t_Handle h_FmPcd, t_Handle h_Profile)
+t_Error FM_PCD_PlcrProfileDelete(t_Handle h_Profile)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPcd;
+    t_Device *p_Dev = (t_Device*) h_Profile;
+    t_Device *p_PcdDev = NULL;
     ioc_fm_obj_t id;
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
-    id.obj = h_Profile;
+    p_PcdDev = (t_Device*)p_Dev->h_UserPriv;
+    id.obj = UINT_TO_PTR(p_Dev->id);
 
-    if (ioctl(p_Dev->fd, FM_PCD_IOC_PLCR_DEL_PROFILE, &id))
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_PLCR_DEL_PROFILE, &id)){
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+    }
 
+    p_PcdDev->owners--;
+    free(p_Dev);
     return E_OK;
 }
 
-#if defined(FM_CAPWAP_SUPPORT) || defined(FM_IP_FRAG_N_REASSEM_SUPPORT)
-
-t_Handle FM_PCD_ManipSetNode(t_Handle h_FmPcd, t_FmPcdManipParams *p_FmPcdManipParams)
+t_Handle FM_PCD_ManipNodeSet(t_Handle h_FmPcd, t_FmPcdManipParams *p_FmPcdManipParams)
 {
     t_Device *p_Dev = (t_Device*) h_FmPcd;
 	ioc_fm_pcd_manip_params_t params;
@@ -650,14 +828,8 @@ t_Error  FM_PCD_ManipDeleteNode(t_Handle h_FmPcd, t_Handle h_HdrManipNode)
 
     return E_OK;
 }
-#endif /* defined(FM_CAPWAP_SUPPORT) || ... */
-
 #ifdef FM_CAPWAP_SUPPORT
-t_Handle FM_PCD_StatisticsSetNode(t_Handle h_FmPcd, t_FmPcdStatsParams *p_StatsParams)
-{
-warning "CAPWAP lib function missing"
-    return NULL;
-}
+#error CAPWAP feature not supported
 #endif
 
 typedef struct {
@@ -696,12 +868,6 @@ t_Handle FM_PORT_Open(t_FmPortParams *p_FmPortParams)
     memset(devName, 0, sizeof(devName));
     switch (p_FmPortParams->portType)
     {
-        /*TODO:FMD16 OH parsing port breaks down  */
-#if 0
-        case e_FM_PORT_TYPE_OH_HOST_COMMAND:
-            sprintf(devName, "%s%s%d-port-oh", "/dev/", DEV_FM_NAME, ((t_Device*)p_FmPortParams->h_Fm)->id);
-            break;
-#endif
         case e_FM_PORT_TYPE_OH_OFFLINE_PARSING:
             sprintf(devName, "%s%s%d-port-oh%d", "/dev/", DEV_FM_NAME,
                     ((t_Device*)p_FmPortParams->h_Fm)->id, p_FmPortParams->portId);
@@ -857,12 +1023,59 @@ t_Error FM_PORT_FreePCDFqids (t_Handle h_FmPort, uint32_t base_fqid)
 
 t_Error FM_PORT_SetPCD(t_Handle h_FmPort, t_FmPortPcdParams *p_FmPortPcd)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPort;
+    t_Device *p_Dev = (t_Device*) h_FmPort;
+    ioc_fm_port_pcd_params_t params;
 
     ASSERT_COND(sizeof(t_FmPortPcdParams) == sizeof(ioc_fm_port_pcd_params_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
-    if (ioctl(p_Dev->fd, FM_PORT_IOC_SET_PCD, p_FmPortPcd))
+    memcpy(&params, p_FmPortPcd, sizeof(t_FmPortPcdParams));
+
+    /* correct h_NetEnv param from t_FmPortPcdParams */
+    DEV_TO_ID(params.net_env_id);
+
+    /* correct pcd structures according to what support was set */
+    if (params.pcd_support == e_IOC_FM_PORT_PCD_SUPPORT_PRS_AND_KG_AND_CC ||
+        params.pcd_support == e_IOC_FM_PORT_PCD_SUPPORT_PRS_AND_KG_AND_CC_AND_PLCR ||
+        params.pcd_support == e_IOC_FM_PORT_PCD_SUPPORT_PRS_AND_CC) {
+
+        if (params.p_cc_params && params.p_cc_params->cc_tree_id)
+            DEV_TO_ID(params.p_cc_params->cc_tree_id);
+        else 
+            XX_Print("fmlib warning (%s): Coarse Clasification not set ! \n", __func__);
+    }
+
+    if (params.pcd_support == e_IOC_FM_PORT_PCD_SUPPORT_PRS_AND_KG ||
+        params.pcd_support == e_IOC_FM_PORT_PCD_SUPPORT_PRS_AND_KG_AND_CC ||
+        params.pcd_support == e_IOC_FM_PORT_PCD_SUPPORT_PRS_AND_KG_AND_CC_AND_PLCR ||
+        params.pcd_support == e_IOC_FM_PORT_PCD_SUPPORT_PRS_AND_KG_AND_PLCR ){
+
+        if (params.p_kg_params){
+            uint32_t i;
+            for (i = 0; i < params.p_kg_params->num_of_schemes; i++)
+                if (params.p_kg_params->schemes_ids[i])
+                    DEV_TO_ID(params.p_kg_params->schemes_ids[i]);
+                else
+                    XX_Print("fmlib warning (%s): Scheme:%u not set!\n", __func__, i);
+                
+            if (params.p_kg_params && params.p_kg_params->direct_scheme)
+                DEV_TO_ID(params.p_kg_params->direct_scheme_id);
+        } else
+            XX_Print("fmlib warning (%s): KeyGen not set ! \n", __func__);
+    }
+
+    if (params.pcd_support == e_IOC_FM_PORT_PCD_SUPPORT_PLCR_ONLY ||
+        params.pcd_support == e_IOC_FM_PORT_PCD_SUPPORT_PRS_AND_PLCR ||
+        params.pcd_support == e_IOC_FM_PORT_PCD_SUPPORT_PRS_AND_KG_AND_CC_AND_PLCR ||
+        params.pcd_support == e_IOC_FM_PORT_PCD_SUPPORT_PRS_AND_KG_AND_PLCR){
+
+        if (params.p_plcr_params && params.p_plcr_params->plcr_profile_id)
+                DEV_TO_ID(params.p_plcr_params->plcr_profile_id);
+        else 
+            XX_Print("fmlib warning (%s): Policer not set !\n", __func__);
+    }
+
+    if (ioctl(p_Dev->fd, FM_PORT_IOC_SET_PCD, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
     return E_OK;
@@ -870,7 +1083,7 @@ t_Error FM_PORT_SetPCD(t_Handle h_FmPort, t_FmPortPcdParams *p_FmPortPcd)
 
 t_Error FM_PORT_DeletePCD(t_Handle h_FmPort)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPort;
+    t_Device *p_Dev = (t_Device*) h_FmPort;
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
@@ -894,7 +1107,7 @@ t_Error FM_PORT_DetachPCD(t_Handle h_FmPort)
 
 t_Error FM_PORT_AttachPCD(t_Handle h_FmPort)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPort;
+    t_Device *p_Dev = (t_Device*) h_FmPort;
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
@@ -906,7 +1119,7 @@ t_Error FM_PORT_AttachPCD(t_Handle h_FmPort)
 
 t_Error FM_PORT_PcdPlcrAllocProfiles(t_Handle h_FmPort, uint16_t numOfProfiles)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPort;
+    t_Device *p_Dev = (t_Device*) h_FmPort;
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
@@ -918,7 +1131,7 @@ t_Error FM_PORT_PcdPlcrAllocProfiles(t_Handle h_FmPort, uint16_t numOfProfiles)
 
 t_Error FM_PORT_PcdPlcrFreeProfiles(t_Handle h_FmPort)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPort;
+    t_Device *p_Dev = (t_Device*) h_FmPort;
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
@@ -930,7 +1143,7 @@ t_Error FM_PORT_PcdPlcrFreeProfiles(t_Handle h_FmPort)
 
 t_Error FM_PORT_PcdKgModifyInitialScheme(t_Handle h_FmPort, t_FmPcdKgSchemeSelect *p_FmPcdKgScheme)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPort;
+    t_Device *p_Dev = (t_Device*) h_FmPort;
 
     ASSERT_COND(sizeof(t_FmPcdKgSchemeSelect) == sizeof(ioc_fm_pcd_kg_scheme_select_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
@@ -943,7 +1156,7 @@ t_Error FM_PORT_PcdKgModifyInitialScheme(t_Handle h_FmPort, t_FmPcdKgSchemeSelec
 
 t_Error FM_PORT_PcdPlcrModifyInitialProfile (t_Handle h_FmPort, t_Handle h_Profile)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPort;
+    t_Device *p_Dev = (t_Device*) h_FmPort;
     ioc_fm_obj_t id;
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
@@ -958,7 +1171,7 @@ t_Error FM_PORT_PcdPlcrModifyInitialProfile (t_Handle h_FmPort, t_Handle h_Profi
 
 t_Error FM_PORT_PcdCcModifyTree (t_Handle h_FmPort, t_Handle h_CcTree)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPort;
+    t_Device *p_Dev = (t_Device*) h_FmPort;
     ioc_fm_obj_t id;
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
@@ -973,7 +1186,7 @@ t_Error FM_PORT_PcdCcModifyTree (t_Handle h_FmPort, t_Handle h_CcTree)
 
 t_Error FM_PORT_PcdKgBindSchemes (t_Handle h_FmPort, t_FmPcdPortSchemesParams *p_PortScheme)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPort;
+    t_Device *p_Dev = (t_Device*) h_FmPort;
 
     ASSERT_COND(sizeof(t_FmPcdPortSchemesParams) == sizeof(ioc_fm_pcd_port_schemes_params_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
@@ -986,7 +1199,7 @@ t_Error FM_PORT_PcdKgBindSchemes (t_Handle h_FmPort, t_FmPcdPortSchemesParams *p
 
 t_Error FM_PORT_PcdKgUnbindSchemes (t_Handle h_FmPort, t_FmPcdPortSchemesParams *p_PortScheme)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPort;
+    t_Device *p_Dev = (t_Device*) h_FmPort;
 
     ASSERT_COND(sizeof(t_FmPcdPortSchemesParams) == sizeof(ioc_fm_pcd_port_schemes_params_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
@@ -999,7 +1212,7 @@ t_Error FM_PORT_PcdKgUnbindSchemes (t_Handle h_FmPort, t_FmPcdPortSchemesParams 
 
 t_Error FM_PORT_PcdModifyPrsStart (t_Handle h_FmPort, t_FmPcdPrsStart *p_FmPcdPrsStart)
 {
-    t_Device    *p_Dev = (t_Device*) h_FmPort;
+    t_Device *p_Dev = (t_Device*) h_FmPort;
 
     ASSERT_COND(sizeof(t_FmPcdPrsStart) == sizeof(ioc_fm_pcd_prs_start_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
