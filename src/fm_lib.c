@@ -299,7 +299,6 @@ uint32_t FM_PCD_GetCounter(t_Handle h_FmPcd, e_FmPcdCounters counter)
 }
 
 #if 0
-TODO: To be removed.
 t_Error FM_PCD_SetCounter(t_Handle h_FmPcd, e_FmPcdCounters counter, uint32_t value)
 {
     t_Device                        *p_Dev = (t_Device*) h_FmPcd;
@@ -518,8 +517,8 @@ t_Handle FM_PCD_MatchTableSet(t_Handle h_FmPcd, t_FmPcdCcNodeParams *p_CcNodePar
     SANITY_CHECK_RETURN_VALUE(p_PcdDev, E_INVALID_HANDLE, NULL);
 
     memcpy(&params, p_CcNodeParam, sizeof(t_FmPcdCcNodeParams));
-    /*correct*/
 
+    /*correct*/
     for(i = 0; i < params.keys_params.num_of_keys;i++){
         if (params.keys_params.key_params[i].cc_next_engine_params.next_engine == e_IOC_FM_PCD_CC &&
             params.keys_params.key_params[i].cc_next_engine_params.params.cc_params.cc_node_id)
@@ -800,8 +799,11 @@ t_Error FM_PCD_PlcrProfileDelete(t_Handle h_Profile)
 
 t_Handle FM_PCD_ManipNodeSet(t_Handle h_FmPcd, t_FmPcdManipParams *p_FmPcdManipParams)
 {
-    t_Device *p_Dev = (t_Device*) h_FmPcd;
-	ioc_fm_pcd_manip_params_t params;
+    t_Device *p_PcdDev = (t_Device*) h_FmPcd;
+    t_Device *p_Dev = NULL;
+    ioc_fm_pcd_manip_params_t params;
+
+    SANITY_CHECK_RETURN_VALUE(p_PcdDev, E_INVALID_HANDLE, NULL);
 
     memset(&params, 0, sizeof(ioc_fm_pcd_manip_params_t));
     memcpy(&params, p_FmPcdManipParams, sizeof(ioc_fm_pcd_manip_params_t));
@@ -811,21 +813,36 @@ t_Handle FM_PCD_ManipNodeSet(t_Handle h_FmPcd, t_FmPcdManipParams *p_FmPcdManipP
         return NULL;
     }
 
-	return (t_Handle)params.id;
+    p_Dev = (t_Device *)malloc(sizeof(t_Device));
+    if (!p_Dev)
+    {
+        REPORT_ERROR(MAJOR, E_NO_MEMORY, ("FM KG scheme device!!"));
+        return NULL;
+    }
+
+    memset(p_Dev, 0, sizeof(t_Device));
+    p_Dev->h_UserPriv = (t_Handle)p_PcdDev;
+    p_PcdDev->owners++;
+    p_Dev->id = PTR_TO_UINT(params.id);
+    return (t_Handle) p_Dev;
 }
 
-t_Error  FM_PCD_ManipDeleteNode(t_Handle h_FmPcd, t_Handle h_HdrManipNode)
+t_Error  FM_PCD_ManipNodeDelete(t_Handle h_HdrManipNode)
 {
-    t_Device *p_Dev = (t_Device*) h_FmPcd;
+    t_Device *p_Dev = (t_Device*) h_HdrManipNode;
+    t_Device *p_PcdDev = NULL;
     ioc_fm_obj_t id;
 
-    SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
+    SANITY_CHECK_EXIT(p_Dev, E_INVALID_HANDLE);
 
-    id.obj = h_HdrManipNode;
+    p_PcdDev = (t_Device*)p_Dev->h_UserPriv;
+    id.obj = UINT_TO_PTR(p_Dev->id);
 
     if (ioctl(p_Dev->fd, FM_PCD_IOC_MANIP_DELETE_NODE, &id))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
+    p_PcdDev->owners--;
+    free(p_Dev);
     return E_OK;
 }
 #ifdef FM_CAPWAP_SUPPORT
