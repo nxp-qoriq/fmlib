@@ -182,6 +182,7 @@ t_Handle FM_PCD_Open(t_FmPcdParams *p_FmPcdParams)
 
     p_Dev->id = ((t_Device*) p_FmPcdParams->h_Fm)->id;
     p_Dev->fd = fd;
+    p_Dev->owners = 0;
     return (t_Handle) p_Dev;
 }
 
