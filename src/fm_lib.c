@@ -697,6 +697,99 @@ t_Error FM_PCD_CcNodeModifyKeyAndNextEngine(t_Handle h_FmPcd, t_Handle h_CcNode,
     return E_OK;
 }
 
+t_Handle FM_PCD_HashTableSet(t_Handle h_FmPcd, t_FmPcdHashTableParams *p_Param)
+{
+    t_Device *p_PcdDev = (t_Device*) h_FmPcd;
+    t_Device *p_Dev = (t_Device*) h_FmPcd;
+    ioc_fm_pcd_hash_table_params_t params;
+
+    SANITY_CHECK_RETURN_VALUE(p_PcdDev, E_INVALID_HANDLE, NULL);
+
+    memcpy(&params, p_Param, sizeof(ioc_fm_pcd_hash_table_params_t));
+
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_HASH_TABLE_SET, &params))
+    {
+        REPORT_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+        return NULL;
+    }
+
+    p_Dev = (t_Device *)malloc(sizeof(t_Device));
+    if (!p_Dev)
+    {
+        REPORT_ERROR(MAJOR, E_NO_MEMORY, ("FM KG scheme device!!"));
+        return NULL;
+    }
+    memset(p_Dev, 0, sizeof(t_Device));
+    p_Dev->h_UserPriv = (t_Handle)p_PcdDev;
+    p_PcdDev->owners++;
+    p_Dev->id = PTR_TO_UINT(params.id);
+
+    return (t_Handle) p_Dev;
+}
+
+t_Error FM_PCD_HashTableDelete(t_Handle h_HashTbl)
+{
+    t_Device *p_Dev = (t_Device*) h_HashTbl;
+    t_Device *p_PcdDev = NULL;
+    ioc_fm_obj_t id;
+
+    SANITY_CHECK_EXIT(p_Dev, E_INVALID_HANDLE);
+
+    p_PcdDev = (t_Device*)p_Dev->h_UserPriv;
+    id.obj = UINT_TO_PTR(p_Dev->id);
+
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_HASH_TABLE_DELETE, &id))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    p_PcdDev->owners--;
+    free(p_Dev);
+    return E_OK;
+}
+
+t_Error FM_PCD_HashTableAddKey(t_Handle            h_HashTbl,
+                               uint8_t             keySize,
+                               t_FmPcdCcKeyParams  *p_KeyParams)
+{
+    t_Device *p_Dev = (t_Device*) h_HashTbl;
+    t_Device *p_PcdDev = NULL;
+    ioc_fm_pcd_hash_table_add_key_params_t param;
+
+    SANITY_CHECK_EXIT(p_Dev, E_INVALID_HANDLE);
+
+    p_PcdDev = (t_Device*)p_Dev->h_UserPriv;
+
+    param.p_hash_tbl = UINT_TO_PTR(p_Dev->id);
+    param.key_size = keySize;
+    memcpy(&param.p_key_params, p_KeyParams, sizeof(ioc_fm_pcd_hash_table_add_key_params_t));
+
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_HASH_TABLE_ADD_KEY, &param))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    return E_OK;
+}
+
+t_Error FM_PCD_HashTableRemoveKey(t_Handle h_HashTbl,
+                                  uint8_t  keySize,
+                                  uint8_t  *p_Key)
+{
+    t_Device *p_Dev = (t_Device*) h_HashTbl;
+    t_Device *p_PcdDev = NULL;
+    ioc_fm_pcd_hash_table_remove_key_params_t param;
+
+    SANITY_CHECK_EXIT(p_Dev, E_INVALID_HANDLE);
+
+    p_PcdDev = (t_Device*)p_Dev->h_UserPriv;
+
+    param.p_hash_tbl = UINT_TO_PTR(p_Dev->id);
+    param.key_size = keySize;
+    param.p_key = p_Key;
+
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_HASH_TABLE_REMOVE_KEY, &param))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    return E_OK;
+}
+
 t_Error FM_PCD_CcNodeModifyKey(t_Handle h_FmPcd, t_Handle h_CcNode, uint16_t keyIndex, uint8_t keySize, uint8_t  *p_Key, uint8_t *p_Mask)
 {
     t_Device *p_Dev = (t_Device*) h_FmPcd;
