@@ -1334,6 +1334,18 @@ t_Error FM_PORT_PcdModifyPrsStart (t_Handle h_FmPort, t_FmPcdPrsStart *p_FmPcdPr
     return E_OK;
 }
 
+t_Error FM_PCD_SetAdvancedOffloadSupport(t_Handle h_FmPort)
+{
+    t_Device    *p_Dev = (t_Device *)h_FmPort;
+
+    SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, E_OK);
+
+    if (ioctl(p_Dev->fd, FM_PCD_IOC_SET_ADVANCED_OFFLOAD_SUPPORT))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    return E_OK;
+}
+
 #ifdef P1023
 void Platform_is_P1023()
 {
