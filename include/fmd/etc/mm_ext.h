@@ -1,6 +1,6 @@
 /******************************************************************************
 
- © 1995-2003, 2004, 2005-2011 Freescale Semiconductor, Inc.
+ © 1995-2003, 2004, 2005-2012 Freescale Semiconductor, Inc.
  All rights reserved.
 
  This is proprietary source code of Freescale Semiconductor Inc.,
@@ -277,7 +277,7 @@ bool        MM_InRange(t_Handle h_MM, uint64_t addr);
  @Description   Returns the size (in bytes) of free memory.
 
  @Param[in]     h_MM    - Handle to the MM object.
- 
+
  @Return        Free memory size in bytes.
 *//***************************************************************************/
 uint64_t MM_GetFreeMemSize(t_Handle h_MM);

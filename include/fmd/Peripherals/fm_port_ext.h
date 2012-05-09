@@ -1,6 +1,6 @@
 /******************************************************************************
 
- © 1995-2003, 2004, 2005-2011 Freescale Semiconductor, Inc.
+ © 1995-2003, 2004, 2005-2012 Freescale Semiconductor, Inc.
  All rights reserved.
 
  This is proprietary source code of Freescale Semiconductor Inc.,
@@ -444,7 +444,7 @@ typedef struct t_FmPcdPrsStart {
                                              'parsingOffset' */
 } t_FmPcdPrsStart;
 
-#if DPAA_VERSION >= 3
+#if (DPAA_VERSION >= 11)
 /**************************************************************************//**
  @Description   struct for defining external buffer margins
 *//***************************************************************************/
@@ -453,9 +453,9 @@ typedef struct t_FmPortVSPAllocParams {
     uint8_t     dfltRelativeId;         /**< The default Virtual-Storage-Profile-id dedicated to Rx/OP port
                                              The same default Virtual-Storage-Profile-id will be for coupled Tx port
                                              if relevant function called for Rx port */
-    t_Handle    h_FmTxPort;             /**< Handle to coupled Tx Port */
+    t_Handle    h_FmTxPort;             /**< Handle to coupled Tx Port; not relevant for OP port. */
 } t_FmPortVSPAllocParams;
-#endif /* DPAA_VERSION >= 3 */
+#endif /* (DPAA_VERSION >= 11) */
 
 
 /**************************************************************************//**
@@ -562,7 +562,7 @@ t_Error FM_PORT_PcdPlcrAllocProfiles(t_Handle h_FmPort, uint16_t numOfProfiles);
 *//***************************************************************************/
 t_Error FM_PORT_PcdPlcrFreeProfiles(t_Handle h_FmPort);
 
-#if DPAA_VERSION >= 3
+#if (DPAA_VERSION >= 11)
 /**************************************************************************//**
  @Function      FM_PORT_VSPAlloc
 
@@ -579,7 +579,7 @@ t_Error FM_PORT_PcdPlcrFreeProfiles(t_Handle h_FmPort);
                 and also before FM_PORT_Enable() (i.e. the port should be disabled).
 *//***************************************************************************/
 t_Error FM_PORT_VSPAlloc(t_Handle h_FmPort, t_FmPortVSPAllocParams *p_Params);
-#endif /* DPAA_VERSION >= 3 */
+#endif /* (DPAA_VERSION >= 11) */
 
 /**************************************************************************//**
  @Function      FM_PORT_PcdKgModifyInitialScheme

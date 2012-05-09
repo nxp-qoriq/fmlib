@@ -1,6 +1,6 @@
 /******************************************************************************
 
- © 1995-2003, 2004, 2005-2011 Freescale Semiconductor, Inc.
+ © 1995-2003, 2004, 2005-2012 Freescale Semiconductor, Inc.
  All rights reserved.
 
  This is proprietary source code of Freescale Semiconductor Inc.,
@@ -61,6 +61,7 @@ typedef uint8_t headerFieldEth_t;
 #define NET_HEADER_FIELD_ETH_PADDING                    (NET_HEADER_FIELD_ETH_DA << 5)
 #define NET_HEADER_FIELD_ETH_ALL_FIELDS                 ((NET_HEADER_FIELD_ETH_DA << 6) - 1)
 
+#define NET_HEADER_FIELD_ETH_ADDR_SIZE                 6
 
 typedef uint16_t headerFieldIpv4_t;
 
@@ -81,6 +82,9 @@ typedef uint16_t headerFieldIpv4_t;
 #define NET_HEADER_FIELD_IPv4_OPTS_COUNT                (NET_HEADER_FIELD_IPv4_VER << 14)
 #define NET_HEADER_FIELD_IPv4_ALL_FIELDS                ((NET_HEADER_FIELD_IPv4_VER << 15) - 1)
 
+#define NET_HEADER_FIELD_IPv4_ADDR_SIZE                 4
+#define NET_HEADER_FIELD_IPv4_PROTO_SIZE                1
+
 
 typedef uint8_t headerFieldIpv6_t;
 
@@ -93,12 +97,18 @@ typedef uint8_t headerFieldIpv6_t;
 #define NET_HEADER_FIELD_IPv6_HOP_LIMIT                 (NET_HEADER_FIELD_IPv6_VER << 6)
 #define NET_HEADER_FIELD_IPv6_ALL_FIELDS                ((NET_HEADER_FIELD_IPv6_VER << 7) - 1)
 
+#define NET_HEADER_FIELD_IPv6_ADDR_SIZE                 16
+#define NET_HEADER_FIELD_IPv6_NEXT_HDR_SIZE             1
+
 #define NET_HEADER_FIELD_ICMP_TYPE                      (1)
 #define NET_HEADER_FIELD_ICMP_CODE                      (NET_HEADER_FIELD_ICMP_TYPE << 1)
 #define NET_HEADER_FIELD_ICMP_CKSUM                     (NET_HEADER_FIELD_ICMP_TYPE << 2)
 #define NET_HEADER_FIELD_ICMP_ID                        (NET_HEADER_FIELD_ICMP_TYPE << 3)
 #define NET_HEADER_FIELD_ICMP_SQ_NUM                    (NET_HEADER_FIELD_ICMP_TYPE << 4)
 #define NET_HEADER_FIELD_ICMP_ALL_FIELDS                ((NET_HEADER_FIELD_ICMP_TYPE << 5) - 1)
+
+#define NET_HEADER_FIELD_ICMP_CODE_SIZE                 1
+#define NET_HEADER_FIELD_ICMP_TYPE_SIZE                 1
 
 #define NET_HEADER_FIELD_IGMP_VERSION                   (1)
 #define NET_HEADER_FIELD_IGMP_TYPE                      (NET_HEADER_FIELD_IGMP_VERSION << 1)
@@ -122,6 +132,8 @@ typedef uint16_t headerFieldTcp_t;
 #define NET_HEADER_FIELD_TCP_OPTS_COUNT                 (NET_HEADER_FIELD_TCP_PORT_SRC << 10)
 #define NET_HEADER_FIELD_TCP_ALL_FIELDS                 ((NET_HEADER_FIELD_TCP_PORT_SRC << 11) - 1)
 
+#define NET_HEADER_FIELD_TCP_PORT_SIZE                  2
+
 
 typedef uint8_t headerFieldSctp_t;
 
@@ -131,12 +143,15 @@ typedef uint8_t headerFieldSctp_t;
 #define NET_HEADER_FIELD_SCTP_CKSUM                     (NET_HEADER_FIELD_SCTP_PORT_SRC << 3)
 #define NET_HEADER_FIELD_SCTP_ALL_FIELDS                ((NET_HEADER_FIELD_SCTP_PORT_SRC << 4) - 1)
 
+#define NET_HEADER_FIELD_SCTP_PORT_SIZE                 2
 
 typedef uint8_t headerFieldDccp_t;
 
 #define NET_HEADER_FIELD_DCCP_PORT_SRC                  (1)
 #define NET_HEADER_FIELD_DCCP_PORT_DST                  (NET_HEADER_FIELD_DCCP_PORT_SRC << 1)
 #define NET_HEADER_FIELD_DCCP_ALL_FIELDS                ((NET_HEADER_FIELD_DCCP_PORT_SRC << 2) - 1)
+
+#define NET_HEADER_FIELD_DCCP_PORT_SIZE                 2
 
 
 typedef uint8_t headerFieldUdp_t;
@@ -147,6 +162,8 @@ typedef uint8_t headerFieldUdp_t;
 #define NET_HEADER_FIELD_UDP_CKSUM                      (NET_HEADER_FIELD_UDP_PORT_SRC << 3)
 #define NET_HEADER_FIELD_UDP_ALL_FIELDS                 ((NET_HEADER_FIELD_UDP_PORT_SRC << 4) - 1)
 
+#define NET_HEADER_FIELD_UDP_PORT_SIZE                  2
+
 typedef uint8_t headerFieldUdpEncapEsp_t;
 
 #define NET_HEADER_FIELD_UDP_ENCAP_ESP_PORT_SRC         (1)
@@ -156,6 +173,9 @@ typedef uint8_t headerFieldUdpEncapEsp_t;
 #define NET_HEADER_FIELD_UDP_ENCAP_ESP_SPI              (NET_HEADER_FIELD_UDP_ENCAP_ESP_PORT_SRC << 4)
 #define NET_HEADER_FIELD_UDP_ENCAP_ESP_SEQUENCE_NUM     (NET_HEADER_FIELD_UDP_ENCAP_ESP_PORT_SRC << 5)
 #define NET_HEADER_FIELD_UDP_ENCAP_ESP_ALL_FIELDS       ((NET_HEADER_FIELD_UDP_ENCAP_ESP_PORT_SRC << 6) - 1)
+
+#define NET_HEADER_FIELD_UDP_ENCAP_ESP_PORT_SIZE        2
+#define NET_HEADER_FIELD_UDP_ENCAP_ESP_SPI_SIZE         4
 
 #define NET_HEADER_FIELD_IPHC_CID                       (1)
 #define NET_HEADER_FIELD_IPHC_CID_TYPE                  (NET_HEADER_FIELD_IPHC_CID << 1)
@@ -304,6 +324,8 @@ typedef uint8_t headerFieldIpsecEsp_t;
 #define NET_HEADER_FIELD_IPSEC_ESP_SPI                  (1)
 #define NET_HEADER_FIELD_IPSEC_ESP_SEQUENCE_NUM         (NET_HEADER_FIELD_IPSEC_ESP_SPI << 1)
 #define NET_HEADER_FIELD_IPSEC_ESP_ALL_FIELDS           ((NET_HEADER_FIELD_IPSEC_ESP_SPI << 2) - 1)
+
+#define NET_HEADER_FIELD_IPSEC_ESP_SPI_SIZE             4
 
 
 typedef uint8_t headerFieldMpls_t;
