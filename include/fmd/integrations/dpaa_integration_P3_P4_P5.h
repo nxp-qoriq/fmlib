@@ -24,7 +24,7 @@
 #endif
 
 
-#define DPAA_VERSION    2
+#define DPAA_VERSION    10
 
 /**************************************************************************//**
  @Description   DPAA SW Portals Enumeration.
