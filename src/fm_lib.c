@@ -902,7 +902,7 @@ t_Handle FM_PCD_ManipNodeSet(t_Handle h_FmPcd, t_FmPcdManipParams *p_FmPcdManipP
     memset(&params, 0, sizeof(ioc_fm_pcd_manip_params_t));
     memcpy(&params, p_FmPcdManipParams, sizeof(ioc_fm_pcd_manip_params_t));
 
-    if (ioctl(p_Dev->fd, FM_PCD_IOC_MANIP_SET_NODE , &params)){
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_MANIP_SET_NODE , &params)){
         REPORT_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
         return NULL;
     }
