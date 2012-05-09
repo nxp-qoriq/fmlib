@@ -1,13 +1,14 @@
-/* =====================================================================
- *
- *  Copyright 2009-2012, Freescale Semiconductor, Inc., All Rights Reserved.
- *
- *  This file contains copyrighted material. Use of this file is restricted
- *  by the provisions of a Freescale Software License Agreement, which has
- *  either accompanied the delivery of this software in shrink wrap
- *  form or been expressly executed between the parties.
- *
- * ===================================================================*/
+/******************************************************************************
+
+  © 1995-2003, 2004, 2005-2012 Freescale Semiconductor, Inc.
+  All rights reserved.
+
+  This is proprietary source code of Freescale Semiconductor Inc.,
+  and its use is subject to the NetComm Device Drivers EULA.
+  The copyright notice above does not evidence any actual or intended
+  publication of such source code.
+
+ **************************************************************************/
 /******************************************************************************
  @File          fm_lib.c
 
@@ -529,7 +530,8 @@ t_Handle FM_PCD_MatchTableSet(t_Handle h_FmPcd, t_FmPcdCcNodeParams *p_CcNodePar
             params.keys_params.key_params[i].cc_next_engine_params.params.kg_params.p_direct_scheme)
                 DEV_TO_ID(params.keys_params.key_params[i].cc_next_engine_params.params.kg_params.p_direct_scheme);
 
-            /*TODO params.keys_params.key_params[i].cc_next_engine_params.manip_id*/
+        if (params.keys_params.key_params[i].cc_next_engine_params.manip_id)
+            DEV_TO_ID(params.keys_params.key_params[i].cc_next_engine_params.manip_id);
     }
 
     if (params.keys_params.cc_next_engine_params_for_miss.next_engine == e_IOC_FM_PCD_CC &&
@@ -540,7 +542,8 @@ t_Handle FM_PCD_MatchTableSet(t_Handle h_FmPcd, t_FmPcdCcNodeParams *p_CcNodePar
         params.keys_params.cc_next_engine_params_for_miss.params.kg_params.p_direct_scheme)
             DEV_TO_ID(params.keys_params.cc_next_engine_params_for_miss.params.kg_params.p_direct_scheme);
 
-    /*TODO params.keys_params.cc_next_engine_params.manip_id*/
+    if (params.keys_params.cc_next_engine_params_for_miss.manip_id)
+        DEV_TO_ID(params.keys_params.cc_next_engine_params_for_miss.manip_id);
 
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_CC_SET_NODE, &params))
     {
