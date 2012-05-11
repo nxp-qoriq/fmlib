@@ -1247,8 +1247,10 @@ typedef struct t_FmPcdCcNextEngineParams {
  @Description   Parameters for defining a single CC key
 *//***************************************************************************/
 typedef struct t_FmPcdCcKeyParams {
-    uint8_t                     *p_Key;     /**< pointer to the key of the size defined in keySize */
-    uint8_t                     *p_Mask;    /**< pointer to the Mask per key  of the size defined
+    uint8_t                     *p_Key;     /**< Relevant only if 'action' = e_FM_PCD_ACTION_EXACT_MATCH;
+                                                 pointer to the key of the size defined in keySize */
+    uint8_t                     *p_Mask;    /**< Relevant only if 'action' = e_FM_PCD_ACTION_EXACT_MATCH;
+                                                 pointer to the Mask per key  of the size defined
                                                  in keySize. p_Key and p_Mask (if defined) has to be
                                                  of the same size defined in the keySize */
     t_FmPcdCcNextEngineParams   ccNextEngineParams;
@@ -1298,7 +1300,10 @@ typedef struct t_KeysParams {
                                                      e_FM_PCD_ACTION_INDEXED_LOOKUP, 'keySize' must be 2. */
     t_FmPcdCcKeyParams          keyParams[FM_PCD_MAX_NUM_OF_KEYS];
                                                 /**< An array with 'numOfKeys' entries, each entry specifies the
-                                                     corresponding key parameters. */
+                                                     corresponding key parameters;
+                                                     When 'action' = e_FM_PCD_ACTION_EXACT_MATCH, this value must not
+                                                     exceed 255 (FM_PCD_MAX_NUM_OF_KEYS-1) as the last entry is saved
+                                                     for the 'miss' entry. */
     t_FmPcdCcNextEngineParams   ccNextEngineParamsForMiss;
                                                 /**< Parameters for defining the next engine when a key is not matched;
                                                      Not relevant if action = e_FM_PCD_ACTION_INDEXED_LOOKUP. */
