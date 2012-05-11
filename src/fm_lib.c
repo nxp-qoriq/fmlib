@@ -935,7 +935,7 @@ t_Error  FM_PCD_ManipNodeDelete(t_Handle h_HdrManipNode)
     p_PcdDev = (t_Device*)p_Dev->h_UserPriv;
     id.obj = UINT_TO_PTR(p_Dev->id);
 
-    if (ioctl(p_Dev->fd, FM_PCD_IOC_MANIP_DELETE_NODE, &id))
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_MANIP_DELETE_NODE, &id))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
     p_PcdDev->owners--;
