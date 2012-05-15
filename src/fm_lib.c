@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <termios.h>
 #include <sys/ioctl.h>
+#include <stdbool.h>
 
 #include "fm_ext.h"
 #include "fm_pcd_ext.h"

@@ -65,7 +65,7 @@ typedef uint64_t physAddress_t;
 #undef TRUE
 #define FALSE   0
 #define TRUE    1
-typedef char bool;
+/* TOBE removed: typedef char bool;*/
 #endif /* defined(__cplusplus) */
 
 /************************/
