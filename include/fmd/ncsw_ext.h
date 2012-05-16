@@ -408,7 +408,7 @@ typedef e_RxStoreResponse (t_RxStoreFunction)(t_Handle  h_App,
 
 
 typedef struct t_Device {
-    uint32_t    id;         /**< the device id */
+    uintptr_t   id;         /**< the device id */
     int         fd;         /**< the device file-descritpor */
     t_Handle    h_UserPriv;
     uint32_t    owners;

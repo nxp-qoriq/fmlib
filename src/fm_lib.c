@@ -171,7 +171,7 @@ t_Handle FM_PCD_Open(t_FmPcdParams *p_FmPcdParams)
     }
 
     memset(devName, 0, 20);
-    sprintf(devName, "%s%s%d-pcd", "/dev/", DEV_FM_NAME, ((t_Device*) p_FmPcdParams->h_Fm)->id);
+    sprintf(devName, "%s%s%u-pcd", "/dev/", DEV_FM_NAME, (uint32_t)((t_Device*) p_FmPcdParams->h_Fm)->id);
     fd = open(devName, O_RDWR);
     if (fd < 0)
     {
@@ -984,24 +984,24 @@ t_Handle FM_PORT_Open(t_FmPortParams *p_FmPortParams)
     switch (p_FmPortParams->portType)
     {
         case e_FM_PORT_TYPE_OH_OFFLINE_PARSING:
-            sprintf(devName, "%s%s%d-port-oh%d", "/dev/", DEV_FM_NAME,
-                    ((t_Device*)p_FmPortParams->h_Fm)->id, p_FmPortParams->portId);
+            sprintf(devName, "%s%s%u-port-oh%d", "/dev/", DEV_FM_NAME,
+                    (uint32_t)((t_Device*)p_FmPortParams->h_Fm)->id, p_FmPortParams->portId);
             break;
         case e_FM_PORT_TYPE_RX:
-            sprintf(devName, "%s%s%d-port-rx%d", "/dev/", DEV_FM_NAME,
-                    ((t_Device*)p_FmPortParams->h_Fm)->id, p_FmPortParams->portId);
+            sprintf(devName, "%s%s%u-port-rx%d", "/dev/", DEV_FM_NAME,
+                    (uint32_t)((t_Device*)p_FmPortParams->h_Fm)->id, p_FmPortParams->portId);
             break;
         case e_FM_PORT_TYPE_RX_10G:
-            sprintf(devName, "%s%s%d-port-rx%d", "/dev/", DEV_FM_NAME,
-                    ((t_Device*)p_FmPortParams->h_Fm)->id, FM_MAX_NUM_OF_1G_RX_PORTS+p_FmPortParams->portId);
+            sprintf(devName, "%s%s%u-port-rx%d", "/dev/", DEV_FM_NAME,
+                    (uint32_t)((t_Device*)p_FmPortParams->h_Fm)->id, FM_MAX_NUM_OF_1G_RX_PORTS+p_FmPortParams->portId);
             break;
         case e_FM_PORT_TYPE_TX:
-            sprintf(devName, "%s%s%d-port-tx%d", "/dev/", DEV_FM_NAME,
-                    ((t_Device*)p_FmPortParams->h_Fm)->id, p_FmPortParams->portId);
+            sprintf(devName, "%s%s%u-port-tx%d", "/dev/", DEV_FM_NAME,
+                    (uint32_t)((t_Device*)p_FmPortParams->h_Fm)->id, p_FmPortParams->portId);
             break;
         case e_FM_PORT_TYPE_TX_10G:
-            sprintf(devName, "%s%s%d-port-tx%d", "/dev/", DEV_FM_NAME,
-                    ((t_Device*)p_FmPortParams->h_Fm)->id, FM_MAX_NUM_OF_1G_TX_PORTS+p_FmPortParams->portId);
+            sprintf(devName, "%s%s%u-port-tx%d", "/dev/", DEV_FM_NAME,
+                    (uint32_t)((t_Device*)p_FmPortParams->h_Fm)->id, FM_MAX_NUM_OF_1G_TX_PORTS+p_FmPortParams->portId);
             break;
         default:
             free(p_FmPort);
