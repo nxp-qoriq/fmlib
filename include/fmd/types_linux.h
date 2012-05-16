@@ -34,6 +34,7 @@
 #else
 # include <stdint.h>
 # include <stddef.h>
+# include <stdbool.h>
 #endif
 
 #ifdef NETCOMMSW_ALIASING
