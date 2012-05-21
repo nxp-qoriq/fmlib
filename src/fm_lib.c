@@ -392,8 +392,8 @@ t_Handle FM_PCD_KgSchemeSet (t_Handle h_FmPcd, t_FmPcdKgSchemeParams *p_Scheme)
     memcpy(&params, p_Scheme, sizeof(t_FmPcdKgSchemeParams));
 
     /* correct h_NetEnv param from scheme */
-    if (params.netEnvParams.net_env_id)
-        DEV_TO_ID(params.netEnvParams.net_env_id);
+    if (params.net_env_params.net_env_id)
+        DEV_TO_ID(params.net_env_params.net_env_id);
 
     /* correct next engine params handlers: cc*/
     if (params.next_engine == e_IOC_FM_PCD_CC && 
@@ -546,7 +546,7 @@ t_Handle FM_PCD_MatchTableSet(t_Handle h_FmPcd, t_FmPcdCcNodeParams *p_CcNodePar
     if (params.keys_params.cc_next_engine_params_for_miss.manip_id)
         DEV_TO_ID(params.keys_params.cc_next_engine_params_for_miss.manip_id);
 
-    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_CC_SET_NODE, &params))
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_MATCH_TABLE_SET, &params))
     {
         REPORT_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
         return NULL;
