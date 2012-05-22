@@ -40,6 +40,17 @@
         p = UINT_TO_PTR(p_Dev->id); \
     } while(0)
 
+/*#define FM_LIB_DBG*/
+
+#if defined(FM_LIB_DBG)
+    #define _fml_dbg(format, arg...) \
+        printf("fmlib [%s:%u] - " format, \
+            __func__, __LINE__, ##arg)
+#else
+#   define _fml_dbg(arg...)
+#endif
+
+
 /*******************************************************************************
 *  FM FUNCTIONS                                                                *
 *******************************************************************************/
@@ -49,6 +60,8 @@ t_Handle FM_Open(uint8_t id)
     t_Device    *p_Dev;
     int         fd;
     char        devName[20];
+
+    _fml_dbg("Calling...\n");
 
     p_Dev = (t_Device*) malloc(sizeof(t_Device));
     if (!p_Dev)
@@ -71,6 +84,9 @@ t_Handle FM_Open(uint8_t id)
 
     p_Dev->id = id;
     p_Dev->fd = fd;
+
+    _fml_dbg("Called.\n");
+
     return (t_Handle)p_Dev;
 }
 
@@ -80,8 +96,12 @@ void FM_Close(t_Handle h_Fm)
 
     SANITY_CHECK_RETURN(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     close(p_Dev->fd);
     free(p_Dev);
+
+    _fml_dbg("Called.\n");
 }
 
 t_Error FM_SetPortsBandwidth(t_Handle h_Fm, t_FmPortsBandwidthParams *p_PortsBandwidth)
@@ -91,8 +111,12 @@ t_Error FM_SetPortsBandwidth(t_Handle h_Fm, t_FmPortsBandwidthParams *p_PortsBan
     ASSERT_COND(sizeof(t_FmPortsBandwidthParams) == sizeof(ioc_fm_port_bandwidth_params));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_IOC_SET_PORTS_BANDWIDTH, p_PortsBandwidth))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -104,8 +128,12 @@ t_Error  FM_GetRevision(t_Handle h_Fm, t_FmRevisionInfo *p_FmRevisionInfo)
     ASSERT_COND(sizeof(t_FmRevisionInfo) == sizeof(ioc_fm_revision_info_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_IOC_GET_REVISION, p_FmRevisionInfo))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -117,10 +145,14 @@ uint32_t FM_GetCounter(t_Handle h_Fm, e_FmCounters counter)
 
     SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, 0);
 
+    _fml_dbg("Calling...\n");
+
     params.cnt = (ioc_fm_counters) counter;
 
     if (ioctl(p_Dev->fd, FM_IOC_GET_COUNTER, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return params.val;
 }
@@ -132,11 +164,15 @@ t_Error  FM_SetCounter(t_Handle h_Fm, e_FmCounters counter, uint32_t val)
 
     SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, 0);
 
+    _fml_dbg("Calling...\n");
+
     params.cnt = (ioc_fm_counters) counter;
     params.val = val;
 
     if (ioctl(p_Dev->fd, FM_IOC_SET_COUNTER, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -147,8 +183,12 @@ t_Error FM_ForceIntr(t_Handle h_Fm, e_FmExceptions exception)
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_IOC_FORCE_INTR, (ioc_fm_exceptions) exception))
         REPORT_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -162,6 +202,8 @@ t_Handle FM_PCD_Open(t_FmPcdParams *p_FmPcdParams)
     t_Device    *p_Dev;
     int         fd;
     char        devName[20];
+
+    _fml_dbg("Calling...\n");
 
     p_Dev = (t_Device*) malloc(sizeof(t_Device));
     if (!p_Dev)
@@ -185,6 +227,9 @@ t_Handle FM_PCD_Open(t_FmPcdParams *p_FmPcdParams)
     p_Dev->id = ((t_Device*) p_FmPcdParams->h_Fm)->id;
     p_Dev->fd = fd;
     p_Dev->owners = 0;
+
+    _fml_dbg("Called.\n");
+
     return (t_Handle) p_Dev;
 }
 
@@ -193,6 +238,8 @@ void FM_PCD_Close(t_Handle h_FmPcd)
     t_Device    *p_Dev = (t_Device*) h_FmPcd;
 
     SANITY_CHECK_RETURN(p_Dev, E_INVALID_HANDLE);
+
+    _fml_dbg("Calling...\n");
 
     close(p_Dev->fd);
 
@@ -203,6 +250,8 @@ void FM_PCD_Close(t_Handle h_FmPcd)
     }
 
     free(p_Dev);
+
+    _fml_dbg("Called.\n");
 }
 
 t_Error FM_PCD_Enable(t_Handle h_FmPcd)
@@ -211,8 +260,12 @@ t_Error FM_PCD_Enable(t_Handle h_FmPcd)
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_PCD_IOC_ENABLE))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -223,8 +276,12 @@ t_Error FM_PCD_Disable(t_Handle h_FmPcd)
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_PCD_IOC_DISABLE))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -236,8 +293,12 @@ t_Error FM_PCD_PrsLoadSw(t_Handle h_FmPcd, t_FmPcdPrsSwParams *p_SwPrs)
     ASSERT_COND(sizeof(t_FmPcdPrsSwParams) == sizeof(ioc_fm_pcd_prs_sw_params_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_PCD_IOC_PRS_LOAD_SW, p_SwPrs))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -249,11 +310,15 @@ t_Error FM_PCD_KgSetDfltValue(t_Handle h_FmPcd, uint8_t valueId, uint32_t value)
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     params.value = value;
     params.valueId = valueId;
 
     if (ioctl(p_Dev->fd, FM_PCD_IOC_KG_SET_DFLT_VALUE, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -264,8 +329,12 @@ t_Error FM_PCD_KgSetAdditionalDataAfterParsing(t_Handle h_FmPcd, uint8_t payload
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_PCD_IOC_KG_SET_ADDITIONAL_DATA_AFTER_PARSING, &payloadOffset))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -277,11 +346,15 @@ t_Error FM_PCD_SetException(t_Handle h_FmPcd, e_FmPcdExceptions exception, bool 
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     params.exception = exception;
     params.enable = enable;
 
     if (ioctl(p_Dev->fd, FM_PCD_IOC_SET_EXCEPTION, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -293,10 +366,14 @@ uint32_t FM_PCD_GetCounter(t_Handle h_FmPcd, e_FmPcdCounters counter)
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     params.cnt = (ioc_fm_pcd_counters) counter;
 
     if (ioctl(p_Dev->fd, FM_PCD_IOC_GET_COUNTER, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return params.val;
 }
@@ -326,8 +403,12 @@ t_Error FM_PCD_ForceIntr (t_Handle h_FmPcd, e_FmPcdExceptions exception)
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_PCD_IOC_FORCE_INTR, &intCast))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -339,6 +420,8 @@ t_Handle FM_PCD_NetEnvCharacteristicsSet(t_Handle h_FmPcd, t_FmPcdNetEnvParams *
     ioc_fm_pcd_net_env_params_t params;
 
     SANITY_CHECK_RETURN_VALUE(p_PcdDev, E_INVALID_HANDLE, NULL);
+
+    _fml_dbg("Calling...\n");
 
     memcpy(&params, p_NetEnvParams, sizeof(t_FmPcdNetEnvParams));
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_SET_NET_ENV_CHARACTERISTICS, &params))
@@ -358,6 +441,8 @@ t_Handle FM_PCD_NetEnvCharacteristicsSet(t_Handle h_FmPcd, t_FmPcdNetEnvParams *
     p_PcdDev->owners++;
     p_Dev->id = PTR_TO_UINT(params.id);
 
+    _fml_dbg("Called.\n");
+
     return (t_Handle) p_Dev;;
 }
 
@@ -369,6 +454,8 @@ t_Error FM_PCD_NetEnvCharacteristicsDelete(t_Handle h_NetEnv)
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     p_PcdDev = (t_Device *)p_Dev->h_UserPriv;
     id.obj = UINT_TO_PTR(p_Dev->id);
 
@@ -378,6 +465,9 @@ t_Error FM_PCD_NetEnvCharacteristicsDelete(t_Handle h_NetEnv)
 
     p_PcdDev->owners--;
     free(p_Dev);
+
+    _fml_dbg("Called.\n");
+
     return E_OK;
 }
 
@@ -388,6 +478,8 @@ t_Handle FM_PCD_KgSchemeSet (t_Handle h_FmPcd, t_FmPcdKgSchemeParams *p_Scheme)
     ioc_fm_pcd_kg_scheme_params_t params;
 
     SANITY_CHECK_RETURN_VALUE(p_PcdDev, E_INVALID_HANDLE, NULL);
+
+    _fml_dbg("Calling...\n");
 
     memcpy(&params, p_Scheme, sizeof(t_FmPcdKgSchemeParams));
 
@@ -417,6 +509,9 @@ t_Handle FM_PCD_KgSchemeSet (t_Handle h_FmPcd, t_FmPcdKgSchemeParams *p_Scheme)
     p_Dev->h_UserPriv = (t_Handle)p_PcdDev;
     p_PcdDev->owners++;
     p_Dev->id = PTR_TO_UINT(params.id);
+
+    _fml_dbg("Called.\n");
+
     return (t_Handle) p_Dev;
 }
 
@@ -428,6 +523,8 @@ t_Error FM_PCD_KgSchemeDelete(t_Handle h_Scheme)
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     p_PcdDev =  (t_Device *)p_Dev->h_UserPriv;
     id.obj = UINT_TO_PTR(p_Dev->id);
 
@@ -437,6 +534,9 @@ t_Error FM_PCD_KgSchemeDelete(t_Handle h_Scheme)
 
     p_PcdDev->owners--;
     free(p_Dev);
+
+    _fml_dbg("Called.\n");
+
     return E_OK;
 }
 
@@ -448,6 +548,8 @@ t_Handle FM_PCD_CcRootBuild(t_Handle h_FmPcd, t_FmPcdCcTreeParams *p_PcdTreePara
     uint32_t i, j;
 
     SANITY_CHECK_RETURN_VALUE(p_PcdDev, E_INVALID_HANDLE, NULL);
+
+    _fml_dbg("Calling...\n");
 
     memcpy(&params, p_PcdTreeParam, sizeof(t_FmPcdCcTreeParams));
 
@@ -487,6 +589,8 @@ t_Handle FM_PCD_CcRootBuild(t_Handle h_FmPcd, t_FmPcdCcTreeParams *p_PcdTreePara
     p_PcdDev->owners++;
     p_Dev->id = PTR_TO_UINT(params.id);
 
+    _fml_dbg("Called.\n");
+
     return (t_Handle) p_Dev;
 }
 
@@ -498,6 +602,8 @@ t_Error FM_PCD_CcRootDelete(t_Handle h_CcTree)
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     p_PcdDev = (t_Device *)p_Dev->h_UserPriv;
     id.obj = UINT_TO_PTR(p_Dev->id);
 
@@ -507,6 +613,9 @@ t_Error FM_PCD_CcRootDelete(t_Handle h_CcTree)
 
     p_PcdDev->owners--;
     free(p_Dev);
+
+    _fml_dbg("Called.\n");
+
     return E_OK;
 }
 
@@ -518,6 +627,8 @@ t_Handle FM_PCD_MatchTableSet(t_Handle h_FmPcd, t_FmPcdCcNodeParams *p_CcNodePar
     uint32_t i;
 
     SANITY_CHECK_RETURN_VALUE(p_PcdDev, E_INVALID_HANDLE, NULL);
+
+    _fml_dbg("Calling...\n");
 
     memcpy(&params, p_CcNodeParam, sizeof(t_FmPcdCcNodeParams));
 
@@ -563,6 +674,8 @@ t_Handle FM_PCD_MatchTableSet(t_Handle h_FmPcd, t_FmPcdCcNodeParams *p_CcNodePar
     p_PcdDev->owners++;
     p_Dev->id = PTR_TO_UINT(params.id);
 
+    _fml_dbg("Called.\n");
+
     return (t_Handle) p_Dev;
 }
 
@@ -574,6 +687,8 @@ t_Error FM_PCD_MatchTableDelete(t_Handle h_CcNode)
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     p_PcdDev = (t_Device *)p_Dev->h_UserPriv;
     id.obj = UINT_TO_PTR(p_Dev->id);
 
@@ -583,6 +698,9 @@ t_Error FM_PCD_MatchTableDelete(t_Handle h_CcNode)
 
     p_PcdDev->owners--;
     free(p_Dev);
+
+    _fml_dbg("Called.\n");
+
     return E_OK;
 }
 
@@ -594,6 +712,8 @@ t_Error FM_PCD_CcTreeModifyNextEngine(t_Handle h_FmPcd, t_Handle h_CcTree, uint8
     ASSERT_COND(sizeof(t_FmPcdCcNextEngineParams) == sizeof(ioc_fm_pcd_cc_next_engine_params_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     params.id = UINT_TO_PTR(((t_Device *)h_CcTree)->id);
     params.grp_indx = grpId;
     params.indx = index;
@@ -601,6 +721,8 @@ t_Error FM_PCD_CcTreeModifyNextEngine(t_Handle h_FmPcd, t_Handle h_CcTree, uint8
 
     if (ioctl(p_Dev->fd, FM_PCD_IOC_CC_TREE_MODIFY_NEXT_ENGINE, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -613,12 +735,16 @@ t_Error FM_PCD_CcNodeModifyNextEngine(t_Handle h_FmPcd, t_Handle h_CcNode, uint1
     ASSERT_COND(sizeof(t_FmPcdCcNextEngineParams) == sizeof(ioc_fm_pcd_cc_next_engine_params_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     params.id = UINT_TO_PTR(((t_Device *)h_CcNode)->id);
     params.key_indx = keyIndex;
     memcpy(&params.cc_next_engine_params, p_FmPcdCcNextEngineParams, sizeof(t_FmPcdCcNextEngineParams));
 
     if (ioctl(p_Dev->fd, FM_PCD_IOC_CC_NODE_MODIFY_NEXT_ENGINE, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -631,11 +757,15 @@ t_Error FM_PCD_CcNodeModifyMissNextEngine(t_Handle h_FmPcd, t_Handle h_CcNode, t
     ASSERT_COND(sizeof(t_FmPcdCcNextEngineParams) == sizeof(ioc_fm_pcd_cc_next_engine_params_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     params.id = UINT_TO_PTR(((t_Device *)h_CcNode)->id);
     memcpy(&params.cc_next_engine_params, p_FmPcdCcNextEngineParams, sizeof(t_FmPcdCcNextEngineParams));
 
     if (ioctl(p_Dev->fd, FM_PCD_IOC_CC_NODE_MODIFY_MISS_NEXT_ENGINE, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -649,6 +779,8 @@ t_Error FM_PCD_MatchTableAddKey(t_Handle h_CcNode, uint16_t keyIndex, uint8_t ke
     ASSERT_COND(sizeof(t_FmPcdCcKeyParams) == sizeof(ioc_fm_pcd_cc_key_params_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     p_PcdDev = (t_Device *)p_Dev->h_UserPriv;
 
     params.id = UINT_TO_PTR(p_Dev->id);
@@ -659,6 +791,8 @@ t_Error FM_PCD_MatchTableAddKey(t_Handle h_CcNode, uint16_t keyIndex, uint8_t ke
     /* TODO: correct p_KeyParams */
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_CC_NODE_ADD_KEY, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -671,6 +805,8 @@ t_Error FM_PCD_MatchTableRemoveKey(t_Handle h_CcNode, uint16_t keyIndex)
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     p_PcdDev = (t_Device *)p_Dev->h_UserPriv;
 
     params.id = UINT_TO_PTR(p_Dev->id);
@@ -678,6 +814,8 @@ t_Error FM_PCD_MatchTableRemoveKey(t_Handle h_CcNode, uint16_t keyIndex)
 
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_CC_NODE_REMOVE_KEY, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -690,6 +828,8 @@ t_Error FM_PCD_CcNodeModifyKeyAndNextEngine(t_Handle h_FmPcd, t_Handle h_CcNode,
     ASSERT_COND(sizeof(t_FmPcdCcKeyParams) == sizeof(ioc_fm_pcd_cc_key_params_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     params.id = UINT_TO_PTR(((t_Device *)h_CcNode)->id);
     params.key_indx = keyIndex;
     params.key_size = keySize;
@@ -697,6 +837,8 @@ t_Error FM_PCD_CcNodeModifyKeyAndNextEngine(t_Handle h_FmPcd, t_Handle h_CcNode,
 
     if (ioctl(p_Dev->fd, FM_PCD_IOC_CC_NODE_MODIFY_KEY_AND_NEXT_ENGINE, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -708,6 +850,8 @@ t_Handle FM_PCD_HashTableSet(t_Handle h_FmPcd, t_FmPcdHashTableParams *p_Param)
     ioc_fm_pcd_hash_table_params_t params;
 
     SANITY_CHECK_RETURN_VALUE(p_PcdDev, E_INVALID_HANDLE, NULL);
+
+    _fml_dbg("Calling...\n");
 
     memcpy(&params, p_Param, sizeof(ioc_fm_pcd_hash_table_params_t));
 
@@ -728,6 +872,8 @@ t_Handle FM_PCD_HashTableSet(t_Handle h_FmPcd, t_FmPcdHashTableParams *p_Param)
     p_PcdDev->owners++;
     p_Dev->id = PTR_TO_UINT(params.id);
 
+    _fml_dbg("Called.\n");
+
     return (t_Handle) p_Dev;
 }
 
@@ -739,6 +885,8 @@ t_Error FM_PCD_HashTableDelete(t_Handle h_HashTbl)
 
     SANITY_CHECK_EXIT(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     p_PcdDev = (t_Device*)p_Dev->h_UserPriv;
     id.obj = UINT_TO_PTR(p_Dev->id);
 
@@ -747,6 +895,9 @@ t_Error FM_PCD_HashTableDelete(t_Handle h_HashTbl)
 
     p_PcdDev->owners--;
     free(p_Dev);
+
+    _fml_dbg("Called.\n");
+
     return E_OK;
 }
 
@@ -760,6 +911,8 @@ t_Error FM_PCD_HashTableAddKey(t_Handle            h_HashTbl,
 
     SANITY_CHECK_EXIT(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     p_PcdDev = (t_Device*)p_Dev->h_UserPriv;
 
     param.p_hash_tbl = UINT_TO_PTR(p_Dev->id);
@@ -768,6 +921,8 @@ t_Error FM_PCD_HashTableAddKey(t_Handle            h_HashTbl,
 
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_HASH_TABLE_ADD_KEY, &param))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -782,6 +937,8 @@ t_Error FM_PCD_HashTableRemoveKey(t_Handle h_HashTbl,
 
     SANITY_CHECK_EXIT(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     p_PcdDev = (t_Device*)p_Dev->h_UserPriv;
 
     param.p_hash_tbl = UINT_TO_PTR(p_Dev->id);
@@ -790,6 +947,8 @@ t_Error FM_PCD_HashTableRemoveKey(t_Handle h_HashTbl,
 
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_HASH_TABLE_REMOVE_KEY, &param))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -803,6 +962,8 @@ t_Error FM_PCD_CcNodeModifyKey(t_Handle h_FmPcd, t_Handle h_CcNode, uint16_t key
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     params.id = UINT_TO_PTR(((t_Device *)h_CcNode)->id);
     params.key_indx = keyIndex;
     params.key_size = keySize;
@@ -815,6 +976,8 @@ t_Error FM_PCD_CcNodeModifyKey(t_Handle h_FmPcd, t_Handle h_CcNode, uint16_t key
     if (ioctl(p_Dev->fd, FM_PCD_IOC_CC_NODE_MODIFY_KEY, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
+    _fml_dbg("Called.\n");
+
     return E_OK;
 }
 
@@ -826,6 +989,8 @@ t_Handle FM_PCD_PlcrProfileSet(t_Handle h_FmPcd, t_FmPcdPlcrProfileParams *p_Pro
     ioc_fm_pcd_plcr_profile_params_t params;
 
     SANITY_CHECK_RETURN_VALUE(p_PcdDev, E_INVALID_HANDLE, NULL);
+
+    _fml_dbg("Calling...\n");
 
     memcpy(&params, p_Profile, sizeof(t_FmPcdPlcrProfileParams));
 
@@ -872,6 +1037,9 @@ t_Handle FM_PCD_PlcrProfileSet(t_Handle h_FmPcd, t_FmPcdPlcrProfileParams *p_Pro
     p_Dev->h_UserPriv = (t_Handle)p_PcdDev;
     p_PcdDev->owners++;
     p_Dev->id = PTR_TO_UINT(params.id);
+
+    _fml_dbg("Called.\n");
+
     return (t_Handle) p_Dev;
 }
 
@@ -883,6 +1051,8 @@ t_Error FM_PCD_PlcrProfileDelete(t_Handle h_Profile)
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     p_PcdDev = (t_Device*)p_Dev->h_UserPriv;
     id.obj = UINT_TO_PTR(p_Dev->id);
 
@@ -892,6 +1062,9 @@ t_Error FM_PCD_PlcrProfileDelete(t_Handle h_Profile)
 
     p_PcdDev->owners--;
     free(p_Dev);
+
+    _fml_dbg("Called.\n");
+
     return E_OK;
 }
 
@@ -902,6 +1075,8 @@ t_Handle FM_PCD_ManipNodeSet(t_Handle h_FmPcd, t_FmPcdManipParams *p_FmPcdManipP
     ioc_fm_pcd_manip_params_t params;
 
     SANITY_CHECK_RETURN_VALUE(p_PcdDev, E_INVALID_HANDLE, NULL);
+
+    _fml_dbg("Calling...\n");
 
     memset(&params, 0, sizeof(ioc_fm_pcd_manip_params_t));
     memcpy(&params, p_FmPcdManipParams, sizeof(ioc_fm_pcd_manip_params_t));
@@ -922,6 +1097,9 @@ t_Handle FM_PCD_ManipNodeSet(t_Handle h_FmPcd, t_FmPcdManipParams *p_FmPcdManipP
     p_Dev->h_UserPriv = (t_Handle)p_PcdDev;
     p_PcdDev->owners++;
     p_Dev->id = PTR_TO_UINT(params.id);
+
+    _fml_dbg("Called.\n");
+
     return (t_Handle) p_Dev;
 }
 
@@ -933,6 +1111,8 @@ t_Error  FM_PCD_ManipNodeDelete(t_Handle h_HdrManipNode)
 
     SANITY_CHECK_EXIT(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     p_PcdDev = (t_Device*)p_Dev->h_UserPriv;
     id.obj = UINT_TO_PTR(p_Dev->id);
 
@@ -941,6 +1121,9 @@ t_Error  FM_PCD_ManipNodeDelete(t_Handle h_HdrManipNode)
 
     p_PcdDev->owners--;
     free(p_Dev);
+
+    _fml_dbg("Called.\n");
+
     return E_OK;
 }
 #ifdef FM_CAPWAP_SUPPORT
@@ -962,6 +1145,8 @@ t_Handle FM_PORT_Open(t_FmPortParams *p_FmPortParams)
     int         fd;
     char        devName[30];
     t_FmPort    *p_FmPort;
+
+    _fml_dbg("Calling...\n");
 
     p_Dev = (t_Device*) malloc(sizeof(t_Device));
     if (!p_Dev)
@@ -1028,6 +1213,8 @@ t_Handle FM_PORT_Open(t_FmPortParams *p_FmPortParams)
     p_Dev->fd = fd;
     p_Dev->h_UserPriv = (t_Handle) p_FmPort;
 
+    _fml_dbg("Called.\n");
+
     return (t_Handle) p_Dev;
 }
 
@@ -1037,10 +1224,14 @@ void FM_PORT_Close(t_Handle h_FmPort)
 
     SANITY_CHECK_RETURN(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     close(p_Dev->fd);
     if (p_Dev->h_UserPriv)
         free(p_Dev->h_UserPriv);
     free(p_Dev);
+
+    _fml_dbg("Called.\n");
 }
 
 t_Error FM_PORT_Disable(t_Handle h_FmPort)
@@ -1049,8 +1240,12 @@ t_Error FM_PORT_Disable(t_Handle h_FmPort)
 
     SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, E_OK);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_PORT_IOC_DISABLE))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -1061,8 +1256,12 @@ t_Error FM_PORT_Enable(t_Handle h_FmPort)
 
     SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, E_OK);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_PORT_IOC_ENABLE))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -1073,8 +1272,12 @@ t_Error FM_PORT_DeleteRateLimit(t_Handle h_FmPort)
 
     SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, E_OK);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_PORT_IOC_REMOVE_RATE_LIMIT))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -1086,8 +1289,12 @@ t_Error FM_PORT_SetRateLimit(t_Handle h_FmPort, t_FmPortRateLimit *p_RateLimit)
     ASSERT_COND(sizeof(t_FmPortRateLimit) == sizeof(ioc_fm_port_rate_limit_t));
     SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, E_OK);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_PORT_IOC_SET_RATE_LIMIT, p_RateLimit))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -1099,8 +1306,12 @@ t_Error FM_PORT_SetErrorsRoute(t_Handle h_FmPort, fmPortFrameErrSelect_t errs)
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_PORT_IOC_SET_ERRORS_ROUTE, &intCast))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -1112,6 +1323,8 @@ uint32_t FM_PORT_AllocPCDFqids (t_Handle h_FmPort, uint32_t numFqids, uint8_t al
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     param.num_fqids  = numFqids;
     param.alignment = alignment;
     if (ioctl(p_Dev->fd, FM_PORT_IOC_ALLOC_PCD_FQIDS, &param))
@@ -1120,6 +1333,8 @@ uint32_t FM_PORT_AllocPCDFqids (t_Handle h_FmPort, uint32_t numFqids, uint8_t al
                 ("Failed to allocate %d queue IDs!", numFqids));
         return 0;
     }
+
+    _fml_dbg("Called.\n");
 
     return param.base_fqid;
 }
@@ -1130,9 +1345,14 @@ t_Error FM_PORT_FreePCDFqids (t_Handle h_FmPort, uint32_t base_fqid)
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_PORT_IOC_FREE_PCD_FQIDS, &base_fqid))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION,
                 ("Invalid base FQID %d or other error!", base_fqid));
+
+    _fml_dbg("Called.\n");
+
     return E_OK;
 }
 
@@ -1143,6 +1363,8 @@ t_Error FM_PORT_SetPCD(t_Handle h_FmPort, t_FmPortPcdParams *p_FmPortPcd)
 
     ASSERT_COND(sizeof(t_FmPortPcdParams) == sizeof(ioc_fm_port_pcd_params_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
+
+    _fml_dbg("Calling...\n");
 
     memcpy(&params, p_FmPortPcd, sizeof(t_FmPortPcdParams));
 
@@ -1196,6 +1418,8 @@ t_Error FM_PORT_SetPCD(t_Handle h_FmPort, t_FmPortPcdParams *p_FmPortPcd)
     if (ioctl(p_Dev->fd, FM_PORT_IOC_SET_PCD, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
+    _fml_dbg("Called.\n");
+
     return E_OK;
 }
 
@@ -1205,8 +1429,12 @@ t_Error FM_PORT_DeletePCD(t_Handle h_FmPort)
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_PORT_IOC_DELETE_PCD))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -1217,8 +1445,12 @@ t_Error FM_PORT_DetachPCD(t_Handle h_FmPort)
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_PORT_IOC_DETACH_PCD))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -1229,8 +1461,12 @@ t_Error FM_PORT_AttachPCD(t_Handle h_FmPort)
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_PORT_IOC_ATTACH_PCD))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -1241,8 +1477,12 @@ t_Error FM_PORT_PcdPlcrAllocProfiles(t_Handle h_FmPort, uint16_t numOfProfiles)
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_PORT_IOC_PCD_PLCR_ALLOC_PROFILES, &numOfProfiles))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -1253,8 +1493,12 @@ t_Error FM_PORT_PcdPlcrFreeProfiles(t_Handle h_FmPort)
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_PORT_IOC_PCD_PLCR_FREE_PROFILES))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -1266,8 +1510,12 @@ t_Error FM_PORT_PcdKgModifyInitialScheme(t_Handle h_FmPort, t_FmPcdKgSchemeSelec
     ASSERT_COND(sizeof(t_FmPcdKgSchemeSelect) == sizeof(ioc_fm_pcd_kg_scheme_select_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_PORT_IOC_PCD_KG_MODIFY_INITIAL_SCHEME, p_FmPcdKgScheme))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -1279,10 +1527,14 @@ t_Error FM_PORT_PcdPlcrModifyInitialProfile (t_Handle h_FmPort, t_Handle h_Profi
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     id.obj = h_Profile;
 
     if (ioctl(p_Dev->fd, FM_PORT_IOC_PCD_PLCR_MODIFY_INITIAL_PROFILE, &id))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -1294,10 +1546,14 @@ t_Error FM_PORT_PcdCcModifyTree (t_Handle h_FmPort, t_Handle h_CcTree)
 
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     id.obj = h_CcTree;
 
     if (ioctl(p_Dev->fd, FM_PORT_IOC_PCD_CC_MODIFY_TREE, &id))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -1309,8 +1565,12 @@ t_Error FM_PORT_PcdKgBindSchemes (t_Handle h_FmPort, t_FmPcdPortSchemesParams *p
     ASSERT_COND(sizeof(t_FmPcdPortSchemesParams) == sizeof(ioc_fm_pcd_port_schemes_params_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_PORT_IOC_PCD_KG_BIND_SCHEMES, p_PortScheme))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -1322,8 +1582,12 @@ t_Error FM_PORT_PcdKgUnbindSchemes (t_Handle h_FmPort, t_FmPcdPortSchemesParams 
     ASSERT_COND(sizeof(t_FmPcdPortSchemesParams) == sizeof(ioc_fm_pcd_port_schemes_params_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_PORT_IOC_PCD_KG_UNBIND_SCHEMES, p_PortScheme))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -1335,8 +1599,12 @@ t_Error FM_PORT_PcdModifyPrsStart (t_Handle h_FmPort, t_FmPcdPrsStart *p_FmPcdPr
     ASSERT_COND(sizeof(t_FmPcdPrsStart) == sizeof(ioc_fm_pcd_prs_start_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_PORT_IOC_PCD_PRS_MODIFY_START_OFFSET, p_FmPcdPrsStart))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
@@ -1347,8 +1615,12 @@ t_Error FM_PCD_SetAdvancedOffloadSupport(t_Handle h_FmPort)
 
     SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, E_OK);
 
+    _fml_dbg("Calling...\n");
+
     if (ioctl(p_Dev->fd, FM_PCD_IOC_SET_ADVANCED_OFFLOAD_SUPPORT))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
 
     return E_OK;
 }
