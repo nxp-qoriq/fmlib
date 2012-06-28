@@ -30,6 +30,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 /**************************************************************************//**
  @File          fm_port_ext.h
 
@@ -61,7 +62,7 @@
 
                 The FM uses a general module called "port" to represent a Tx port
                 (MAC), an Rx port (MAC) or Offline Parsing port.
-                The number of ports in an FM varies between SOC's.
+                The number of ports in an FM varies between SOCs.
                 The SW driver manages these ports as sub-modules of the FM, i.e.
                 after an FM is initialized, its ports may be initialized and
                 operated upon.
@@ -71,7 +72,9 @@
                 verifies coherence and returns error if applicable.
 
                 On initialization, user specifies the port type and it's index
-                (relative to the port's type) - always starting at 0.
+                (relative to the port's type). Host command and offline parsing
+                ports share the same id range, i.e. the user may only initialize
+                port 0 as either host command or offline parsing, but not both.
 
  @{
 *//***************************************************************************/
@@ -99,6 +102,7 @@ typedef enum e_FmPortPcdSupport {
                                                     /**< Use all PCD engines */
     , e_FM_PORT_PCD_SUPPORT_PRS_AND_KG_AND_PLCR     /**< Use Parser, Keygen and Policer */
     , e_FM_PORT_PCD_SUPPORT_PRS_AND_CC              /**< Use Parser and Coarse Classification */
+    , e_FM_PORT_PCD_SUPPORT_PRS_AND_CC_AND_PLCR     /**< Use Parser and Coarse Classification and Policer */
 #ifdef FM_CAPWAP_SUPPORT
     , e_FM_PORT_PCD_SUPPORT_CC_ONLY                 /**< Use only Coarse Classification */
     , e_FM_PORT_PCD_SUPPORT_CC_AND_KG               /**< Use Coarse Classification,and Keygen */
@@ -117,40 +121,43 @@ typedef enum e_FmPortPcdSupport {
 *//***************************************************************************/
 typedef uint32_t    fmPortFrameErrSelect_t;                         /**< typedef for defining Frame Descriptor errors */
 
-#define FM_PORT_FRM_ERR_UNSUPPORTED_FORMAT              0x04000000  /**< Offline parsing only! Unsupported Format */
-#define FM_PORT_FRM_ERR_LENGTH                          0x02000000  /**< Offline parsing only! Length Error */
-#define FM_PORT_FRM_ERR_DMA                             0x01000000  /**< DMA Data error */
+#define FM_PORT_FRM_ERR_UNSUPPORTED_FORMAT      FM_FD_ERR_UNSUPPORTED_FORMAT    /**< Not for Rx-Port! Unsupported Format */
+#define FM_PORT_FRM_ERR_LENGTH                  FM_FD_ERR_LENGTH                /**< Not for Rx-Port! Length Error */
+#define FM_PORT_FRM_ERR_DMA                     FM_FD_ERR_DMA                   /**< DMA Data error */
 #ifdef FM_DISABLE_SEC_ERRORS
-#define FM_PORT_FRM_ERR_NON_FM                          0x00400000  /**< non Frame-Manager error; probably come from SEC that
-                                                                         was chained to FM */
+#define FM_PORT_FRM_ERR_NON_FM                  FM_FD_RX_STATUS_ERR_NON_FM      /*< non Frame-Manager error; probably come from SEC that
+                                                                                    was chained to FM */
 #endif /* FM_DISABLE_SEC_ERRORS */
-
-#define FM_PORT_FRM_ERR_IPRE                            0x00200000
-#define FM_PORT_FRM_ERR_IPFE                            0x00100000
+#ifdef FM_IP_FRAG_N_REASSEM_SUPPORT
+#define FM_PORT_FRM_ERR_IPRE                    (FM_FD_ERR_IPR & ~FM_FD_IPR)    /**< IPR error */
+#define FM_PORT_FRM_ERR_IPR_TO                  (FM_FD_ERR_IPR_TO & ~FM_FD_IPR) /**< IPR timeout */
+#define FM_PORT_FRM_ERR_IPFE                    FM_FD_ERR_IPF                   /**< IPF error */
+#endif /* FM_IP_FRAG_N_REASSEM_SUPPORT */
 
 #ifdef FM_CAPWAP_SUPPORT
-#define FM_PORT_FRM_ERR_CRE                             0x00200000
-#define FM_PORT_FRM_ERR_CHE                             0x00100000
+#define FM_PORT_FRM_ERR_CRE                     FM_FD_ERR_CRE
+#define FM_PORT_FRM_ERR_CHE                     FM_FD_ERR_CHE
 #endif /* FM_CAPWAP_SUPPORT */
 
-#define FM_PORT_FRM_ERR_PHYSICAL                        0x00080000  /**< Rx FIFO overflow, FCS error, code error, running disparity
-                                                                         error (SGMII and TBI modes), FIFO parity error. PHY
-                                                                         Sequence error, PHY error control character detected. */
-#define FM_PORT_FRM_ERR_SIZE                            0x00040000  /**< Frame too long OR Frame size exceeds max_length_frame  */
-#define FM_PORT_FRM_ERR_CLS_DISCARD                     0x00020000  /**< classification discard */
-#define FM_PORT_FRM_ERR_EXTRACTION                      0x00008000  /**< Extract Out of Frame */
-#define FM_PORT_FRM_ERR_NO_SCHEME                       0x00004000  /**< No Scheme Selected */
-#define FM_PORT_FRM_ERR_KEYSIZE_OVERFLOW                0x00002000  /**< Keysize Overflow */
-#define FM_PORT_FRM_ERR_COLOR_YELLOW                    0x00000400  /**< Frame color is yellow */
-#define FM_PORT_FRM_ERR_COLOR_RED                       0x00000800  /**< Frame color is red */
-#define FM_PORT_FRM_ERR_ILL_PLCR                        0x00000200  /**< Illegal Policer Profile selected */
-#define FM_PORT_FRM_ERR_PLCR_FRAME_LEN                  0x00000100  /**< Policer frame length error */
-#define FM_PORT_FRM_ERR_PRS_TIMEOUT                     0x00000080  /**< Parser Time out Exceed */
-#define FM_PORT_FRM_ERR_PRS_ILL_INSTRUCT                0x00000040  /**< Invalid Soft Parser instruction */
-#define FM_PORT_FRM_ERR_PRS_HDR_ERR                     0x00000020  /**< Header error was identified during parsing */
-#define FM_PORT_FRM_ERR_BLOCK_LIMIT_EXCEEDED            0x00000008  /**< Frame parsed beyind 256 first bytes */
-#define FM_PORT_FRM_ERR_PROCESS_TIMEOUT                 0x00000001  /**< FPM Frame Processing Timeout Exceeded */
+#define FM_PORT_FRM_ERR_PHYSICAL                FM_FD_ERR_PHYSICAL              /**< Rx FIFO overflow, FCS error, code error, running disparity
+                                                                                     error (SGMII and TBI modes), FIFO parity error. PHY
+                                                                                     Sequence error, PHY error control character detected. */
+#define FM_PORT_FRM_ERR_SIZE                    FM_FD_ERR_SIZE                  /**< Frame too long OR Frame size exceeds max_length_frame  */
+#define FM_PORT_FRM_ERR_CLS_DISCARD             FM_FD_ERR_CLS_DISCARD           /**< classification discard */
+#define FM_PORT_FRM_ERR_EXTRACTION              FM_FD_ERR_EXTRACTION            /**< Extract Out of Frame */
+#define FM_PORT_FRM_ERR_NO_SCHEME               FM_FD_ERR_NO_SCHEME             /**< No Scheme Selected */
+#define FM_PORT_FRM_ERR_KEYSIZE_OVERFLOW        FM_FD_ERR_KEYSIZE_OVERFLOW      /**< Keysize Overflow */
+#define FM_PORT_FRM_ERR_COLOR_RED               FM_FD_ERR_COLOR_RED             /**< Frame color is red */
+#define FM_PORT_FRM_ERR_COLOR_YELLOW            FM_FD_ERR_COLOR_YELLOW          /**< Frame color is yellow */
+#define FM_PORT_FRM_ERR_ILL_PLCR                FM_FD_ERR_ILL_PLCR              /**< Illegal Policer Profile selected */
+#define FM_PORT_FRM_ERR_PLCR_FRAME_LEN          FM_FD_ERR_PLCR_FRAME_LEN        /**< Policer frame length error */
+#define FM_PORT_FRM_ERR_PRS_TIMEOUT             FM_FD_ERR_PRS_TIMEOUT           /**< Parser Time out Exceed */
+#define FM_PORT_FRM_ERR_PRS_ILL_INSTRUCT        FM_FD_ERR_PRS_ILL_INSTRUCT      /**< Invalid Soft Parser instruction */
+#define FM_PORT_FRM_ERR_PRS_HDR_ERR             FM_FD_ERR_PRS_HDR_ERR           /**< Header error was identified during parsing */
+#define FM_PORT_FRM_ERR_BLOCK_LIMIT_EXCEEDED    FM_FD_ERR_BLOCK_LIMIT_EXCEEDED  /**< Frame parsed beyind 256 first bytes */
+#define FM_PORT_FRM_ERR_PROCESS_TIMEOUT         0x00000001       /**< FPM Frame Processing Timeout Exceeded */
 /* @} */
+
 
 
 
@@ -190,16 +197,38 @@ typedef enum e_FmPortDualRateLimiterScaleDown {
  @Description   A structure for defining Tx rate limiting
 *//***************************************************************************/
 typedef struct t_FmPortRateLimit {
-    uint16_t                            maxBurstSize;           /**< in KBytes for Tx ports, in frames
-                                                                     for OP ports. (note that
+    uint16_t                            maxBurstSize;           /**< in kBytes for Tx ports, in frames
+                                                                     for offline parsing ports. (note that
                                                                      for early chips burst size is
                                                                      rounded up to a multiply of 1000 frames).*/
     uint32_t                            rateLimit;              /**< in Kb/sec for Tx ports, in frame/sec for
-                                                                     OP ports. Rate limit refers to
+                                                                     offline parsing ports. Rate limit refers to
                                                                      data rate (rather than line rate). */
-    e_FmPortDualRateLimiterScaleDown    rateLimitDivider;       /**< For OP ports only. Not-valid
+    e_FmPortDualRateLimiterScaleDown    rateLimitDivider;       /**< For offline parsing ports only. Not-valid
                                                                      for some earlier chip revisions */
 } t_FmPortRateLimit;
+
+/**************************************************************************//**
+ @Description   Structure for Port id parameters.
+                Fields commented 'IN' are passed by the port module to be used
+                by the FM module.
+                Fields commented 'OUT' will be filled by FM before returning to port.
+*//***************************************************************************/
+typedef struct t_FmPortCongestionGrps {
+    uint16_t    numOfCongestionGrpsToConsider;          /**< The number of required congestion groups
+                                                             to define the size of the following array */
+    uint8_t     congestionGrpsToConsider[FM_PORT_NUM_OF_CONGESTION_GRPS];
+                                                        /**< An array of CG indexes;
+                                                             Note that the size of the array should be
+                                                             'numOfCongestionGrpsToConsider'. */
+#if DPAA_VERSION >= 11
+    bool        pfcPrioritiesEn[FM_PORT_NUM_OF_CONGESTION_GRPS][FM_MAX_NUM_OF_PFC_PRIORITIES];
+                                                        /**< a matrix that represents the map between the CG ids
+                                                             defined in 'congestionGrpsToConsider' to the priorties
+                                                             mapping array. */
+#endif /* DPAA_VERSION >= 11 */
+} t_FmPortCongestionGrps;
+
 
 /**************************************************************************//**
  @Function      FM_PORT_Disable
@@ -240,7 +269,7 @@ t_Error FM_PORT_Enable(t_Handle h_FmPort);
                 The selected rate limit specified here would be
                 rounded DOWN to the nearest 16M.
 
-                May be used for Tx and OP ports only
+                May be used for Tx and offline parsing ports only
 
  @Param[in]     h_FmPort        A handle to a FM Port module.
  @Param[in]     p_RateLimit     A structure of rate limit parameters
@@ -257,7 +286,7 @@ t_Error FM_PORT_SetRateLimit(t_Handle h_FmPort, t_FmPortRateLimit *p_RateLimit);
  @Description   Calling this routine disables and clears rate limit
                 initialization.
 
-                May be used for Tx and OP ports only
+                May be used for Tx and offline parsing ports only
 
  @Param[in]     h_FmPort        A handle to a FM Port module.
 
@@ -267,6 +296,70 @@ t_Error FM_PORT_SetRateLimit(t_Handle h_FmPort, t_FmPortRateLimit *p_RateLimit);
 *//***************************************************************************/
 t_Error FM_PORT_DeleteRateLimit(t_Handle h_FmPort);
 
+
+/**************************************************************************//**
+ @Function      FM_PORT_AddCongestionGrps
+
+ @Description   This routine effects the corresponding Tx port.
+                It should be called in order to enable pause
+                frame transmission in case of congestion in one or more
+                of the congestion groups relevant to this port.
+                Each call to this routine may add one or more congestion
+                groups to be considered relevant to this port.
+
+                May be used for Rx, or RX+OP ports only (depending on chip)
+                (Not implemented yet in fm-lib!)
+
+ @Param[in]     h_FmPort            A handle to a FM Port module.
+ @Param[in]     p_CongestionGrps    A pointer to an array of congestion groups
+                                    id's to consider.
+
+ @Return        E_OK on success; Error code otherwise.
+
+ @Cautions      Allowed only following FM_PORT_Init().
+*//***************************************************************************/
+t_Error FM_PORT_AddCongestionGrps(t_Handle h_FmPort, t_FmPortCongestionGrps *p_CongestionGrps);
+
+/**************************************************************************//**
+ @Function      FM_PORT_RemoveCongestionGrps
+
+ @Description   This routine effects the corresponding Tx port. It should be
+                called when congestion groups were
+                defined for this port and are no longer relevant, or pause
+                frames transmitting is not required on their behalf.
+                Each call to this routine may remove one or more congestion
+                groups to be considered relevant to this port.
+
+                May be used for Rx, or RX+OP ports only (depending on chip)
+                (Not implemented yet in fm-lib!)
+
+ @Param[in]     h_FmPort            A handle to a FM Port module.
+ @Param[in]     p_CongestionGrps    A pointer to an array of congestion groups
+                                    id's to consider.
+
+ @Return        E_OK on success; Error code otherwise.
+
+ @Cautions      Allowed only following FM_PORT_Init().
+*//***************************************************************************/
+t_Error FM_PORT_RemoveCongestionGrps(t_Handle h_FmPort, t_FmPortCongestionGrps *p_CongestionGrps);
+
+/**************************************************************************//**
+ @Function      FM_PORT_SetRxL4ChecksumVerify
+
+ @Description   This routine is relevant for Rx ports (1G and 10G). The routine
+                set/clear the L3/L4 checksum verification (on RX side).
+                Note that this takes effect only if hw-parser is enabled!
+                (Not implemented yet in fm-lib!)
+
+ @Param[in]     h_FmPort        A handle to a FM Port module.
+ @Param[in]     l4Checksum      boolean indicates whether to do L3/L4 checksum
+                                on frames or not.
+
+ @Return        E_OK on success; Error code otherwise.
+
+ @Cautions      Allowed only following FM_PORT_Init().
+*//***************************************************************************/
+t_Error FM_PORT_SetRxL4ChecksumVerify(t_Handle h_FmPort, bool l4Checksum);
 
 /**************************************************************************//**
  @Function      FM_PORT_SetErrorsRoute
@@ -279,7 +372,7 @@ t_Error FM_PORT_DeleteRateLimit(t_Handle h_FmPort);
                 Errors that were configured to be discarded (at initialization)
                 may not be selected here.
 
-                May be used for Rx and OP ports only
+                May be used for Rx and offline parsing ports only
 
  @Param[in]     h_FmPort    A handle to a FM Port module.
  @Param[in]     errs        A list of errors to enqueue to error queue
@@ -389,8 +482,7 @@ typedef struct t_FmPortPcdPrsParams {
                                                                          incoming frames. */
     uint8_t                         parsingOffset;                  /**< Number of bytes from beginning of packet to start parsing */
     e_NetHeaderType                 firstPrsHdr;                    /**< The type of the first header expected at 'parsingOffset' */
-    bool                            includeInPrsStatistics;         /**< TRUE to include this port in the parser statistics;
-                                                                         NOTE: this field is not valid when the FN is in "guest" mode. */
+    bool                            includeInPrsStatistics;         /**< TRUE to include this port in the parser statistics */
     uint8_t                         numOfHdrsWithAdditionalParams;  /**< Normally 0, some headers may get
                                                                          special parameters */
     t_FmPcdPrsAdditionalHdrParams   additionalParams[FM_PCD_PRS_NUM_OF_HDRS];
@@ -465,7 +557,7 @@ typedef struct t_FmPcdPrsStart {
                                              'parsingOffset' */
 } t_FmPcdPrsStart;
 
-#if (DPAA_VERSION >= 11)
+#if DPAA_VERSION >= 11
 /**************************************************************************//**
  @Description   struct for defining external buffer margins
 *//***************************************************************************/
@@ -476,7 +568,7 @@ typedef struct t_FmPortVSPAllocParams {
                                              if relevant function called for Rx port */
     t_Handle    h_FmTxPort;             /**< Handle to coupled Tx Port; not relevant for OP port. */
 } t_FmPortVSPAllocParams;
-#endif /* (DPAA_VERSION >= 11) */
+#endif /* DPAA_VERSION >= 11 */
 
 
 /**************************************************************************//**
@@ -487,7 +579,7 @@ typedef struct t_FmPortVSPAllocParams {
                 disabled (BMI to BMI) and configures it according to the passed
                 parameters.
 
-                May be used for Rx and OP ports only
+                May be used for Rx and offline parsing ports only
 
  @Param[in]     h_FmPort        A handle to a FM Port module.
  @Param[in]     p_FmPortPcd     A Structure of parameters defining the port's PCD
@@ -506,7 +598,7 @@ t_Error FM_PORT_SetPCD(t_Handle h_FmPort, t_FmPortPcdParams *p_FmPortPcd);
                 The port returns to its default configuration which is PCD
                 disabled (BMI to BMI) and all PCD configuration is removed.
 
-                May be used for Rx and OP ports which are
+                May be used for Rx and offline parsing ports which are
                 in PCD mode  only
 
  @Param[in]     h_FmPort        A handle to a FM Port module.
@@ -525,7 +617,7 @@ t_Error FM_PORT_DeletePCD(t_Handle h_FmPort);
                 The couple of routines are used to allow PCD configuration changes
                 that demand that PCD will not be used while changes take place.
 
-                May be used for Rx and OP ports which are
+                May be used for Rx and offline parsing ports which are
                 in PCD mode only
 
  @Param[in]     h_FmPort        A handle to a FM Port module.
@@ -542,7 +634,7 @@ t_Error FM_PORT_AttachPCD(t_Handle h_FmPort);
  @Description   Calling this routine detaches the port from its PCD functionality.
                 The port returns to its default flow which is BMI to BMI.
 
-                May be used for Rx and OP ports which are
+                May be used for Rx and offline parsing ports which are
                 in PCD mode only
 
  @Param[in]     h_FmPort        A handle to a FM Port module.
@@ -583,7 +675,7 @@ t_Error FM_PORT_PcdPlcrAllocProfiles(t_Handle h_FmPort, uint16_t numOfProfiles);
 *//***************************************************************************/
 t_Error FM_PORT_PcdPlcrFreeProfiles(t_Handle h_FmPort);
 
-#if (DPAA_VERSION >= 11)
+#if DPAA_VERSION >= 11
 /**************************************************************************//**
  @Function      FM_PORT_VSPAlloc
 
@@ -600,7 +692,7 @@ t_Error FM_PORT_PcdPlcrFreeProfiles(t_Handle h_FmPort);
                 and also before FM_PORT_Enable() (i.e. the port should be disabled).
 *//***************************************************************************/
 t_Error FM_PORT_VSPAlloc(t_Handle h_FmPort, t_FmPortVSPAllocParams *p_Params);
-#endif /* (DPAA_VERSION >= 11) */
+#endif /* DPAA_VERSION >= 11 */
 
 /**************************************************************************//**
  @Function      FM_PORT_PcdKgModifyInitialScheme
@@ -705,6 +797,10 @@ t_Error FM_PORT_PcdKgUnbindSchemes (t_Handle h_FmPort, t_FmPcdPortSchemesParams 
 *//***************************************************************************/
 t_Error FM_PORT_PcdPrsModifyStartOffset (t_Handle h_FmPort, t_FmPcdPrsStart *p_FmPcdPrsStart);
 
+#ifdef ALU_CUSTOM
+/*              (Not implemented yet in fm-lib!) */
+t_Error FM_PORT_GetIPv4OptionsCount(t_Handle h_FmPort, uint32_t *p_Ipv4OptionsCount);
+#endif /* ALU_CUSTOM */
 
 /** @} */ /* end of lnx_usr_FM_PORT_pcd_runtime_control_grp group */
 

@@ -1411,8 +1411,8 @@ t_Error FM_PORT_SetPCD(t_Handle h_FmPort, t_FmPortPcdParams *p_FmPortPcd)
         if (params.p_kg_params){
             uint32_t i;
             for (i = 0; i < params.p_kg_params->num_of_schemes; i++)
-                if (params.p_kg_params->schemes_ids[i])
-                    DEV_TO_ID(params.p_kg_params->schemes_ids[i]);
+                if (params.p_kg_params->scheme_ids[i])
+                    DEV_TO_ID(params.p_kg_params->scheme_ids[i]);
                 else
                     XX_Print("fmlib warning (%s): Scheme:%u not set!\n", __func__, i);
                 

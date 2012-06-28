@@ -46,6 +46,7 @@
 
 
 #define DPAA_VERSION    10
+#define ALU_CUSTOM
 
 /**************************************************************************//**
  @Description   DPAA SW Portals Enumeration.
@@ -190,6 +191,9 @@ typedef enum
 #define FM_PORT_NUM_OF_CONGESTION_GRPS          256         /**< Total number of congestion groups in QM */
 #define FM_MAX_NUM_OF_SUB_PORTALS               12
 #define FM_PORT_MAX_NUM_OF_OBSERVED_EXT_POOLS   0
+
+#define FM_IPSEC_SUPPORT
+#define FM_IP_FRAG_N_REASSEM_SUPPORT
 
 /* RAMs defines */
 #define FM_MURAM_SIZE                   (160 * KILOBYTE)

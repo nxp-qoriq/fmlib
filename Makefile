@@ -103,26 +103,30 @@ install-%: %.a
 	@($(INSTALL) -d $(DESTDIR)$(PREFIX)/share/doc/fm-lib-$(FM_LIB_VERSION))
 	@($(INSTALL) $(FM_LIB_DOCFILES) $(DESTDIR)$(PREFIX)/share/doc/fm-lib-$(FM_LIB_VERSION))
 
-targets:
+targets help:
 	@(echo)
 	@(echo "make all: build libraries for all platforms (local build)")
 	@(echo)
 	@(echo "make archive: build tarball with fm libraries")
 	@(echo)
-	@(echo "make libfm-<arch>.a (e.g. libfm-ppce500mc.a):")
+	@(echo "make libfm-<arch>.a (e.g. \"make libfm-ppce500mc.a\"):")
 	@(echo "	build library for specific platform <arch>")
 	@(echo)
-	@(echo "make install-libfm-<arch> (e.g. install-libfm-ppce500mc):")
+	@(echo "The available make libfm-<arch>.a targets are:")
+	@(echo "	libfm-ppce500mc.a	(P3, P4)")
+	@(echo "	libfm-ppc32e5500.a	(P5 - 32b)")
+	@(echo "	libfm-ppc64e5500.a	(P5 - 64b)")
+	@(echo "	libfm-ppce500v2.a	(P1023)")
+	@(echo)
+	@(echo "make install-libfm-<arch> (e.g. \"make install-libfm-ppce500mc\"):")
 	@(echo "	install the library and headers to the location specified by DESTDIR, PREFIX")
 	@(echo)
-	@(echo "The available <arch> options are:")
-	@(echo "	ppce500mc:	P3, P4")
-	@(echo "	ppc32e5500:	P5(32b)")
-	@(echo "	ppc64e5500:	P5(64b)")
-	@(echo "	ppce500v2:	P1")
+	@(echo "Please also mind the fact that the environment for invoking 'make' with this Makefile")
+	@(echo "needs also contain certain required variables, most notably KERNEL_SRC!")
+	@(echo)
 
 clean:
 	@(echo "Cleaning...")
 	@(rm -rf *.a *.o *.d .*.o.cmd)
 
-.PHONY: targets clean
+.PHONY: targets help clean
