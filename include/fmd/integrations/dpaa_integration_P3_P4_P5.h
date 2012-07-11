@@ -193,7 +193,6 @@ typedef enum
 #define FM_PORT_MAX_NUM_OF_OBSERVED_EXT_POOLS   0
 
 #define FM_IPSEC_SUPPORT
-#define FM_IP_FRAG_N_REASSEM_SUPPORT
 
 /* RAMs defines */
 #define FM_MURAM_SIZE                   (160 * KILOBYTE)

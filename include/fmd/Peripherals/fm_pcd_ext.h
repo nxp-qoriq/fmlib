@@ -880,7 +880,6 @@ typedef enum e_FmPcdCcStatsMode {
     e_FM_PCD_CC_STATS_MODE_RMON,            /**< Byte and frame length range count statistics */
 } e_FmPcdCcStatsMode;
 
-#ifdef FM_IP_FRAG_N_REASSEM_SUPPORT
 /**************************************************************************//**
  @Description   Enumeration type for determining the action in case an IP packet
                 is larger than MTU but its DF (Don't Fragment) bit is set.
@@ -890,7 +889,6 @@ typedef enum e_FmPcdManipDontFragAction {
     e_FM_PCD_MANIP_FRAGMENT_PACKECT,                    /**< Fragment packet and continue normal processing */
     e_FM_PCD_MANIP_CONTINUE_WITHOUT_FRAG                /**< Continue normal processing without fragmenting the packet */
 } e_FmPcdManipDontFragAction;
-#endif /* FM_IP_FRAG_N_REASSEM_SUPPORT */
 
 /**************************************************************************//**
  @Description   Enumeration type for selecting type of special offload manipulation
@@ -1437,11 +1435,9 @@ typedef struct t_FmPcdCcNextEngineParams {
         t_FmPcdCcNextFrParams           frParams;       /**< Parameters in case next engine is FR */
 #endif /* DPAA_VERSION >= 11 */
     } params;                                           /**< union used for all the next-engine parameters options */
-#if defined(FM_CAPWAP_SUPPORT) || defined(FM_IP_FRAG_N_REASSEM_SUPPORT)
     t_Handle                            h_Manip;        /**< Handle to Manipulation object.
                                                              Relevant if next engine is of type result
                                                              (e_FM_PCD_PLCR, e_FM_PCD_KG, e_FM_PCD_DONE) */
-#endif /* defined(FM_CAPWAP_SUPPORT) || ... */
     bool                                statisticsEn;   /**< If TRUE, statistics counters are incremented
                                                              for each frame passing through this
                                                              Coarse Classification entry. */
@@ -1784,7 +1780,6 @@ typedef struct t_FmPcdManipHdrRmvByHdrParams {
     } u;
 } t_FmPcdManipHdrRmvByHdrParams;
 
-#ifdef FM_IP_FRAG_N_REASSEM_SUPPORT
 /**************************************************************************//**
  @Description   Parameters for configuring IP fragmentation manipulation
 *//***************************************************************************/
@@ -1856,7 +1851,6 @@ typedef struct t_FmPcdManipReassemIpParams {
                                                             /**< Represents the time interval in microseconds which defines
                                                                  if opened frame (at least one fragment was processed but not all the fragments)is found as too old*/
 } t_FmPcdManipReassemIpParams;
-#endif /* FM_IP_FRAG_N_REASSEM_SUPPORT */
 
 /**************************************************************************//**
  @Description   Parameters for defining IPSEC manipulation
@@ -2091,7 +2085,6 @@ typedef struct t_FmPcdManipHdrParams {
                                                                          completing the manipulation on the frame */
 } t_FmPcdManipHdrParams;
 
-#ifdef FM_IP_FRAG_N_REASSEM_SUPPORT
 /**************************************************************************//**
  @Description   Parameters for defining fragmentation manipulation
 *//***************************************************************************/
@@ -2113,7 +2106,6 @@ typedef struct t_FmPcdManipReassemParams {
                                                            relevant if 'hdr' = HEADER_TYPE_Ipv4 or HEADER_TYPE_Ipv6 */
     } u;
 } t_FmPcdManipReassemParams;
-#endif /* FM_IP_FRAG_N_REASSEM_SUPPORT */
 
 /**************************************************************************//**
  @Description   Parameters for defining a manipulation node
@@ -2122,10 +2114,8 @@ typedef struct t_FmPcdManipParams {
     e_FmPcdManipType                        type;               /**< Selects type of manipulation node */
     union{
         t_FmPcdManipHdrParams               hdr;                /**< Parameters for defining header manipulation node */
-#ifdef FM_IP_FRAG_N_REASSEM_SUPPORT
         t_FmPcdManipReassemParams           reassem;            /**< Parameters for defining reassembly manipulation node */
         t_FmPcdManipFragParams              frag;               /**< Parameters for defining fragmentation manipulation node */
-#endif /* FM_IP_FRAG_N_REASSEM_SUPPORT */
         t_FmPcdManipSpecialOffloadParams    specialOffload;     /**< Parameters for defining special offload manipulation node */
     } u;
     t_Handle                                h_NextManip;        /**< Handle to another (previously defined) manipulation node;

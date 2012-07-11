@@ -128,11 +128,9 @@ typedef uint32_t    fmPortFrameErrSelect_t;                         /**< typedef
 #define FM_PORT_FRM_ERR_NON_FM                  FM_FD_RX_STATUS_ERR_NON_FM      /*< non Frame-Manager error; probably come from SEC that
                                                                                     was chained to FM */
 #endif /* FM_DISABLE_SEC_ERRORS */
-#ifdef FM_IP_FRAG_N_REASSEM_SUPPORT
 #define FM_PORT_FRM_ERR_IPRE                    (FM_FD_ERR_IPR & ~FM_FD_IPR)    /**< IPR error */
 #define FM_PORT_FRM_ERR_IPR_TO                  (FM_FD_ERR_IPR_TO & ~FM_FD_IPR) /**< IPR timeout */
 #define FM_PORT_FRM_ERR_IPFE                    FM_FD_ERR_IPF                   /**< IPF error */
-#endif /* FM_IP_FRAG_N_REASSEM_SUPPORT */
 
 #ifdef FM_CAPWAP_SUPPORT
 #define FM_PORT_FRM_ERR_CRE                     FM_FD_ERR_CRE
