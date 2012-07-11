@@ -46,6 +46,9 @@
 #include "std_ext.h"
 #include "part_ext.h"
 
+#if defined(NCSW_LINUX) && defined(NCSW_MULTI_PARTITION)
+#error "NCSW_MULTI_PARTITION not supported in NCSW_LINUX!"
+#endif  /* NCSW_LINUX && NCSW_MULTI_PARTITION */
 
 
 /**************************************************************************//**
@@ -507,11 +510,12 @@ int XX_TimerIsActive(t_Handle h_Timer);
 
  @Param[in]     msecs - The requested sleep time (in milliseconds).
 
- @Return        None.
+ @Return        Zero if the requested time has elapsed; Otherwise, the value
+                returned will be the unslept amount) in milliseconds.
 
  @Cautions      This routine enables interrupts during its wait time.
 *//***************************************************************************/
-void XX_Sleep(uint32_t msecs);
+uint32_t XX_Sleep(uint32_t msecs);
 
 /**************************************************************************//**
  @Function      XX_UDelay
