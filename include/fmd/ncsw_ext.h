@@ -80,7 +80,8 @@
         uint##size##_t temp;                \
         WRITE_UINT##size((arg), (data));    \
         temp = GET_UINT##size(arg);         \
-    } while (0)
+        if (temp == data) break;            \
+    } while (1)
 
 #define WRITE_UINT8_SYNC(arg, data)     WRITE_UINT_SYNC(8, (arg), (data))
 
@@ -430,7 +431,7 @@ typedef e_RxStoreResponse (t_RxStoreFunction)(t_Handle  h_App,
 
 typedef struct t_Device {
     uintptr_t   id;         /**< the device id */
-    int         fd;         /**< the device file-descritpor */
+    int         fd;         /**< the device file descriptor */
     t_Handle    h_UserPriv;
     uint32_t    owners;
 } t_Device;

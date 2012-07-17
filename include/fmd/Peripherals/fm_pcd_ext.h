@@ -952,6 +952,11 @@ typedef union u_FmPcdHdrProtocolOpt {
                                 (index may apply:
                                  e_FM_PCD_HDR_INDEX_NONE/e_FM_PCD_HDR_INDEX_1,
                                  e_FM_PCD_HDR_INDEX_2/e_FM_PCD_HDR_INDEX_LAST)
+ 
+                                (Note that starting DPAA 11, NET_HEADER_FIELD_IPv6_NEXT_HDR applies to
+                                 the last next header indication, meaning the next L4, which may be
+                                 present at the Ipv6 last extension. On earlier revisions this field
+                                 applies to the Next-Header field of the main IPv6 header)
 
                     HEADER_TYPE_GRE:
                         NET_HEADER_FIELD_GRE_TYPE
@@ -1819,6 +1824,7 @@ typedef struct t_FmPcdManipReassemIpParams {
     uint8_t                         relativeSchemeId[2];    /**< Partition relative scheme id:
                                                                  relativeSchemeId[0] -  Relative scheme ID for IPV4 Reassembly manipulation;
                                                                  relativeSchemeId[1] -  Relative scheme ID for IPV6 Reassembly manipulation;
+                                                                 NOTE: The following is relevant only for v2 devices
                                                                  Relative scheme ID for IPv4/IPv6 Reassembly manipulation must be smaller than
                                                                  the user schemes id to ensure that the reassembly's schemes will be first match;
                                                                  Rest schemes, if defined, should have higher relative scheme ID. */

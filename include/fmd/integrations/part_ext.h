@@ -39,6 +39,27 @@
 #ifndef __PART_EXT_H
 #define __PART_EXT_H
 
+#include "std_ext.h"
+#include "part_integration_ext.h"
+
+
+#if !(defined(P1023) || defined(P2041) || defined(P3041) || defined(P4080) || defined(P5020) || defined(P5040) || defined(B4860) || defined(T4240))
+#error "unable to proceed without chip-definition"
+#endif
+
+
+/**************************************************************************//*
+ @Description   Part data structure - must be contained in any integration
+                data structure.
+*//***************************************************************************/
+typedef struct t_Part
+{
+    uintptr_t   (* f_GetModuleBase)(t_Handle h_Part, e_ModuleId moduleId);
+                /**< Returns the address of the module's memory map base. */
+    e_ModuleId  (* f_GetModuleIdByBase)(t_Handle h_Part, uintptr_t baseAddress);
+                /**< Returns the module's ID according to its memory map base. */
+} t_Part;
+
 #ifdef P1023
 #include "part_P1023.h"
 #else
