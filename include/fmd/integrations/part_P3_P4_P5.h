@@ -39,10 +39,6 @@
 #ifndef __PART_P3_P4_P5_H
 #define __PART_P3_P4_P5_H
 
-#if !defined(P4080) || defined(P1023)
-#error	"This file should not be #included for any platform other than P3/4/5!"
-#endif	/* !defined(P4080) || defined(P1023) */
-
 /* P3/4/5 chip-specific defs. should go here. */
 
 #endif /* __PART_P3_P4_P5_H */

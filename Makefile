@@ -69,8 +69,9 @@ LOCAL_CFLAGS=-O2 -g0 -Wall \
 	@(echo "(AR) $(@)")
 	@($(AR) rcsv $@ $^)
 
-libfm-ppce500mc.o libfm-ppc32e5500.o libfm-ppc64e5500.o: EXTRA_CFLAGS+=-DP4080
-libfm-ppce500v2.o:  EXTRA_CFLAGS+=-DP1023
+libfm-ppce500mc.o: EXTRA_CFLAGS+=-DP4080
+libfm-ppc32e5500.o libfm-ppc64e5500.o: EXTRA_CFLAGS+=-DP5020
+libfm-ppce500v2.o: EXTRA_CFLAGS+=-DP1023
 
 libfm-ppce500mc.o:  CFLAGS?=-m32 -mhard-float -mcpu=e500mc $(LOCAL_CFLAGS)
 libfm-ppc32e5500.o: CFLAGS?=-m32 -mhard-float -mcpu=e5500  $(LOCAL_CFLAGS)
