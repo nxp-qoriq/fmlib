@@ -1805,11 +1805,11 @@ typedef struct t_FmPcdManipFragIpParams {
     e_FmPcdManipDontFragAction  dontFragAction;         /**< Don't Fragment Action - If an IP packet is larger
                                                              than MTU and its DF bit is set, then this field will
                                                              determine the action to be taken.*/
-#ifdef ALU_CUSTOM
+#ifdef FM_EXTRA_COUNTERS
     bool                        optionsCounterEn;       /**< If TRUE, A counter is incremented each time an IPv4 frame with IPv4 Options
                                                              is encountered and the COPIED flag on one of the options is cleared.
                                                              The counter is located on the port page */
-#endif /* ALU_CUSTOM */
+#endif /* FM_EXTRA_COUNTERS */
 
 } t_FmPcdManipFragIpParams;
 

@@ -46,7 +46,7 @@
 
 
 #define DPAA_VERSION    10
-#define ALU_CUSTOM
+#define FM_EXTRA_COUNTERS
 
 /**************************************************************************//**
  @Description   DPAA SW Portals Enumeration.

@@ -795,10 +795,10 @@ t_Error FM_PORT_PcdKgUnbindSchemes (t_Handle h_FmPort, t_FmPcdPortSchemesParams 
 *//***************************************************************************/
 t_Error FM_PORT_PcdPrsModifyStartOffset (t_Handle h_FmPort, t_FmPcdPrsStart *p_FmPcdPrsStart);
 
-#ifdef ALU_CUSTOM
+#ifdef FM_EXTRA_COUNTERS
 /*              (Not implemented yet in fm-lib!) */
 t_Error FM_PORT_GetIPv4OptionsCount(t_Handle h_FmPort, uint32_t *p_Ipv4OptionsCount);
-#endif /* ALU_CUSTOM */
+#endif /* FM_EXTRA_COUNTERS */
 
 /** @} */ /* end of lnx_usr_FM_PORT_pcd_runtime_control_grp group */
 
