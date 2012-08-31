@@ -228,7 +228,7 @@ typedef enum e_ModuleId
 #define P1023_OFFSET_PORTALS_CI(portal)     (P1023_OFFSET_PORTALS_CI_AREA + 0x1000 * (portal))
 
 /**************************************************************************//**
- @Description   Transaction source ID (for memory conrollers error reporting).
+ @Description   Transaction source ID (for memory controllers error reporting).
 *//***************************************************************************/
 typedef enum e_TransSrc
 {
@@ -275,8 +275,13 @@ typedef enum e_P1023DeviceName
 {
     e_P1023_REV_INVALID     = 0x00000000,       /**< Invalid revision */
     e_SC1023_REV_1_0        = (int)0x80FC0010,  /**< SC1023 rev 1.0 */
+    e_SC1023_REV_1_1        = (int)0x80FC0011,  /**< SC1023 rev 1.1 */
     e_P1023_REV_1_0         = (int)0x80FE0010,  /**< P1023 rev 1.0 with security */
-    e_P1023_REV_1_0_NO_SEC  = (int)0x80F60010   /**< P1023 rev 1.0 without security */
+    e_P1023_REV_1_1         = (int)0x80FE0011,  /**< P1023 rev 1.1 with security */
+    e_P1017_REV_1_1         = (int)0x80FF0011,  /**< P1017 rev 1.1 with security */
+    e_P1023_REV_1_0_NO_SEC  = (int)0x80F60010,  /**< P1023 rev 1.0 without security */
+    e_P1023_REV_1_1_NO_SEC  = (int)0x80F60011,  /**< P1023 rev 1.1 without security */
+    e_P1017_REV_1_1_NO_SEC  = (int)0x80F70011   /**< P1017 rev 1.1 without security */
 } e_P1023DeviceName;
 
 /**************************************************************************//**
@@ -381,19 +386,7 @@ t_Error P1023_GetDdrFactor( uintptr_t   gutilBase,
                             uint32_t    *p_DdrMulFactor,
                             uint32_t    *p_DdrDivFactor);
 
-#if 0
-/**************************************************************************//**
- @Function      P1023_GetDdrType
 
- @Description   returns the multiplication factor of the clock in for the DDR clock .
-
- @Param[in]     gutilBase       - Base address of P1023 GUTIL registers.
- @Param         p_DdrType   - (Out) returns DDR type DDR1/DDR2/DDR3.
-
- @Return        E_OK on success; Other value otherwise.
-*//***************************************************************************/
-t_Error P1023_GetDdrType(uintptr_t gutilBase, e_DdrType *p_DdrType );
-#endif
 
 /** @} */ /* end of 1023_init_grp group */
 /** @} */ /* end of 1023_grp group */
@@ -427,16 +420,17 @@ t_Error P1023_GetDdrType(uintptr_t gutilBase, e_DdrType *p_DdrType );
 #define MODULE_FM_PORT          0x00150000
 #define MODULE_FM_MACSEC        0x00160000
 #define MODULE_FM_MACSEC_SECY   0x00170000
-#define MODULE_ECM              0x00180000
-#define MODULE_DMA              0x00190000
-#define MODULE_DDR              0x001a0000
-#define MODULE_LAW              0x001b0000
-#define MODULE_LBC              0x001c0000
-#define MODULE_I2C              0x001d0000
-#define MODULE_ESPI             0x001e0000
-#define MODULE_PCI              0x001f0000
-#define MODULE_DPA              0x00200000
-#define MODULE_USB              0x00210000
+#define MODULE_FM_SP            0x00280000
+#define MODULE_ECM              0x00190000
+#define MODULE_DMA              0x001a0000
+#define MODULE_DDR              0x001b0000
+#define MODULE_LAW              0x001c0000
+#define MODULE_LBC              0x001d0000
+#define MODULE_I2C              0x001e0000
+#define MODULE_ESPI             0x001f0000
+#define MODULE_PCI              0x00200000
+#define MODULE_DPA_PORT         0x00210000
+#define MODULE_USB              0x00220000
 
 /*****************************************************************************
  LBC INTEGRATION-SPECIFIC DEFINITIONS
@@ -530,7 +524,10 @@ typedef enum e_PciTargetInterface
 /*****************************************************************************
  DMA INTEGRATION-SPECIFIC DEFINITIONS
 ******************************************************************************/
-#define DMA_NUM_OF_CONTROLLERS      1
+#define DMA_NUM_OF_CONTROLLERS      2
+
+
+
 
 /*****************************************************************************
  1588 INTEGRATION-SPECIFIC DEFINITIONS

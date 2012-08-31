@@ -47,18 +47,18 @@
 typedef enum e_DpaaSwPortal {
     e_DPAA_SWPORTAL0 = 0,
     e_DPAA_SWPORTAL1,
-    e_DPAA_SWPORTAL2
+    e_DPAA_SWPORTAL2,
+    e_DPAA_SWPORTAL_DUMMY_LAST
 } e_DpaaSwPortal;
 
 typedef enum {
     e_DPAA_DCPORTAL0 = 0,
-    e_DPAA_DCPORTAL1,
     e_DPAA_DCPORTAL2,
-    e_DPAA_DCPORTAL3
+    e_DPAA_DCPORTAL_DUMMY_LAST
 } e_DpaaDcPortal;
 
-#define DPAA_MAX_NUM_OF_SW_PORTALS  3
-#define DPAA_MAX_NUM_OF_DC_PORTALS  3
+#define DPAA_MAX_NUM_OF_SW_PORTALS      e_DPAA_SWPORTAL_DUMMY_LAST
+#define DPAA_MAX_NUM_OF_DC_PORTALS      e_DPAA_DCPORTAL_DUMMY_LAST
 
 /*****************************************************************************
  QMAN INTEGRATION-SPECIFIC DEFINITIONS
@@ -67,7 +67,7 @@ typedef enum {
 #define QM_MAX_NUM_OF_WQ            8
 #define QM_MAX_NUM_OF_SWP_AS        2
 #define QM_MAX_NUM_OF_CGS           64
-#define QM_MAX_NUM_OF_FQIDS           (16*MEGABYTE)
+#define QM_MAX_NUM_OF_FQIDS         (16*MEGABYTE)
 
 typedef enum {
     e_QM_FQ_CHANNEL_SWPORTAL0 = 0,
@@ -96,6 +96,12 @@ typedef enum {
 #define BM_MAX_NUM_OF_POOLS         8
 
 /*****************************************************************************
+ SEC INTEGRATION-SPECIFIC DEFINITIONS
+******************************************************************************/
+#define SEC_NUM_OF_DECOS    2
+#define SEC_ALL_DECOS_MASK  0x00000003
+
+/*****************************************************************************
  FM INTEGRATION-SPECIFIC DEFINITIONS
 ******************************************************************************/
 #define INTG_MAX_NUM_OF_FM          1
@@ -113,8 +119,8 @@ typedef enum {
 #define FM_MAX_NUM_OF_MACS          (FM_MAX_NUM_OF_1G_MACS+FM_MAX_NUM_OF_10G_MACS)
 #define FM_MAX_NUM_OF_MACSECS       1
 
-// #define FM_MACSEC_SUPPORT
-// #define FM_CAPWAP_SUPPORT
+#define FM_MACSEC_SUPPORT
+#define FM_DISABLE_SEC_ERRORS
 
 #define FM_LOW_END_RESTRICTION      /* prevents the use of TX port 1 with OP port 0 */
 
@@ -139,7 +145,6 @@ typedef enum {
 
 /* QMI defines */
 #define QMI_MAX_NUM_OF_TNUMS            15
-#define MAX_QMI_DEQ_SUBPORTAL           7
 
 /* FPM defines */
 #define FM_NUM_OF_FMAN_CTRL_EVENT_REGS  4
@@ -300,28 +305,21 @@ typedef enum e_FmMacsecInterModuleEvent {
 #define FM_QMI_NO_ECC_EXCEPTIONS
 #define FM_CSI_CFED_LIMIT
 #define FM_PEDANTIC_DMA
+#define FM_QMI_NO_DEQ_OPTIONS_SUPPORT
+#define FM_FIFO_ALLOCATION_ALG
+#define FM_DEQ_PIPELINE_PARAMS_FOR_OP
+#define FM_HAS_TOTAL_DMAS
+#define FM_KG_NO_IPPID_SUPPORT
+#define FM_NO_GUARANTEED_RESET_VALUES
+#define FM_MAC_RESET
 
 /* FM erratas */
-#define FM_NO_RX_PREAM_ERRATA_DTSECx1
-#define FM_RX_PREAM_4_ERRATA_DTSEC_A001                 FM_NO_RX_PREAM_ERRATA_DTSECx1
-#define FM_MAGIC_PACKET_UNRECOGNIZED_ERRATA_DTSEC2      /* No implementation, Out of LLD scope */
+#define FM_RX_PREAM_4_ERRATA_DTSEC_A001
+#define FM_MAGIC_PACKET_UNRECOGNIZED_ERRATA_DTSEC2      /* No implementation */
 
-#define FM_IM_TX_SYNC_SKIP_TNUM_ERRATA_FMAN_A001        /* Implemented by ucode */
-#define FM_HC_DEF_FQID_ONLY_ERRATA_FMAN_A003            /* Implemented by ucode */
-#define FM_IM_TX_SHARED_TNUM_ERRATA_FMAN4               /* Implemented by ucode */
-#define FM_IM_GS_DEADLOCK_ERRATA_FMAN5                  /* Implemented by ucode */
-#define FM_IM_DEQ_PIPELINE_DEPTH_ERRATA_FMAN10          /* Implemented by ucode */
-#define FM_CC_GEN6_MISSMATCH_ERRATA_FMAN12              /* Implemented by ucode */
-#define FM_CC_CHANGE_SHARED_TNUM_ERRATA_FMAN13          /* Implemented by ucode */
-#define FM_IM_LARGE_MRBLR_ERRATA_FMAN15                 /* Implemented by ucode */
+#define FM_DEBUG_TRACE_FMAN_A004                        /* No implementation */
+#define FM_INT_BUF_LEAK_FMAN_A005                       /* No implementation. App must avoid S/G */
 
-#define FM_UCODE_NOT_RESET_ERRATA_BUGZILLA6173
-
-/* ??? */
-#define FM_GRS_ERRATA_DTSEC_A002
-#define FM_BAD_TX_TS_IN_B_2_B_ERRATA_DTSEC_A003
-#define FM_GTS_ERRATA_DTSEC_A004
-#define FM_TX_LOCKUP_ERRATA_DTSEC6
 
 #define FM_LOCKUP_ALIGNMENT_ERRATA_FMAN_SW004
 

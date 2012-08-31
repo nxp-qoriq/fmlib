@@ -30,6 +30,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 /**************************************************************************//**
  @File          ncsw_ext.h
 
@@ -39,8 +40,7 @@
 #ifndef __NCSW_EXT_H
 #define __NCSW_EXT_H
 
-#include "memcpy_ext.h"
-
+#include <types_ext.h>
 
 #define WRITE_BLOCK                 IOMemSet32
 #define COPY_BLOCK                  Mem2IOCpy32
@@ -77,11 +77,9 @@
 /* Write and Read again macros */
 #define WRITE_UINT_SYNC(size, arg, data)    \
     do {                                    \
-        uint##size##_t temp;                \
         WRITE_UINT##size((arg), (data));    \
-        temp = GET_UINT##size(arg);         \
-        if (temp == data) break;            \
-    } while (1)
+        CORE_MemoryBarrier();               \
+    } while (0)
 
 #define WRITE_UINT8_SYNC(arg, data)     WRITE_UINT_SYNC(8, (arg), (data))
 

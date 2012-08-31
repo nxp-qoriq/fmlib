@@ -73,7 +73,6 @@ FM_LIB_INCLUDE:=$(FM_IOCTL_INC) \
 		$(FM_IOCTL_INC)/Peripherals \
 		$(FM_IOCTL_INC)/integrations \
 		$(FM_LIB_INC) \
-		$(FM_LIB_INC)/etc \
 		$(FM_LIB_INC)/Peripherals \
 		$(FM_LIB_INC)/integrations 
 

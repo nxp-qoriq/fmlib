@@ -30,6 +30,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 /**************************************************************************//**
  @File          xx_ext.h
 
@@ -181,28 +182,6 @@ void * XX_MallocSmart(uint32_t size, int memPartitionId, uint32_t alignment);
  @Return        None.
 *//***************************************************************************/
 #define XX_RestoreAllIntr(flags)    UNUSED(flags)
-
-/**************************************************************************//**
- @Function      XX_Call
-
- @Description   Call a service in another task.
-
-                Activate the routine "f" via the queue identified by "IntrManagerId". The
-                parameter to "f" is Id - the handle of the destination object
-
- @Param[in]     intrManagerId   - Queue ID.
- @Param[in]     f               - routine pointer.
- @Param[in]     Id              - the parameter to be passed to f().
- @Param[in]     h_App           - Application handle.
- @Param[in]     flags           - Unused,
-
- @Return        E_OK is returned on success. E_FAIL is returned otherwise (usually an operating system level failure).
-*//***************************************************************************/
-t_Error XX_Call( uint32_t intrManagerId,
-                 t_Error (* f)(t_Handle),
-                 t_Handle Id,
-                 t_Handle h_App,
-                 uint16_t flags );
 
 /**************************************************************************//**
  @Function      XX_Exit

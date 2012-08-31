@@ -30,6 +30,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 /**************************************************************************//**
  @File          fm_pcd_ext.h
 
@@ -40,7 +41,6 @@
 
 #include "std_ext.h"
 #include "net_ext.h"
-#include "list_ext.h"
 #include "fm_ext.h"
 
 
@@ -97,7 +97,12 @@
 #define FM_PCD_SW_PRS_SIZE                          0x00000800          /**< Total size of SW parser area */
 #define FM_PCD_PRS_SW_OFFSET                        0x00000040          /**< Size of illegal addresses at the beginning
                                                                              of the SW parser area */
+#if (DPAA_VERSION >= 11)
+#define FM_PCD_PRS_SW_PATCHES_SIZE                  0x00000240          /**< Number of bytes saved for patches */
+#else
 #define FM_PCD_PRS_SW_PATCHES_SIZE                  0x00000200          /**< Number of bytes saved for patches */
+#endif /* (DPAA_VERSION >= 11) */
+
 #define FM_PCD_PRS_SW_TAIL_SIZE                     4                   /**< Number of bytes that must be cleared at
                                                                              the end of the SW parser area */
 #define FM_SW_PRS_MAX_IMAGE_SIZE                    (FM_PCD_SW_PRS_SIZE-FM_PCD_PRS_SW_OFFSET-FM_PCD_PRS_SW_TAIL_SIZE-FM_PCD_PRS_SW_PATCHES_SIZE)
@@ -106,9 +111,9 @@
 #define FM_PCD_MAX_MANIP_INSRT_TEMPLATE_SIZE        128                 /**< Maximum size of insertion template for
                                                                              insert manipulation */
 
-#if DPAA_VERSION >= 11
+#if (DPAA_VERSION >= 11)
 #define FM_PCD_FRM_REPLIC_MAX_NUM_OF_ENTRIES        64                  /**< Maximum possible entries for frame replicator group */
-#endif /* DPAA_VERSION >= 11 */
+#endif /* (DPAA_VERSION >= 11) */
 /* @} */
 
 
@@ -490,6 +495,7 @@ typedef protocolOpt_t   ipv4ProtocolOpt_t;      /**< IPv4 protocol options. */
 #define IPV4_MULTICAST_1            0x04000000  /**< IPv4 Multicast. */
 #define IPV4_UNICAST_2              0x02000000  /**< Tunneled IPv4 - Unicast. */
 #define IPV4_MULTICAST_BROADCAST_2  0x01000000  /**< Tunneled IPv4 - Broadcast/Multicast. */
+
 #define IPV4_FRAG_1                 0x00000008  /**< IPV4 reassembly option.
                                                      IPV4 Reassembly manipulation requires network
                                                      environment with IPV4 header and IPV4_FRAG_1 option  */
@@ -498,6 +504,7 @@ typedef protocolOpt_t   ipv6ProtocolOpt_t;      /**< IPv6 protocol options. */
 #define IPV6_MULTICAST_1            0x00800000  /**< IPv6 Multicast. */
 #define IPV6_UNICAST_2              0x00400000  /**< Tunneled IPv6 - Unicast. */
 #define IPV6_MULTICAST_2            0x00200000  /**< Tunneled IPv6 - Multicast. */
+
 #define IPV6_FRAG_1                 0x00000004  /**< IPV6 reassembly option.
                                                      IPV6 Reassembly manipulation requires network
                                                      environment with IPV6 header and IPV6_FRAG_1 option  */
@@ -561,9 +568,9 @@ typedef enum e_FmPcdEngine {
     e_FM_PCD_CC,            /**< Coarse classifier */
     e_FM_PCD_PLCR,          /**< Policer */
     e_FM_PCD_PRS,           /**< Parser */
-#if DPAA_VERSION >= 11
+#if (DPAA_VERSION >= 11)
     e_FM_PCD_FR,            /**< Frame-Replicator */
-#endif /* DPAA_VERSION >= 11 */
+#endif /* (DPAA_VERSION >= 11) */
     e_FM_PCD_HASH           /**< Hash table */
 } e_FmPcdEngine;
 
@@ -877,7 +884,9 @@ typedef enum e_FmPcdCcStatsMode {
     e_FM_PCD_CC_STATS_MODE_NONE = 0,        /**< No statistics support */
     e_FM_PCD_CC_STATS_MODE_FRAME,           /**< Frame count statistics */
     e_FM_PCD_CC_STATS_MODE_BYTE_AND_FRAME,  /**< Byte and frame count statistics */
+#ifdef FM_EXP_FEATURES
     e_FM_PCD_CC_STATS_MODE_RMON,            /**< Byte and frame length range count statistics */
+#endif /* FM_EXP_FEATURES */
 } e_FmPcdCcStatsMode;
 
 /**************************************************************************//**
@@ -886,7 +895,7 @@ typedef enum e_FmPcdCcStatsMode {
 *//***************************************************************************/
 typedef enum e_FmPcdManipDontFragAction {
     e_FM_PCD_MANIP_ENQ_TO_ERR_Q_OR_DISCARD_PACKET = 0,  /**< Discard packet */
-    e_FM_PCD_MANIP_FRAGMENT_PACKECT,                    /**< Fragment packet and continue normal processing */
+    e_FM_PCD_MANIP_FRAGMENT_PACKET,                     /**< Fragment packet and continue normal processing */
     e_FM_PCD_MANIP_CONTINUE_WITHOUT_FRAG                /**< Continue normal processing without fragmenting the packet */
 } e_FmPcdManipDontFragAction;
 
@@ -952,7 +961,7 @@ typedef union u_FmPcdHdrProtocolOpt {
                                 (index may apply:
                                  e_FM_PCD_HDR_INDEX_NONE/e_FM_PCD_HDR_INDEX_1,
                                  e_FM_PCD_HDR_INDEX_2/e_FM_PCD_HDR_INDEX_LAST)
- 
+
                                 (Note that starting DPAA 11, NET_HEADER_FIELD_IPv6_NEXT_HDR applies to
                                  the last next header indication, meaning the next L4, which may be
                                  present at the Ipv6 last extension. On earlier revisions this field
@@ -1243,7 +1252,7 @@ typedef struct t_FmPcdKgPlcrProfile {
     } profileSelect;                                /**< Direct/indirect profile selection and parameters */
 } t_FmPcdKgPlcrProfile;
 
-#if DPAA_VERSION >= 11
+#if (DPAA_VERSION >= 11)
 /**************************************************************************//**
  @Description   Parameters for configuring a storage profile for a KeyGen scheme.
 *//***************************************************************************/
@@ -1269,7 +1278,7 @@ typedef struct t_FmPcdKgStorageProfile {
         } indirectProfile;                          /**< Indirect profile parameters. */
     } profileSelect;                                /**< Direct/indirect profile selection and parameters. */
 } t_FmPcdKgStorageProfile;
-#endif /* DPAA_VERSION >= 11 */
+#endif /* (DPAA_VERSION >= 11) */
 
 /**************************************************************************//**
  @Description   Parameters for defining CC as the next engine after KeyGen
@@ -1324,10 +1333,10 @@ typedef struct t_FmPcdKgSchemeParams {
                                                                      for qidMask. Driver will return error if
                                                                      resource is full at initialization time. */
 
-#if DPAA_VERSION >= 11
+#if (DPAA_VERSION >= 11)
     bool                                overrideStorageProfile; /**< TRUE if KeyGen override previously decided storage profile */
     t_FmPcdKgStorageProfile             storageProfile;         /**< Used when overrideStorageProfile TRUE */
-#endif /* DPAA_VERSION >= 11 */
+#endif /* (DPAA_VERSION >= 11) */
 
     e_FmPcdEngine                       nextEngine;             /**< may be BMI, PLCR or CC */
     union {                                                     /**< depends on nextEngine */
@@ -1340,11 +1349,13 @@ typedef struct t_FmPcdKgSchemeParams {
 } t_FmPcdKgSchemeParams;
 
 /**************************************************************************//**
- @Collection
+ @Collection    Definitions for CC statistics
 *//***************************************************************************/
+#ifdef FM_EXP_FEATURES
 #define FM_PCD_CC_STATS_MAX_NUM_OF_FLR      10  /* Maximal supported number of frame length ranges */
 #define FM_PCD_CC_STATS_FLR_SIZE            2   /* Size in bytes of a frame length range limit */
-#define FM_PCD_CC_STATS_FLR_COUNT_SIZE      4   /* Size in bytes of a frame length range counter */
+#endif /* FM_EXP_FEATURES */
+#define FM_PCD_CC_STATS_COUNTER_SIZE        4   /* Size in bytes of a frame length range counter */
 /* @} */
 
 /**************************************************************************//**
@@ -1354,14 +1365,14 @@ typedef struct t_FmPcdCcNextCcParams {
     t_Handle    h_CcNode;               /**< A handle of the next CC node */
 } t_FmPcdCcNextCcParams;
 
-#if DPAA_VERSION >= 11
+#if (DPAA_VERSION >= 11)
 /**************************************************************************//**
  @Description   Parameters for defining Frame replicator as the next engine after a CC node.
 *//***************************************************************************/
 typedef struct t_FmPcdCcNextFrParams {
     t_Handle    h_FrmReplic;               /**< A handle of the next frame replicator group */
 } t_FmPcdCcNextFrParams;
-#endif /* DPAA_VERSION >= 11 */
+#endif /* (DPAA_VERSION >= 11) */
 
 /**************************************************************************//**
  @Description   Parameters for defining Policer as the next engine after a CC node.
@@ -1380,12 +1391,12 @@ typedef struct t_FmPcdCcNextPlcrParams {
                                              In earlier chips  if policer next engine is KEYGEN,
                                              this parameter can be 0, because the KEYGEN
                                              always decides the enqueue FQID.*/
-#if DPAA_VERSION >= 11
+#if (DPAA_VERSION >= 11)
     uint8_t     newRelativeStorageProfileId;
                                         /**< Indicates the relative storage profile offset within
                                              the port's storage profiles window;
                                              Relevant only if the port was configured with VSP. */
-#endif /* DPAA_VERSION >= 11 */
+#endif /* (DPAA_VERSION >= 11) */
 } t_FmPcdCcNextPlcrParams;
 
 /**************************************************************************//**
@@ -1398,12 +1409,12 @@ typedef struct t_FmPcdCcNextEnqueueParams {
     uint32_t             newFqid;       /**< Valid if overrideFqid=TRUE, FQID for enqueuing the frame
                                              (otherwise FQID is taken from KeyGen),
                                              relevant if action = e_FM_PCD_ENQ_FRAME */
-#if DPAA_VERSION >= 11
+#if (DPAA_VERSION >= 11)
     uint8_t              newRelativeStorageProfileId;
                                         /**< Valid if overrideFqid=TRUE, Indicates the relative virtual
                                              storage profile offset within the port's storage profiles
                                              window; Relevant only if the port was configured with VSP. */
-#endif /* DPAA_VERSION >= 11 */
+#endif /* (DPAA_VERSION >= 11) */
 } t_FmPcdCcNextEnqueueParams;
 
 /**************************************************************************//**
@@ -1415,12 +1426,12 @@ typedef struct t_FmPcdCcNextKgParams {
     uint32_t    newFqid;                /**< Valid if overrideFqid=TRUE, FQID for enqueuing the frame
                                              (otherwise FQID is taken from KeyGen),
                                              Note - this parameters irrelevant for earlier chips */
-#if DPAA_VERSION >= 11
+#if (DPAA_VERSION >= 11)
     uint8_t     newRelativeStorageProfileId;
                                         /**< Valid if overrideFqid=TRUE, Indicates the relative virtual
                                              storage profile offset within the port's storage profiles
                                              window; Relevant only if the port was configured with VSP. */
-#endif /* DPAA_VERSION >= 11 */
+#endif /* (DPAA_VERSION >= 11) */
 
     t_Handle    h_DirectScheme;         /**< Direct scheme handle to go to. */
 } t_FmPcdCcNextKgParams;
@@ -1436,13 +1447,15 @@ typedef struct t_FmPcdCcNextEngineParams {
         t_FmPcdCcNextPlcrParams         plcrParams;     /**< Parameters in case next engine is PLCR */
         t_FmPcdCcNextEnqueueParams      enqueueParams;  /**< Parameters in case next engine is BMI */
         t_FmPcdCcNextKgParams           kgParams;       /**< Parameters in case next engine is KG */
-#if DPAA_VERSION >= 11
+#if (DPAA_VERSION >= 11)
         t_FmPcdCcNextFrParams           frParams;       /**< Parameters in case next engine is FR */
-#endif /* DPAA_VERSION >= 11 */
+#endif /* (DPAA_VERSION >= 11) */
     } params;                                           /**< union used for all the next-engine parameters options */
+
     t_Handle                            h_Manip;        /**< Handle to Manipulation object.
                                                              Relevant if next engine is of type result
                                                              (e_FM_PCD_PLCR, e_FM_PCD_KG, e_FM_PCD_DONE) */
+
     bool                                statisticsEn;   /**< If TRUE, statistics counters are incremented
                                                              for each frame passing through this
                                                              Coarse Classification entry. */
@@ -1457,7 +1470,12 @@ typedef struct t_FmPcdCcKeyParams {
     uint8_t                     *p_Mask;    /**< Relevant only if 'action' = e_FM_PCD_ACTION_EXACT_MATCH;
                                                  pointer to the Mask per key  of the size defined
                                                  in keySize. p_Key and p_Mask (if defined) has to be
-                                                 of the same size defined in the keySize */
+                                                 of the same size defined in the keySize;
+                                                 NOTE that if this value is equal for all entries whithin
+                                                 this table, the driver will automatically use global-mask
+                                                 (i.e. one common mask for all entries) instead of private
+                                                 one; that is done in order to spare some memory and for
+                                                 better performance. */
     t_FmPcdCcNextEngineParams   ccNextEngineParams;
                                             /**< parameters for the next for the defined Key in
                                                  the p_Key */
@@ -1491,10 +1509,13 @@ typedef struct t_KeysParams {
                                                      Should be TRUE to reserve table memory for key masks, even if
                                                      initial keys do not contain masks, or if the node was initialized
                                                      as 'empty' (without keys); this will allow user to add keys with
-                                                     masks at runtime. */
+                                                     masks at runtime.
+                                                     NOTE that if user want to use only global-masks (i.e. one common mask
+                                                     for all the entries within this table, this parameter should set to 'FALSE'. */
     e_FmPcdCcStatsMode          statisticsMode; /**< If not e_FM_PCD_CC_STATS_MODE_NONE, the required structures for
                                                      the requested statistics mode will be allocated according to
                                                      'maxNumOfKeys'. */
+#ifdef FM_EXP_FEATURES
     uint16_t                    frameLengthRanges[FM_PCD_CC_STATS_MAX_NUM_OF_FLR];
                                                 /**< Relevant only for 'e_FM_PCD_CC_STATS_MODE_RMON' statistics mode.
                                                      Holds a list of programmable thresholds. For each received frame,
@@ -1504,7 +1525,7 @@ typedef struct t_KeysParams {
                                                      range i-1 threshold < frame length <= range i threshold
                                                      Each range threshold must be larger then its preceding range
                                                      threshold. Last range threshold must be 0xFFFF. */
-
+#endif /* FM_EXP_FEATURES */
     uint16_t                    numOfKeys;      /**< Number of initial keys;
                                                      Note that in case of 'action' = e_FM_PCD_ACTION_INDEXED_LOOKUP,
                                                      this field should be power-of-2 of the number of bits that are
@@ -1663,6 +1684,7 @@ typedef struct t_FmPcdPlcrProfileParams {
     bool                                trapProfileOnFlowC;         /**< Trap on flow C */
 } t_FmPcdPlcrProfileParams;
 
+#ifdef FM_CAPWAP_SUPPORT
 /**************************************************************************//**
  @Description   Parameters for selecting a location for requested manipulation
 *//***************************************************************************/
@@ -1674,7 +1696,6 @@ typedef struct t_FmManipHdrInfo
     t_FmPcdFields                       fullField;      /**< Relevant only when byField = TRUE: Extract field */
 } t_FmManipHdrInfo;
 
-#ifdef FM_CAPWAP_SUPPORT
 /**************************************************************************//**
  @Description   Parameters for defining an insertion manipulation
                 of type e_FM_PCD_MANIP_INSRT_TO_START_OF_FRAME_TEMPLATE
@@ -1791,9 +1812,9 @@ typedef struct t_FmPcdManipHdrRmvByHdrParams {
 typedef struct t_FmPcdManipFragIpParams {
     uint16_t                    sizeForFragmentation;   /**< If length of the frame is greater than this value,
                                                              IP fragmentation will be executed.*/
-#if DPAA_VERSION == 10
+#if (DPAA_VERSION == 10)
     uint8_t                     scratchBpid;            /**< Absolute buffer pool id according to BM configuration.*/
-#endif /* DPAA_VERSION == 10 */
+#endif /* (DPAA_VERSION == 10) */
     bool                        sgBpidEn;               /**< Enable a dedicated buffer pool id for the Scatter/Gather buffer allocation;
                                                              If disabled, the Scatter/Gather buffer will be allocated from the same pool as the
                                                              received frame's buffer. */
@@ -1810,7 +1831,6 @@ typedef struct t_FmPcdManipFragIpParams {
                                                              is encountered and the COPIED flag on one of the options is cleared.
                                                              The counter is located on the port page */
 #endif /* FM_EXP_FEATURES */
-
 } t_FmPcdManipFragIpParams;
 
 /**************************************************************************//**
@@ -1828,7 +1848,7 @@ typedef struct t_FmPcdManipReassemIpParams {
                                                                  Relative scheme ID for IPv4/IPv6 Reassembly manipulation must be smaller than
                                                                  the user schemes id to ensure that the reassembly's schemes will be first match;
                                                                  Rest schemes, if defined, should have higher relative scheme ID. */
-#if DPAA_VERSION >= 11
+#if (DPAA_VERSION >= 11)
     uint32_t                        nonConsistentSpFqid;    /**< In case that other fragments of the frame corresponds to different storage
                                                                  profile than the opening fragment (Non-Consistent-SP state)
                                                                  then one of two possible scenarios occurs:
@@ -1836,7 +1856,7 @@ typedef struct t_FmPcdManipReassemIpParams {
                                                                  this fqid, otherwise a 'Non Consistent SP' bit will be set in the FD[status].*/
 #else
     uint8_t                         sgBpid;                 /**< Buffer pool id for the S/G frame created by the reassembly process */
-#endif /* DPAA_VERSION >= 11 */
+#endif /* (DPAA_VERSION >= 11) */
     uint8_t                         dataMemId;              /**< Memory partition ID for the IPR's external tables structure */
     uint16_t                        dataLiodnOffset;        /**< LIODN offset for access the IPR's external tables structure. */
     uint16_t                        minFragSize[2];         /**< Minimum fragment size:
@@ -2124,6 +2144,7 @@ typedef struct t_FmPcdManipParams {
         t_FmPcdManipFragParams              frag;               /**< Parameters for defining fragmentation manipulation node */
         t_FmPcdManipSpecialOffloadParams    specialOffload;     /**< Parameters for defining special offload manipulation node */
     } u;
+
     t_Handle                                h_NextManip;        /**< Handle to another (previously defined) manipulation node;
                                                                      Allows concatenation of manipulation actions;
                                                                      This parameter is optional and may be NULL. */
@@ -2198,7 +2219,7 @@ typedef struct t_FmPcdManipStats {
     } u;
 } t_FmPcdManipStats;
 
-#if DPAA_VERSION >= 11
+#if (DPAA_VERSION >= 11)
 /**************************************************************************//**
  @Description   Parameters for defining frame replicator group and its members
 *//***************************************************************************/
@@ -2210,7 +2231,7 @@ typedef struct t_FmPcdFrmReplicGroupParams {
     t_FmPcdCcNextEngineParams   nextEngineParams[FM_PCD_FRM_REPLIC_MAX_NUM_OF_ENTRIES];
                                                     /**< Array of members' parameters */
 } t_FmPcdFrmReplicGroupParams;
-#endif /* DPAA_VERSION >= 11 */
+#endif /* (DPAA_VERSION >= 11) */
 
 #ifdef FM_CAPWAP_SUPPORT
 /**************************************************************************//**
@@ -2955,7 +2976,21 @@ t_Error  FM_PCD_ManipNodeDelete(t_Handle h_ManipNode);
 *//***************************************************************************/
 t_Error FM_PCD_ManipGetStatistics(t_Handle h_ManipNode, t_FmPcdManipStats *p_FmPcdManipStats);
 
-#if DPAA_VERSION >= 11
+/**************************************************************************//**
+ @Function      FM_PCD_ManipNodeReplace
+
+ @Description   Change existing manipulation node to be according to new requirement.
+
+ @Param[in]     h_ManipNode         A handle to a manipulation node.
+ @Param[out]    p_ManipParams       A structure of parameters defining the change requirement
+
+ @Return        E_OK on success; Error code otherwise.
+
+ @Cautions      Allowed only following FM_PCD_ManipNodeSet().
+*//***************************************************************************/
+t_Error FM_PCD_ManipNodeReplace(t_Handle h_ManipNode, t_FmPcdManipParams *p_ManipParams);
+
+#if (DPAA_VERSION >= 11)
 /**************************************************************************//**
  @Function      FM_PCD_FrmReplicSetGroup
 
@@ -3015,7 +3050,7 @@ t_Error FM_PCD_FrmReplicAddMember(t_Handle                   h_FrmReplicGroup,
 *//***************************************************************************/
 t_Error FM_PCD_FrmReplicRemoveMember(t_Handle h_FrmReplicGroup,
                                      uint16_t memberIndex);
-#endif /* DPAA_VERSION >= 11 */
+#endif /* (DPAA_VERSION >= 11) */
 
 #ifdef FM_CAPWAP_SUPPORT
 /**************************************************************************//**

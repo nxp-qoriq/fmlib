@@ -44,9 +44,9 @@
 #ifndef P1023
 
 /**************************************************************************//**
- @Group         P5020_chip_id P5020 Application Programming Interface
+ @Group         P3040/P4080/P5020_chip_id P5020 Application Programming Interface
 
- @Description   P5020 Chip functions,definitions and enums.
+ @Description   P3040/P4080/P5020 Chip functions,definitions and enums.
 
  @{
 *//***************************************************************************/

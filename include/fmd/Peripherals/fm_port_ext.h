@@ -111,6 +111,14 @@ typedef enum e_FmPortPcdSupport {
 } e_FmPortPcdSupport;
 
 /**************************************************************************//**
+ @Description   Port interrupts
+*//***************************************************************************/
+typedef enum e_FmPortExceptions {
+    e_FM_PORT_EXCEPTION_IM_BUSY                 /**< Independent-Mode Rx-BUSY */
+} e_FmPortExceptions;
+
+
+/**************************************************************************//**
  @Collection    General FM Port defines
 *//***************************************************************************/
 #define FM_PORT_PRS_RESULT_NUM_OF_WORDS     8   /**< Number of 4 bytes words in parser result */
@@ -128,9 +136,10 @@ typedef uint32_t    fmPortFrameErrSelect_t;                         /**< typedef
 #define FM_PORT_FRM_ERR_NON_FM                  FM_FD_RX_STATUS_ERR_NON_FM      /*< non Frame-Manager error; probably come from SEC that
                                                                                     was chained to FM */
 #endif /* FM_DISABLE_SEC_ERRORS */
-#define FM_PORT_FRM_ERR_IPRE                    (FM_FD_ERR_IPR & ~FM_FD_IPR)    /**< IPR error */
-#define FM_PORT_FRM_ERR_IPR_TO                  (FM_FD_ERR_IPR_TO & ~FM_FD_IPR) /**< IPR timeout */
-#define FM_PORT_FRM_ERR_IPFE                    FM_FD_ERR_IPF                   /**< IPF error */
+
+#define FM_PORT_FRM_ERR_IPRE                    (FM_FD_ERR_IPR & ~FM_FD_IPR)        /**< IPR error */
+#define FM_PORT_FRM_ERR_IPR_NCSP                (FM_FD_ERR_IPR_NCSP & ~FM_FD_IPR)   /**< IPR non-consistent-sp */
+#define FM_PORT_FRM_ERR_IPFE                    FM_FD_ERR_IPF                       /**< IPF error */
 
 #ifdef FM_CAPWAP_SUPPORT
 #define FM_PORT_FRM_ERR_CRE                     FM_FD_ERR_CRE
@@ -795,10 +804,12 @@ t_Error FM_PORT_PcdKgUnbindSchemes (t_Handle h_FmPort, t_FmPcdPortSchemesParams 
 *//***************************************************************************/
 t_Error FM_PORT_PcdPrsModifyStartOffset (t_Handle h_FmPort, t_FmPcdPrsStart *p_FmPcdPrsStart);
 
+#if DPAA_VERSION >= 11
 #ifdef FM_EXP_FEATURES
 /*              (Not implemented yet in fm-lib!) */
 t_Error FM_PORT_GetIPv4OptionsCount(t_Handle h_FmPort, uint32_t *p_Ipv4OptionsCount);
 #endif /* FM_EXP_FEATURES */
+#endif /* DPAA_VERSION >= 11 */
 
 /** @} */ /* end of lnx_usr_FM_PORT_pcd_runtime_control_grp group */
 
