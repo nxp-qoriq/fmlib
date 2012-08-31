@@ -97,7 +97,7 @@ t_Handle FM_Open(uint8_t id)
     if (fd < 0)
     {
        free(p_Dev);
-       REPORT_ERROR(MAJOR, E_OPEN_FAILED, ("Could not open FM. Ret code=%d, errno=%d. Aborting!!!",
+       REPORT_ERROR(MAJOR, E_NO_DEVICE, ("Could not open FM. Ret code=%d, errno=%d. Aborting!!!",
                fd,
                errno));
        return NULL;
@@ -239,7 +239,7 @@ t_Handle FM_PCD_Open(t_FmPcdParams *p_FmPcdParams)
     if (fd < 0)
     {
        free(p_Dev);
-       REPORT_ERROR(MAJOR, E_OPEN_FAILED, ("Could not open FM. Ret code=%d, errno=%d. Aborting!!!",
+       REPORT_ERROR(MAJOR, E_NO_DEVICE, ("Could not open FM. Ret code=%d, errno=%d. Aborting!!!",
                fd,
                errno));
        return NULL;
@@ -1221,7 +1221,7 @@ t_Handle FM_PORT_Open(t_FmPortParams *p_FmPortParams)
     {
        free(p_FmPort);
        free(p_Dev);
-       REPORT_ERROR(MAJOR, E_OPEN_FAILED, ("Could not open FM-port %s. Ret code=%d, errno=%d. Aborting!!!",
+       REPORT_ERROR(MAJOR, E_NO_DEVICE, ("Could not open FM-port %s. Ret code=%d, errno=%d. Aborting!!!",
                devName,
                fd,
                errno));
