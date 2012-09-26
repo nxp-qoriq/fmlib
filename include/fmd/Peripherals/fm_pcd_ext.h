@@ -64,7 +64,7 @@
                 and the policer global and common registers.
                 In addition, the FM PCD SW module will initialize all required
                 key generator schemes, coarse classification flows, and policer
-                profiles. When an FM module is configured to work with one of these
+                profiles. When a FM module is configured to work with one of these
                 entities, it will register to it using the FM PORT API. The PCD
                 module will manage the PCD resources - i.e. resource management of
                 KeyGen schemes, etc.
@@ -688,10 +688,10 @@ typedef enum e_FmPcdPlcrColorMode {
  @Description   Enumeration type for selecting a policer profile color
 *//***************************************************************************/
 typedef enum e_FmPcdPlcrColor {
-    e_FM_PCD_PLCR_GREEN,                /**< Green */
-    e_FM_PCD_PLCR_YELLOW,               /**< Yellow */
-    e_FM_PCD_PLCR_RED,                  /**< Red */
-    e_FM_PCD_PLCR_OVERRIDE              /**< Color override */
+    e_FM_PCD_PLCR_GREEN,                /**< Green color code */
+    e_FM_PCD_PLCR_YELLOW,               /**< Yellow color code */
+    e_FM_PCD_PLCR_RED,                  /**< Red color code */
+    e_FM_PCD_PLCR_OVERRIDE              /**< Color override code */
 } e_FmPcdPlcrColor;
 
 /**************************************************************************//**
@@ -768,7 +768,7 @@ typedef enum e_FmPcdManipHdrRmvType {
 } e_FmPcdManipHdrRmvType;
 
 /**************************************************************************//**
- @Description   An enum for selecting specific L2 fields removal
+ @Description   Enumeration type for selecting specific L2 fields removal
 *//***************************************************************************/
 typedef enum e_FmPcdManipHdrRmvSpecificL2 {
     e_FM_PCD_MANIP_HDR_RMV_ETHERNET,                /**< Ethernet/802.3 MAC */
@@ -884,9 +884,10 @@ typedef enum e_FmPcdCcStatsMode {
     e_FM_PCD_CC_STATS_MODE_NONE = 0,        /**< No statistics support */
     e_FM_PCD_CC_STATS_MODE_FRAME,           /**< Frame count statistics */
     e_FM_PCD_CC_STATS_MODE_BYTE_AND_FRAME,  /**< Byte and frame count statistics */
-#ifdef FM_EXP_FEATURES
-    e_FM_PCD_CC_STATS_MODE_RMON,            /**< Byte and frame length range count statistics */
-#endif /* FM_EXP_FEATURES */
+#if (DPAA_VERSION >= 11)
+    e_FM_PCD_CC_STATS_MODE_RMON,            /**< Byte and frame length range count statistics;
+                                                 This mode is supported only on B4860 device */
+#endif /* (DPAA_VERSION >= 11) */
 } e_FmPcdCcStatsMode;
 
 /**************************************************************************//**
@@ -1081,7 +1082,8 @@ typedef struct t_FmPcdDistinctionUnit {
                 by a specific PCD Network Environment Characteristics module.
 
                 Each unit represent a protocol or a group of protocols that may
-                be used later by the different PCD engines to distinguish between flows.
+                be used later by the different PCD engines to distinguish
+                between flows.
 *//***************************************************************************/
 typedef struct t_FmPcdNetEnvParams {
     uint8_t                 numOfDistinctionUnits;                      /**< Number of different units to be identified */
@@ -1351,10 +1353,10 @@ typedef struct t_FmPcdKgSchemeParams {
 /**************************************************************************//**
  @Collection    Definitions for CC statistics
 *//***************************************************************************/
-#ifdef FM_EXP_FEATURES
+#if (DPAA_VERSION >= 11)
 #define FM_PCD_CC_STATS_MAX_NUM_OF_FLR      10  /* Maximal supported number of frame length ranges */
 #define FM_PCD_CC_STATS_FLR_SIZE            2   /* Size in bytes of a frame length range limit */
-#endif /* FM_EXP_FEATURES */
+#endif /* (DPAA_VERSION >= 11) */
 #define FM_PCD_CC_STATS_COUNTER_SIZE        4   /* Size in bytes of a frame length range counter */
 /* @} */
 
@@ -1515,17 +1517,18 @@ typedef struct t_KeysParams {
     e_FmPcdCcStatsMode          statisticsMode; /**< If not e_FM_PCD_CC_STATS_MODE_NONE, the required structures for
                                                      the requested statistics mode will be allocated according to
                                                      'maxNumOfKeys'. */
-#ifdef FM_EXP_FEATURES
+#if (DPAA_VERSION >= 11)
     uint16_t                    frameLengthRanges[FM_PCD_CC_STATS_MAX_NUM_OF_FLR];
-                                                /**< Relevant only for 'e_FM_PCD_CC_STATS_MODE_RMON' statistics mode.
-                                                     Holds a list of programmable thresholds. For each received frame,
+                                                /**< Relevant only for 'e_FM_PCD_CC_STATS_MODE_RMON' statistics
+                                                     mode (this feature is supported only on B4860 device);
+                                                     Holds a list of programmable thresholds - for each received frame,
                                                      its length in bytes is examined against these range thresholds and
-                                                     the appropriate counter is incremented by 1. For example, to belong
+                                                     the appropriate counter is incremented by 1 - for example, to belong
                                                      to range i, the following should hold:
                                                      range i-1 threshold < frame length <= range i threshold
                                                      Each range threshold must be larger then its preceding range
-                                                     threshold. Last range threshold must be 0xFFFF. */
-#endif /* FM_EXP_FEATURES */
+                                                     threshold, and last range threshold must be 0xFFFF. */
+#endif /* (DPAA_VERSION >= 11) */
     uint16_t                    numOfKeys;      /**< Number of initial keys;
                                                      Note that in case of 'action' = e_FM_PCD_ACTION_INDEXED_LOOKUP,
                                                      this field should be power-of-2 of the number of bits that are
@@ -2477,7 +2480,7 @@ t_Error FM_PCD_CcRootDelete(t_Handle h_CcTree);
 
  @Return        E_OK on success; Error code otherwise.
 
- @Cautions      Allowed only following FM_PCD_CcRootBuild().
+ @Cautions      Allowed only following FM_PCD_CcBuildTree().
 *//***************************************************************************/
 t_Error FM_PCD_CcRootModifyNextEngine(t_Handle                  h_CcTree,
                                       uint8_t                   grpId,
@@ -2549,7 +2552,7 @@ t_Error FM_PCD_MatchTableRemoveKey(t_Handle h_CcNode, uint16_t keyIndex);
 
  @Description   Add the key (including next engine parameters of this key in the
                 index defined by the keyIndex. Note that 'FM_PCD_LAST_KEY_INDEX'
-                may be used when the user doesn't care about the position of the
+                may be used by user that don't care about the position of the
                 key in the table - in that case, the key will be automatically
                 added by the driver in the last available entry.
 
@@ -3068,7 +3071,7 @@ t_Error FM_PCD_FrmReplicRemoveMember(t_Handle h_FrmReplicGroup,
 t_Handle FM_PCD_StatisticsSetNode(t_Handle h_FmPcd, t_FmPcdStatsParams *p_FmPcdstatsParams);
 #endif /* FM_CAPWAP_SUPPORT */
 
-/** @} */ /* end of lnx_usr_FM_PCD_Runtime_tree_buildgrp group */
+/** @} */ /* end of lnx_usr_FM_PCD_Runtime_build_grp group */
 /** @} */ /* end of lnx_usr_FM_PCD_Runtime_grp group */
 /** @} */ /* end of lnx_usr_FM_PCD_grp group */
 /** @} */ /* end of lnx_usr_FM_grp group */

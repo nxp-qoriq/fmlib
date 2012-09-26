@@ -228,12 +228,12 @@ typedef struct t_FmPortCongestionGrps {
                                                         /**< An array of CG indexes;
                                                              Note that the size of the array should be
                                                              'numOfCongestionGrpsToConsider'. */
-#if DPAA_VERSION >= 11
+#if (DPAA_VERSION >= 11)
     bool        pfcPrioritiesEn[FM_PORT_NUM_OF_CONGESTION_GRPS][FM_MAX_NUM_OF_PFC_PRIORITIES];
                                                         /**< a matrix that represents the map between the CG ids
                                                              defined in 'congestionGrpsToConsider' to the priorties
                                                              mapping array. */
-#endif /* DPAA_VERSION >= 11 */
+#endif /* (DPAA_VERSION >= 11) */
 } t_FmPortCongestionGrps;
 
 
@@ -564,7 +564,7 @@ typedef struct t_FmPcdPrsStart {
                                              'parsingOffset' */
 } t_FmPcdPrsStart;
 
-#if DPAA_VERSION >= 11
+#if (DPAA_VERSION >= 11)
 /**************************************************************************//**
  @Description   struct for defining external buffer margins
 *//***************************************************************************/
@@ -575,7 +575,7 @@ typedef struct t_FmPortVSPAllocParams {
                                              if relevant function called for Rx port */
     t_Handle    h_FmTxPort;             /**< Handle to coupled Tx Port; not relevant for OP port. */
 } t_FmPortVSPAllocParams;
-#endif /* DPAA_VERSION >= 11 */
+#endif /* (DPAA_VERSION >= 11) */
 
 
 /**************************************************************************//**
@@ -682,7 +682,7 @@ t_Error FM_PORT_PcdPlcrAllocProfiles(t_Handle h_FmPort, uint16_t numOfProfiles);
 *//***************************************************************************/
 t_Error FM_PORT_PcdPlcrFreeProfiles(t_Handle h_FmPort);
 
-#if DPAA_VERSION >= 11
+#if (DPAA_VERSION >= 11)
 /**************************************************************************//**
  @Function      FM_PORT_VSPAlloc
 
@@ -699,7 +699,7 @@ t_Error FM_PORT_PcdPlcrFreeProfiles(t_Handle h_FmPort);
                 and also before FM_PORT_Enable() (i.e. the port should be disabled).
 *//***************************************************************************/
 t_Error FM_PORT_VSPAlloc(t_Handle h_FmPort, t_FmPortVSPAllocParams *p_Params);
-#endif /* DPAA_VERSION >= 11 */
+#endif /* (DPAA_VERSION >= 11) */
 
 /**************************************************************************//**
  @Function      FM_PORT_PcdKgModifyInitialScheme
@@ -804,12 +804,12 @@ t_Error FM_PORT_PcdKgUnbindSchemes (t_Handle h_FmPort, t_FmPcdPortSchemesParams 
 *//***************************************************************************/
 t_Error FM_PORT_PcdPrsModifyStartOffset (t_Handle h_FmPort, t_FmPcdPrsStart *p_FmPcdPrsStart);
 
-#if DPAA_VERSION >= 11
+#if (DPAA_VERSION >= 11)
 #ifdef FM_EXP_FEATURES
 /*              (Not implemented yet in fm-lib!) */
 t_Error FM_PORT_GetIPv4OptionsCount(t_Handle h_FmPort, uint32_t *p_Ipv4OptionsCount);
 #endif /* FM_EXP_FEATURES */
-#endif /* DPAA_VERSION >= 11 */
+#endif /* (DPAA_VERSION >= 11) */
 
 /** @} */ /* end of lnx_usr_FM_PORT_pcd_runtime_control_grp group */
 
