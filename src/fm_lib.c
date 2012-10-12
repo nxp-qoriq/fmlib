@@ -445,6 +445,8 @@ t_Handle FM_PCD_NetEnvCharacteristicsSet(t_Handle h_FmPcd, t_FmPcdNetEnvParams *
     _fml_dbg("Calling...\n");
 
     memcpy(&params, p_NetEnvParams, sizeof(t_FmPcdNetEnvParams));
+    params.id = NULL;
+
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_NET_ENV_CHARACTERISTICS_SET, &params))
     {
         REPORT_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
@@ -503,6 +505,7 @@ t_Handle FM_PCD_KgSchemeSet (t_Handle h_FmPcd, t_FmPcdKgSchemeParams *p_Scheme)
     _fml_dbg("Calling...\n");
 
     memcpy(&params, p_Scheme, sizeof(t_FmPcdKgSchemeParams));
+    params.id = NULL;
 
     /* correct h_NetEnv param from scheme */
     if (params.net_env_params.net_env_id)
@@ -573,6 +576,7 @@ t_Handle FM_PCD_CcRootBuild(t_Handle h_FmPcd, t_FmPcdCcTreeParams *p_PcdTreePara
     _fml_dbg("Calling...\n");
 
     memcpy(&params, p_PcdTreeParam, sizeof(t_FmPcdCcTreeParams));
+    params.id = NULL;
 
     /* correct net_env_id */
     if (params.net_env_id)
@@ -652,6 +656,7 @@ t_Handle FM_PCD_MatchTableSet(t_Handle h_FmPcd, t_FmPcdCcNodeParams *p_CcNodePar
     _fml_dbg("Calling...\n");
 
     memcpy(&params, p_CcNodeParam, sizeof(t_FmPcdCcNodeParams));
+    params.id = NULL;
 
     /*correct*/
     for(i = 0; i < params.keys_params.num_of_keys;i++){
@@ -897,7 +902,8 @@ t_Handle FM_PCD_HashTableSet(t_Handle h_FmPcd, t_FmPcdHashTableParams *p_Param)
 
     _fml_dbg("Calling...\n");
 
-    memcpy(&params, p_Param, sizeof(ioc_fm_pcd_hash_table_params_t));
+    memcpy(&params, p_Param, sizeof(t_FmPcdHashTableParams));
+    params.id = NULL;
 
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_HASH_TABLE_SET, &params))
     {
@@ -961,7 +967,7 @@ t_Error FM_PCD_HashTableAddKey(t_Handle            h_HashTbl,
 
     param.p_hash_tbl = UINT_TO_PTR(p_Dev->id);
     param.key_size = keySize;
-    memcpy(&param.p_key_params, p_KeyParams, sizeof(ioc_fm_pcd_hash_table_add_key_params_t));
+    memcpy(&param.key_params, p_KeyParams, sizeof(t_FmPcdCcKeyParams));
 
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_HASH_TABLE_ADD_KEY, &param))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
@@ -1044,6 +1050,7 @@ t_Handle FM_PCD_PlcrProfileSet(t_Handle h_FmPcd, t_FmPcdPlcrProfileParams *p_Pro
     _fml_dbg("Calling...\n");
 
     memcpy(&params, p_Profile, sizeof(t_FmPcdPlcrProfileParams));
+    params.id = NULL;
 
     if (!params.modify &&
         (params.profile_select.new_params.profile_type
@@ -1136,7 +1143,6 @@ t_Handle FM_PCD_ManipNodeSet(t_Handle h_FmPcd, t_FmPcdManipParams *p_FmPcdManipP
         p_Dev = (t_Device*)p_FmPcdManipParams->h_NextManip;
         params.p_next_manip = UINT_TO_PTR(p_Dev->id);
     }
-    params.id = NULL; /* Just to make sure! */
 
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_MANIP_NODE_SET, &params)){
         REPORT_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);

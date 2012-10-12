@@ -77,7 +77,7 @@ FM_LIB_INCLUDE:=$(FM_IOCTL_INC) \
 		$(FM_LIB_INC)/integrations 
 
 # These flags need to be passed to the compiler in any circumstance:
-EXTRA_CFLAGS=-DNCSW_LINUX
+EXTRA_CFLAGS=-DNCSW_LINUX -fPIC -shared -mlongcall
 
 # CFLAGS to use during out-of-Yocto (i.e. "local") build:
 LOCAL_CFLAGS=-O2 -g0 -Wall \
