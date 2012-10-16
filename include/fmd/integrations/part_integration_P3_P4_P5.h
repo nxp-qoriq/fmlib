@@ -54,10 +54,6 @@
 #define CORE_E500MC
 
 #define INTG_MAX_NUM_OF_CORES   1
-#define CORE_GetId()            0
-#define CORE_IS_BIG_ENDIAN
-#define SYS_ANY_CORE    ((uint32_t)-1)  /**< Assignment to any valid core */
-#define SYS_IS_MASTER_CORE()    TRUE
 
 
 /**************************************************************************//**
@@ -223,7 +219,7 @@ typedef enum e_ModuleId
 
 #define NUM_OF_MODULES  e_MODULE_ID_DUMMY_LAST
 
-
+#if 0 /* using unified values */
 /*****************************************************************************
  INTEGRATION-SPECIFIC MODULE CODES
 ******************************************************************************/
@@ -260,6 +256,7 @@ typedef enum e_ModuleId
 #define MODULE_DDR              0x001e0000
 #define MODULE_ESPI             0x001f0000
 #define MODULE_DPAA_IPSEC       0x00200000
+#endif /* using unified values */
 
 /*****************************************************************************
  PAMU INTEGRATION-SPECIFIC DEFINITIONS

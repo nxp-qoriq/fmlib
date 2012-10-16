@@ -40,8 +40,23 @@
 
 #ifdef P1023
 #include "part_integration_P1023.h"
+#elif defined B4860 || defined T4240
+#include "part_integration_B4_T4.h"
 #else
 #include "part_integration_P3_P4_P5.h"
 #endif
+
+/*****************************************************************************
+ *  UNIFIED MODULE CODES
+ *****************************************************************************/
+  #define MODULE_UNKNOWN          0x00000000
+  #define MODULE_FM               0x00010000
+  #define MODULE_FM_MURAM         0x00020000
+  #define MODULE_FM_PCD           0x00030000
+  #define MODULE_FM_RTC           0x00040000
+  #define MODULE_FM_MAC           0x00050000
+  #define MODULE_FM_PORT          0x00060000
+  #define MODULE_MM               0x00070000
+  #define MODULE_FM_SP            0x00080000
 
 #endif /* __PART_INTEGRATION_EXT_H */

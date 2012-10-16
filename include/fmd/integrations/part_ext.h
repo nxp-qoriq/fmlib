@@ -62,6 +62,8 @@ typedef struct t_Part
 
 #ifdef P1023
 #include "part_P1023.h"
+#elif defined B4860 || defined T4240
+#include "part_B4_T4.h"
 #else
 #include "part_P3_P4_P5.h"
 #endif
