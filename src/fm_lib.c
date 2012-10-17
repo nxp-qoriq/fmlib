@@ -1715,6 +1715,17 @@ t_Error FM_PCD_SetAdvancedOffloadSupport(t_Handle h_FmPort)
     return E_OK;
 }
 
+#if (DPAA_VERSION >= 11)
+t_Handle FM_PCD_FrmReplicSetGroup(t_Handle h_FmPcd, t_FmPcdFrmReplicGroupParams *p_FrmReplicGroupParam)
+{
+    return (t_Handle)NULL;
+}
+
+t_Error FM_PCD_FrmReplicDeleteGroup(t_Handle h_FrmReplicGroup)
+{
+    return 0;
+}
+#endif
 
 #ifdef P1023
 void Platform_is_P1023()
