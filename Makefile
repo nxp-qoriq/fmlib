@@ -59,6 +59,8 @@ endif
 
 INSTALL?=install
 
+LIB_DEST_DIR?=$(PREFIX)/lib
+
 # Don't forget to increment .version before doing a new release!
 FM_LIB_VERSION:=$(shell cat .version)
 
@@ -118,9 +120,9 @@ archive: all .version
 
 install-%: %.a
 	@(echo "Installing...")
-	@($(INSTALL) -d $(DESTDIR)$(PREFIX)/lib)
-	@($(INSTALL) $< $(DESTDIR)$(PREFIX)/lib)
-	@(ln -s $(DESTDIR)$(PREFIX)/lib/$< $(DESTDIR)$(PREFIX)/lib/libfm.a)
+	@($(INSTALL) -d $(DESTDIR)$(LIB_DEST_DIR))
+	@($(INSTALL) $< $(DESTDIR)$(LIB_DEST_DIR))
+	@(ln -s $(DESTDIR)$(LIB_DEST_DIR)/$< $(DESTDIR)$(LIB_DEST_DIR)/libfm.a)
 	@(cp -r -p ./include $(DESTDIR)$(PREFIX))
 	@($(INSTALL) -d $(DESTDIR)$(PREFIX)/share/doc/fm-lib-$(FM_LIB_VERSION))
 	@($(INSTALL) $(FM_LIB_DOCFILES) $(DESTDIR)$(PREFIX)/share/doc/fm-lib-$(FM_LIB_VERSION))
