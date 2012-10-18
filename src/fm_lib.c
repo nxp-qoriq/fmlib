@@ -1718,12 +1718,61 @@ t_Error FM_PCD_SetAdvancedOffloadSupport(t_Handle h_FmPort)
 #if (DPAA_VERSION >= 11)
 t_Handle FM_PCD_FrmReplicSetGroup(t_Handle h_FmPcd, t_FmPcdFrmReplicGroupParams *p_FrmReplicGroupParam)
 {
-    return (t_Handle)NULL;
+    t_Device *p_PcdDev = (t_Device*) h_FmPcd;
+    t_Device *p_Dev = NULL;
+    ioc_fm_pcd_frm_replic_group_params_t params;
+
+    SANITY_CHECK_RETURN_VALUE(p_PcdDev, E_INVALID_HANDLE, NULL);
+
+    _fml_dbg("Calling...\n");
+
+    memcpy(&params, p_FrmReplicGroupParam, sizeof(t_FmPcdFrmReplicGroupParams));
+    params.id = NULL;
+
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_FRM_REPLIC_GROUP_SET, &params))
+    {
+        REPORT_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+        return NULL;
+    }
+
+    p_Dev = (t_Device *)malloc(sizeof(t_Device));
+    if (!p_Dev)
+    {
+        REPORT_ERROR(MAJOR, E_NO_MEMORY, ("FM PCD NetEnv Chrs device!!"));
+        return NULL;
+    }
+    memset(p_Dev, 0, sizeof(t_Device));
+    p_Dev->h_UserPriv = (t_Handle)p_PcdDev;
+    p_PcdDev->owners++;
+    p_Dev->id = PTR_TO_UINT(params.id);
+
+    _fml_dbg("Called.\n");
+
+    return (t_Handle) p_Dev;;
 }
 
 t_Error FM_PCD_FrmReplicDeleteGroup(t_Handle h_FrmReplicGroup)
 {
-    return 0;
+    t_Device *p_Dev = (t_Device*) h_FrmReplicGroup;
+    t_Device *p_PcdDev = NULL;
+    ioc_fm_obj_t id;
+
+    SANITY_CHECK_EXIT(p_Dev, E_INVALID_HANDLE);
+
+    _fml_dbg("Calling...\n");
+
+    p_PcdDev = (t_Device*)p_Dev->h_UserPriv;
+    id.obj = UINT_TO_PTR(p_Dev->id);
+
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_FRM_REPLIC_GROUP_DELETE, &id))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    p_PcdDev->owners--;
+    free(p_Dev);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
 }
 #endif
 
