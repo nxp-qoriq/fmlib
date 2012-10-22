@@ -957,7 +957,7 @@ t_Error FM_PCD_HashTableAddKey(t_Handle            h_HashTbl,
 {
     t_Device *p_Dev = (t_Device*) h_HashTbl;
     t_Device *p_PcdDev = NULL;
-    ioc_fm_pcd_hash_table_add_key_params_t param;
+    ioc_fm_pcd_hash_table_add_key_params_t params;
 
     SANITY_CHECK_EXIT(p_Dev, E_INVALID_HANDLE);
 
@@ -965,11 +965,11 @@ t_Error FM_PCD_HashTableAddKey(t_Handle            h_HashTbl,
 
     p_PcdDev = (t_Device*)p_Dev->h_UserPriv;
 
-    param.p_hash_tbl = UINT_TO_PTR(p_Dev->id);
-    param.key_size = keySize;
-    memcpy(&param.key_params, p_KeyParams, sizeof(t_FmPcdCcKeyParams));
+    params.p_hash_tbl = UINT_TO_PTR(p_Dev->id);
+    params.key_size = keySize;
+    memcpy(&params.key_params, p_KeyParams, sizeof(t_FmPcdCcKeyParams));
 
-    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_HASH_TABLE_ADD_KEY, &param))
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_HASH_TABLE_ADD_KEY, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
     _fml_dbg("Called.\n");
@@ -983,7 +983,7 @@ t_Error FM_PCD_HashTableRemoveKey(t_Handle h_HashTbl,
 {
     t_Device *p_Dev = (t_Device*) h_HashTbl;
     t_Device *p_PcdDev = NULL;
-    ioc_fm_pcd_hash_table_remove_key_params_t param;
+    ioc_fm_pcd_hash_table_remove_key_params_t params;
 
     SANITY_CHECK_EXIT(p_Dev, E_INVALID_HANDLE);
 
@@ -991,11 +991,11 @@ t_Error FM_PCD_HashTableRemoveKey(t_Handle h_HashTbl,
 
     p_PcdDev = (t_Device*)p_Dev->h_UserPriv;
 
-    param.p_hash_tbl = UINT_TO_PTR(p_Dev->id);
-    param.key_size = keySize;
-    param.p_key = p_Key;
+    params.p_hash_tbl = UINT_TO_PTR(p_Dev->id);
+    params.key_size = keySize;
+    params.p_key = p_Key;
 
-    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_HASH_TABLE_REMOVE_KEY, &param))
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_HASH_TABLE_REMOVE_KEY, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
     _fml_dbg("Called.\n");
@@ -1775,6 +1775,38 @@ t_Error FM_PCD_FrmReplicDeleteGroup(t_Handle h_FrmReplicGroup)
     return E_OK;
 }
 #endif
+
+t_Error FM_MAC_AddHashMacAddr(t_Handle h_FmMac, t_EnetAddr *p_EnetAddr)
+{
+    t_Device    *p_Dev = (t_Device *)h_FmMac;
+
+    SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, E_OK);
+
+    _fml_dbg("Calling...\n");
+
+    if (ioctl(p_Dev->fd, FM_PORT_IOC_ADD_RX_HASH_MAC_ADDR, p_EnetAddr))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+
+t_Error FM_MAC_RemoveHashMacAddr(t_Handle h_FmMac, t_EnetAddr *p_EnetAddr)
+{
+    t_Device    *p_Dev = (t_Device *)h_FmMac;
+
+    SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, E_OK);
+
+    _fml_dbg("Calling...\n");
+
+    if (ioctl(p_Dev->fd, FM_PORT_IOC_REMOVE_RX_HASH_MAC_ADDR, p_EnetAddr))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
 
 #ifdef P1023
 void Platform_is_P1023()

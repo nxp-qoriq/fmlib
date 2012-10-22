@@ -43,6 +43,7 @@
 #include "fm_pcd_ext.h"
 #include "fm_ext.h"
 #include "net_ext.h"
+#include "enet_ext.h"
 
 
 /**************************************************************************//**
@@ -852,6 +853,63 @@ uint32_t FM_PORT_AllocPCDFqids (t_Handle h_FmPort, uint32_t numFqids, uint8_t al
  @Return        Error code, or 0 on success.
 *//***************************************************************************/
 t_Error FM_PORT_FreePCDFqids (t_Handle h_FmPort, uint32_t base_fqid);
+
+/**************************************************************************//**
+ @Function      FM_MAC_AddHashMacAddr
+
+ @Description   Add an Address to the hash table. This is for filter purpose only.
+
+                fmlib only: One can simply pass the port handle directly to this API
+                or use the FM_PORT_GetMacHandle() below to "convert" it to a MAC handle,
+                if API compatibility with (???) needs to be maintained.
+
+ @Param[in]     h_FmMac         A handle to a FM MAC module.
+ @Param[in]     p_EnetAddr      The Ethernet MAC address
+
+ @Return        E_OK on success; Error code otherwise.
+
+ @Cautions      Allowed only following FM_MAC_Init(). It is a filter only address.
+ @Cautions      Some address need to be filterd out in upper FM blocks.
+*//***************************************************************************/
+t_Error FM_MAC_AddHashMacAddr(t_Handle h_FmMac, t_EnetAddr *p_EnetAddr);
+
+/**************************************************************************//**
+ @Function      FM_MAC_RemoveHashMacAddr
+
+ @Description   Delete an Address to the hash table. This is for filter purpose only.
+
+                fmlib only: One can simply pass the port handle directly to this API
+                or use the FM_PORT_GetMacHandle() below to "convert" it to a MAC handle,
+                if API compatibility with (???) needs to be maintained.
+
+ @Param[in]     h_FmMac         A handle to a FM MAC module.
+ @Param[in]     p_EnetAddr      The Ethernet MAC address
+
+ @Return        E_OK on success; Error code otherwise.
+
+ @Cautions      Allowed only following FM_MAC_Init().
+*//***************************************************************************/
+t_Error FM_MAC_RemoveHashMacAddr(t_Handle h_FmMac, t_EnetAddr *p_EnetAddr);
+
+/**************************************************************************//**
+ @Function      FM_PORT_GetMacHandle
+
+ @Description   Convenience operator for getting the MAC handle for a given port.
+
+ @Param[in]     h_FmPort        A handle to a FM Port module.
+
+ @Return        E_OK on success; Error code otherwise.
+
+ @Cautions      Allowed only following FM_MAC_Init().
+ @Cautions      Since there is no way to know upfront whether or not the port
+                has a valid MAC device attached to it, we simply (and silently)
+                substitute the very port's handle to the MAC handle,
+                deferring the check until the first FM_MAC_*() API call.
+*//***************************************************************************/
+static inline
+t_Handle FM_PORT_GetMacHandle(t_Handle h_FmPort) {
+    return h_FmPort;
+}
 
 /** @} */ /* end of lnx_usr_FM_PORT_runtime_data_grp group */
 /** @} */ /* end of lnx_usr_FM_PORT_grp group */
