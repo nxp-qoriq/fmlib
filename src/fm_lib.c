@@ -71,6 +71,17 @@
 #   define _fml_dbg(arg...)
 #endif
 
+/* Major and minor are in sync with FMD, respin is for fmlib identification */
+#define FM_LIB_VERSION_MAJOR    18
+#define FM_LIB_VERSION_MINOR     1
+#define FM_LIB_VERSION_RESPIN    0
+
+#if (FMD_API_VERSION_MAJOR != FM_LIB_VERSION_MAJOR) || \
+    (FMD_API_VERSION_MINOR != FM_LIB_VERSION_MINOR)
+#warning FMD and FMLIB version mismatch
+#endif
+
+t_Error FM_GetApiVersion(t_Handle h_Fm, ioc_fm_api_version_t *p_version);
 
 /*******************************************************************************
 *  FM FUNCTIONS                                                                *
@@ -81,6 +92,8 @@ t_Handle FM_Open(uint8_t id)
     t_Device    *p_Dev;
     int         fd;
     char        devName[20];
+    static bool called = FALSE;
+    ioc_fm_api_version_t ver;
 
     _fml_dbg("Calling...\n");
 
@@ -105,7 +118,24 @@ t_Handle FM_Open(uint8_t id)
 
     p_Dev->id = id;
     p_Dev->fd = fd;
+    if (!called)
+    {
+        called = TRUE;
 
+        FM_GetApiVersion((t_Handle)p_Dev, &ver);
+
+        if (FMD_API_VERSION_MAJOR != ver.version.major ||
+            FMD_API_VERSION_MINOR != ver.version.minor ||
+            FMD_API_VERSION_RESPIN != ver.version.respin)
+        {
+            printf("Warning:\nCompiled against FMD API version %u.%u.%u\n",
+                FMD_API_VERSION_MAJOR, FMD_API_VERSION_MINOR, FMD_API_VERSION_RESPIN);
+            printf("Running with FMD API version %u.%u.%u\n",
+                ver.version.major, ver.version.minor, ver.version.respin);
+            printf("Current fmlib version %u.%u.%u\n",
+                FM_LIB_VERSION_MAJOR, FM_LIB_VERSION_MINOR, FM_LIB_VERSION_RESPIN);
+        }
+    }
     _fml_dbg("Called.\n");
 
     return (t_Handle)p_Dev;
@@ -207,6 +237,22 @@ t_Error FM_ForceIntr(t_Handle h_Fm, e_FmExceptions exception)
     _fml_dbg("Calling...\n");
 
     if (ioctl(p_Dev->fd, FM_IOC_FORCE_INTR, (ioc_fm_exceptions) exception))
+        REPORT_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+
+t_Error  FM_GetApiVersion(t_Handle h_Fm, ioc_fm_api_version_t *p_version)
+{
+    t_Device                    *p_Dev = (t_Device*) h_Fm;
+
+    _fml_dbg("Calling...\n");
+
+    SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
+
+    if (ioctl(p_Dev->fd, FM_IOC_GET_API_VERSION, p_version))
         REPORT_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
     _fml_dbg("Called.\n");
