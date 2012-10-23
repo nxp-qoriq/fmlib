@@ -61,7 +61,7 @@ INSTALL?=install
 LIB_DEST_DIR?=$(PREFIX)/lib
 
 # Add any collateral files that need to be included in the archive, here:
-FM_LIB_DOCFILES=COPYING INSTALL README 
+FM_LIB_DOCFILES=COPYING INSTALL README
 
 # Don't touch these!
 FM_IOCTL_INC?=$(KERNEL_SRC)/include/linux/fmd
@@ -72,7 +72,7 @@ FM_LIB_INCLUDE:=$(FM_IOCTL_INC) \
 		$(FM_IOCTL_INC)/integrations \
 		$(FM_LIB_INC) \
 		$(FM_LIB_INC)/Peripherals \
-		$(FM_LIB_INC)/integrations 
+		$(FM_LIB_INC)/integrations
 
 # These flags need to be passed to the compiler in any circumstance:
 EXTRA_CFLAGS=-DNCSW_LINUX -fPIC -shared -mlongcall
@@ -96,6 +96,7 @@ libfm-ppce500v2.o: EXTRA_CFLAGS+=-DP1023
 libfm-ppce500mc.o:  CFLAGS?=-m32 -mhard-float -mcpu=e500mc $(LOCAL_CFLAGS)
 libfm-ppc32e5500.o: CFLAGS?=-m32 -mhard-float -mcpu=e5500  $(LOCAL_CFLAGS)
 libfm-ppc64e5500.o: CFLAGS?=-m64 -mhard-float -mcpu=e5500  $(LOCAL_CFLAGS)
+libfm-ppce500v2.o:  CFLAGS?=-m32 -msoft-float -mcpu=8548   $(LOCAL_CFLAGS)
 # TODO: replace when compiler support is added:
 #{
 libfm-ppc32e6500.o: CFLAGS?=-m32 -mhard-float -mcpu=e5500  $(LOCAL_CFLAGS)
@@ -109,11 +110,11 @@ libfm-ppce500v2.o:  CFLAGS?=-m32 -msoft-float -mcpu=8548   $(LOCAL_CFLAGS)
 CFLAGS+=$(EXTRA_CFLAGS) -isystem $(KERNEL_SRC)/include
 
 
-all: libfm-ppc32e6500.a libfm-ppc64e6500.a libfm-ppc32e5500.a libfm-ppc64e5500.a \
-		libfm-ppce500mc.a libfm-ppce500v2.a
+all: libfm-ppc32e5500.a libfm-ppc64e5500.a libfm-ppce500mc.a \
+		libfm-ppce500v2.a libfm-ppc64e6500.a libfm-ppc32e6500.a
 
-libfm-ppc32e6500.o libfm-ppc64e6500.o libfm-ppc32e5500.o libfm-ppc64e5500.o \
-		libfm-ppce500mc.o libfm-ppce500v2.o: \
+libfm-ppc32e5500.o libfm-ppc64e5500.o libfm-ppce500mc.o libfm-ppce500v2.o \
+		libfm-ppc32e6500.o libfm-ppc64e6500.o: \
 		$(FM_LIB_SRCDIR)/fm_lib.c $(addsuffix /*.h,$(FM_LIB_INCLUDE))
 	@(echo "(CC)  $@")
 	@(echo $(CC) $(CFLAGS) $(addprefix -I,$(FM_LIB_INCLUDE)) -c -o $@ $< > .$@.cmd)
