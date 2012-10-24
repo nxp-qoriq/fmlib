@@ -61,9 +61,6 @@ INSTALL?=install
 
 LIB_DEST_DIR?=$(PREFIX)/lib
 
-# Don't forget to increment .version before doing a new release!
-FM_LIB_VERSION:=$(shell cat .version)
-
 # Add any collateral files that need to be included in the archive, here:
 FM_LIB_DOCFILES=COPYING INSTALL README 
 
@@ -113,9 +110,9 @@ libfm-ppc32e5500.o libfm-ppc64e5500.o libfm-ppce500mc.o libfm-ppce500v2.o: \
 	@($(CC) $(CFLAGS) $(addprefix -I,$(FM_LIB_INCLUDE)) -c -o $@ $<)
 
 archive: all .version
-	@(echo "Creating tarball for fmlib-$(FM_LIB_VERSION)...")
-	@(tar -czf fm-lib-$(FM_LIB_VERSION)-bi.tar.gz . \
-		--transform "s,\\.\\(.*\\),fm-lib-$(FM_LIB_VERSION)\\1," \
+	@(echo "Creating tarball for fmlib...")
+	@(tar -czf fm-lib-bi.tar.gz . \
+		--transform "s,\\.\\(.*\\),fm-lib\\1," \
 		--exclude=Makefile --exclude=.version --exclude-vcs --exclude=*.tar.gz)
 
 install-%: %.a
@@ -124,8 +121,8 @@ install-%: %.a
 	@($(INSTALL) $< $(DESTDIR)$(LIB_DEST_DIR))
 	@(ln -s $(DESTDIR)$(LIB_DEST_DIR)/$< $(DESTDIR)$(LIB_DEST_DIR)/libfm.a)
 	@(cp -r -p ./include $(DESTDIR)$(PREFIX))
-	@($(INSTALL) -d $(DESTDIR)$(PREFIX)/share/doc/fm-lib-$(FM_LIB_VERSION))
-	@($(INSTALL) $(FM_LIB_DOCFILES) $(DESTDIR)$(PREFIX)/share/doc/fm-lib-$(FM_LIB_VERSION))
+	@($(INSTALL) -d $(DESTDIR)$(PREFIX)/share/doc/fm-lib)
+	@($(INSTALL) $(FM_LIB_DOCFILES) $(DESTDIR)$(PREFIX)/share/doc/fm-lib)
 
 targets help:
 	@(echo)
