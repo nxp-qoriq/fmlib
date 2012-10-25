@@ -99,7 +99,6 @@ typedef enum e_FmPortType {
 #define FM_FD_ERR_IPR_NCSP              (0x00100000 | FM_FD_IPR)    /**< IPR non-consistent-sp */
 #define FM_FD_ERR_IPR                   (0x00200000 | FM_FD_IPR)    /**< IPR error */
 #define FM_FD_ERR_IPR_TO                (0x00300000 | FM_FD_IPR)    /**< IPR timeout */
-#define FM_FD_ERR_IPF                   0x00100000                  /**< IPF error */
 
 #ifdef FM_CAPWAP_SUPPORT
 #define FM_FD_ERR_CRE                   0x00200000
@@ -133,7 +132,6 @@ typedef enum e_FmPortType {
                                          FM_FD_ERR_IPR                  | \
                                          FM_FD_ERR_IPR_TO               | \
                                          FM_FD_ERR_IPR_NCSP             | \
-                                         FM_FD_ERR_IPF                  | \
                                          FM_FD_ERR_PHYSICAL             | \
                                          FM_FD_ERR_SIZE                 | \
                                          FM_FD_ERR_CLS_DISCARD          | \
@@ -157,7 +155,7 @@ typedef enum e_FmPortType {
  @Description   FM Exceptions
 *//***************************************************************************/
 typedef enum e_FmExceptions {
-    e_FM_EX_DMA_BUS_ERROR,              /**< DMA bus error. */
+    e_FM_EX_DMA_BUS_ERROR = 0,          /**< DMA bus error. */
     e_FM_EX_DMA_READ_ECC,               /**< Read Buffer ECC error (Valid for FM rev < 6)*/
     e_FM_EX_DMA_SYSTEM_WRITE_ECC,       /**< Write Buffer ECC error on system side (Valid for FM rev < 6)*/
     e_FM_EX_DMA_FM_WRITE_ECC,           /**< Write Buffer ECC error on FM side (Valid for FM rev < 6)*/

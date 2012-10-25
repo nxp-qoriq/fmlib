@@ -139,7 +139,8 @@ typedef uint32_t    fmPortFrameErrSelect_t;                         /**< typedef
 
 #define FM_PORT_FRM_ERR_IPRE                    (FM_FD_ERR_IPR & ~FM_FD_IPR)        /**< IPR error */
 #define FM_PORT_FRM_ERR_IPR_NCSP                (FM_FD_ERR_IPR_NCSP & ~FM_FD_IPR)   /**< IPR non-consistent-sp */
-#define FM_PORT_FRM_ERR_IPFE                    FM_FD_ERR_IPF                       /**< IPF error */
+
+#define FM_PORT_FRM_ERR_IPFE                    0 /**< Obsolete; will be removed in the future */
 
 #ifdef FM_CAPWAP_SUPPORT
 #define FM_PORT_FRM_ERR_CRE                     FM_FD_ERR_CRE
