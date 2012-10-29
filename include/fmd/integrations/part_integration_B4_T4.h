@@ -52,7 +52,11 @@
 
 #define CORE_E6500
 
-#define INTG_MAX_NUM_OF_CORES   24
+#define INTG_MAX_NUM_OF_CORES   1
+#define CORE_GetId()            0
+#define CORE_IS_BIG_ENDIAN
+#define SYS_ANY_CORE    ((uint32_t)-1)  /**< Assignment to any valid core */
+#define SYS_IS_MASTER_CORE()    TRUE
 
 
 /**************************************************************************//**
