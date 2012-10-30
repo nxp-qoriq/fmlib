@@ -805,13 +805,6 @@ t_Error FM_PORT_PcdKgUnbindSchemes (t_Handle h_FmPort, t_FmPcdPortSchemesParams 
 *//***************************************************************************/
 t_Error FM_PORT_PcdPrsModifyStartOffset (t_Handle h_FmPort, t_FmPcdPrsStart *p_FmPcdPrsStart);
 
-#if (DPAA_VERSION >= 11)
-#ifdef FM_EXP_FEATURES
-/*              (Not implemented yet in fm-lib!) */
-t_Error FM_PORT_GetIPv4OptionsCount(t_Handle h_FmPort, uint32_t *p_Ipv4OptionsCount);
-#endif /* FM_EXP_FEATURES */
-#endif /* (DPAA_VERSION >= 11) */
-
 /** @} */ /* end of lnx_usr_FM_PORT_pcd_runtime_control_grp group */
 
 
