@@ -43,6 +43,7 @@
 #ifdef P1023
 
 #define CONFIG_FMAN_P1023
+#define DPAA_VERSION 10
 
 typedef enum e_DpaaSwPortal {
     e_DPAA_SWPORTAL0 = 0,
