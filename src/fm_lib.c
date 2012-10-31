@@ -1794,7 +1794,7 @@ t_Handle FM_PCD_FrmReplicSetGroup(t_Handle h_FmPcd, t_FmPcdFrmReplicGroupParams 
 
     _fml_dbg("Called.\n");
 
-    return (t_Handle) p_Dev;;
+    return (t_Handle) p_Dev;
 }
 
 t_Error FM_PCD_FrmReplicDeleteGroup(t_Handle h_FrmReplicGroup)
@@ -1803,7 +1803,7 @@ t_Error FM_PCD_FrmReplicDeleteGroup(t_Handle h_FrmReplicGroup)
     t_Device *p_PcdDev = NULL;
     ioc_fm_obj_t id;
 
-    SANITY_CHECK_EXIT(p_Dev, E_INVALID_HANDLE);
+    SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
     _fml_dbg("Calling...\n");
 
@@ -1811,6 +1811,59 @@ t_Error FM_PCD_FrmReplicDeleteGroup(t_Handle h_FrmReplicGroup)
     id.obj = UINT_TO_PTR(p_Dev->id);
 
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_FRM_REPLIC_GROUP_DELETE, &id))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    p_PcdDev->owners--;
+    free(p_Dev);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+
+t_Error FM_PCD_FrmReplicAddMember(t_Handle h_ReplicGroup,
+                                  uint16_t memberIndex,
+                                  t_FmPcdCcNextEngineParams *p_MemberParams)
+{
+    t_Device *p_Dev = (t_Device*) h_ReplicGroup;
+    t_Device *p_PcdDev = NULL;
+    ioc_fm_pcd_frm_replic_member_params_t params;
+
+    SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
+
+    _fml_dbg("Calling...\n");
+
+    p_PcdDev = (t_Device*)p_Dev->h_UserPriv;
+
+    params.member.h_replic_group = UINT_TO_PTR(p_Dev->id);
+    params.member.member_index = memberIndex;
+    memcpy(&params.next_engine_params, p_MemberParams, sizeof(*p_MemberParams));
+
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_FRM_REPLIC_MEMBER_ADD, &params))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+
+t_Error FM_PCD_FrmReplicRemoveMember(t_Handle   h_ReplicGroup,
+                                     uint16_t   memberIndex)
+{
+    t_Device *p_Dev = (t_Device*) h_ReplicGroup;
+    t_Device *p_PcdDev = NULL;
+    ioc_fm_pcd_frm_replic_member_t param;
+
+    SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
+
+    _fml_dbg("Calling...\n");
+
+    p_PcdDev = (t_Device*)p_Dev->h_UserPriv;
+
+    param.h_replic_group = UINT_TO_PTR(p_Dev->id);
+    param.member_index = memberIndex;
+
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_FRM_REPLIC_MEMBER_REMOVE, &param))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
     p_PcdDev->owners--;
