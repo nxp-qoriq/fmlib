@@ -81,6 +81,36 @@ typedef enum e_FmPortType {
 } e_FmPortType;
 
 /**************************************************************************//**
+/**************************************************************************//**
+ @Description   Parse results memory layout
+*//***************************************************************************/
+typedef _Packed struct t_FmPrsResult {
+    volatile uint8_t     lpid;               /**< Logical port id */
+    volatile uint8_t     shimr;              /**< Shim header result  */
+    volatile uint16_t    l2r;                /**< Layer 2 result */
+    volatile uint16_t    l3r;                /**< Layer 3 result */
+    volatile uint8_t     l4r;                /**< Layer 4 result */
+    volatile uint8_t     cplan;              /**< Classification plan id */
+    volatile uint16_t    nxthdr;             /**< Next Header  */
+    volatile uint16_t    cksum;              /**< running-sum */
+    volatile uint16_t    flags_frag_off;     /**< Flags & fragment-offset field of the last IP-header */
+    volatile uint8_t     route_type;         /**< Routing type field of a IPv6 routing extension header */
+    volatile uint8_t     rhp_ip_valid;       /**< Routing Extension Header Present; last bit is IP valid */
+    volatile uint8_t     shim_off[2];        /**< Shim offset */
+    volatile uint8_t     ip_pid_off;         /**< IP PID (last IP-proto) offset */
+    volatile uint8_t     eth_off;            /**< ETH offset */
+    volatile uint8_t     llc_snap_off;       /**< LLC_SNAP offset */
+    volatile uint8_t     vlan_off[2];        /**< VLAN offset */
+    volatile uint8_t     etype_off;          /**< ETYPE offset */
+    volatile uint8_t     pppoe_off;          /**< PPP offset */
+    volatile uint8_t     mpls_off[2];        /**< MPLS offset */
+    volatile uint8_t     ip_off[2];          /**< IP offset */
+    volatile uint8_t     gre_off;            /**< GRE offset */
+    volatile uint8_t     l4_off;             /**< Layer 4 offset */
+    volatile uint8_t     nxthdr_off;         /**< Parser end point */
+} _PackedType t_FmPrsResult;
+
+/**************************************************************************//**
  @Collection   FM Frame descriptor macros
 *//***************************************************************************/
 #define FM_FD_CMD_FCO                   0x80000000  /**< Frame queue Context Override */
@@ -175,6 +205,24 @@ typedef enum e_FmExceptions {
 } e_FmExceptions;
 
 /**************************************************************************//**
+ @Description   Enum for defining port DMA swap mode
+*//***************************************************************************/
+typedef enum e_FmDmaSwapOption {
+    e_FM_DMA_NO_SWP,           /**< No swap, transfer data as is.*/
+    e_FM_DMA_SWP_PPC_LE,       /**< The transferred data should be swapped
+                                    in PowerPc Little Endian mode. */
+    e_FM_DMA_SWP_BE            /**< The transferred data should be swapped
+                                    in Big Endian mode */
+} e_FmDmaSwapOption;
+
+/**************************************************************************//**
+ @Description   Enum for defining port DMA cache attributes
+*//***************************************************************************/
+typedef enum e_FmDmaCacheOption {
+    e_FM_DMA_NO_STASH = 0,     /**< Cacheable, no Allocate (No Stashing) */
+    e_FM_DMA_STASH = 1         /**< Cacheable and Allocate (Stashing on) */
+} e_FmDmaCacheOption;
+/**************************************************************************//**
  @Group         lnx_usr_FM_init_grp FM Initialization Unit
 
  @Description   FM Initialization Unit
@@ -191,6 +239,91 @@ typedef enum e_FmExceptions {
 
 t_Handle FM_Open(uint8_t id);
 void     FM_Close(t_Handle h_Fm);
+
+
+/**************************************************************************//**
+ @Description   A structure for defining buffer prefix area content.
+*//***************************************************************************/
+typedef struct t_FmBufferPrefixContent {
+    uint16_t    privDataSize;       /**< Number of bytes to be left at the beginning
+                                         of the external buffer; Note that the private-area will
+                                         start from the base of the buffer address. */
+    bool        passPrsResult;      /**< TRUE to pass the parse result to/from the FM;
+                                         User may use FM_PORT_GetBufferPrsResult() in order to
+                                         get the parser-result from a buffer. */
+    bool        passTimeStamp;      /**< TRUE to pass the timeStamp to/from the FM
+                                         User may use FM_PORT_GetBufferTimeStamp() in order to
+                                         get the parser-result from a buffer. */
+    bool        passHashResult;     /**< TRUE to pass the KG hash result to/from the FM
+                                         User may use FM_PORT_GetBufferHashResult() in order to
+                                         get the parser-result from a buffer. */
+    bool        passAllOtherPCDInfo;/**< Add all other Internal-Context information:
+                                         AD, hash-result, key, etc. */
+    uint16_t    dataAlign;          /**< 0 to use driver's default alignment [64],
+                                         other value for selecting a data alignment (must be a power of 2);
+                                         if write optimization is used, must be >= 16. */
+    uint8_t     manipExtraSpace;    /**< Maximum extra size needed (insertion-size minus removal-size);
+                                         Note that this field impacts the size of the buffer-prefix
+                                         (i.e. it pushes the data offset);
+                                         This field is irrelevant if DPAA_VERSION==10 */
+} t_FmBufferPrefixContent;
+
+/**************************************************************************//**
+ @Description   A structure of information about each of the external
+                buffer pools used by a port or storage-profile.
+*//***************************************************************************/
+typedef struct t_FmExtPoolParams {
+    uint8_t                 id;     /**< External buffer pool id */
+    uint16_t                size;   /**< External buffer pool buffer size */
+} t_FmExtPoolParams;
+
+/**************************************************************************//**
+ @Description   A structure for informing the driver about the external
+                buffer pools allocated in the BM and used by a port or a
+                storage-profile.
+*//***************************************************************************/
+typedef struct t_FmExtPools {
+    uint8_t                 numOfPoolsUsed;     /**< Number of pools use by this port */
+    t_FmExtPoolParams       extBufPool[FM_PORT_MAX_NUM_OF_EXT_POOLS];
+                                                /**< Parameters for each port */
+} t_FmExtPools;
+
+/**************************************************************************//**
+ @Description   A structure for defining backup BM Pools.
+*//***************************************************************************/
+typedef struct t_FmBackupBmPools {
+    uint8_t     numOfBackupPools;       /**< Number of BM backup pools -
+                                             must be smaller than the total number of
+                                             pools defined for the specified port.*/
+    uint8_t     poolIds[FM_PORT_MAX_NUM_OF_EXT_POOLS];
+                                        /**< numOfBackupPools pool id's, specifying which
+                                             pools should be used only as backup. Pool
+                                             id's specified here must be a subset of the
+                                             pools used by the specified port.*/
+} t_FmBackupBmPools;
+
+/**************************************************************************//**
+ @Description   A structure for defining BM pool depletion criteria
+*//***************************************************************************/
+typedef struct t_FmBufPoolDepletion {
+    bool        poolsGrpModeEnable;                 /**< select mode in which pause frames will be sent after
+                                                         a number of pools (all together!) are depleted */
+    uint8_t     numOfPools;                         /**< the number of depleted pools that will invoke
+                                                         pause frames transmission. */
+    bool        poolsToConsider[BM_MAX_NUM_OF_POOLS];
+                                                    /**< For each pool, TRUE if it should be considered for
+                                                         depletion (Note - this pool must be used by this port!). */
+    bool        singlePoolModeEnable;               /**< select mode in which pause frames will be sent after
+                                                         a single-pool is depleted; */
+    bool        poolsToConsiderForSingleMode[BM_MAX_NUM_OF_POOLS];
+                                                    /**< For each pool, TRUE if it should be considered for
+                                                         depletion (Note - this pool must be used by this port!) */
+#if (DPAA_VERSION >= 11)
+    bool        pfcPrioritiesEn[FM_MAX_NUM_OF_PFC_PRIORITIES];
+                                                    /**< This field is used by the MAC as the Priority Enable Vector in the PFC frame which is transmitted */
+#endif /* (DPAA_VERSION >= 11) */
+} t_FmBufPoolDepletion;
+
 
 /** @} */ /* end of lnx_usr_FM_init_grp group */
 
@@ -372,6 +505,8 @@ t_Error FM_ForceIntr (t_Handle h_Fm, e_FmExceptions exception);
 /** @} */ /* end of lnx_usr_FM_grp group */
 
 #ifdef NCSW_BACKWARD_COMPATIBLE_API
+typedef t_FmBackupBmPools           t_FmPortBackupBmPools;
+typedef t_FmBufPoolDepletion        t_FmPortBufPoolDepletion;
 #define e_FM_EX_BMI_PIPELINE_ECC    e_FM_EX_BMI_STORAGE_PROFILE_ECC
 #endif /* NCSW_BACKWARD_COMPATIBLE_API */
 

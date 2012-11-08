@@ -48,6 +48,9 @@
 #include "fm_ext.h"
 #include "fm_pcd_ext.h"
 #include "fm_port_ext.h"
+#if (DPAA_VERSION >= 11)
+#include "fm_vsp_ext.h"
+#endif
 
 #include "fm_ioctls.h"
 #include "fm_pcd_ioctls.h"
@@ -1906,6 +1909,107 @@ t_Error FM_MAC_RemoveHashMacAddr(t_Handle h_FmMac, t_EnetAddr *p_EnetAddr)
 
     return E_OK;
 }
+
+#if (DPAA_VERSION >= 11)
+t_Error FM_PORT_VSPAlloc(t_Handle h_FmPort, t_FmPortVSPAllocParams *p_Params)
+{
+    t_Device    *p_Dev = (t_Device*) h_FmPort;
+
+    SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, E_OK);
+
+    _fml_dbg("Calling...\n");
+
+    if (ioctl(p_Dev->fd, FM_PORT_IOC_VSP_ALLOC, p_Params))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+
+t_Handle FM_VSP_Config(t_FmVspParams *p_FmVspParams)
+{
+    t_Device *p_Dev = NULL;
+    t_Device *p_VspDev = NULL;
+    ioc_fm_vsp_params_t param;
+
+    SANITY_CHECK_RETURN_VALUE((void *)p_FmVspParams, E_INVALID_HANDLE, NULL);
+    p_Dev = p_FmVspParams->h_Fm;
+    SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, NULL);
+
+    _fml_dbg("Calling...\n");
+
+    memcpy(&param, p_FmVspParams, sizeof(param));
+    param.h_Fm = UINT_TO_PTR(p_Dev->id);
+    param.id = NULL;
+
+    if (ioctl(p_Dev->fd, FM_IOC_VSP_CONFIG, &param))
+    {
+        REPORT_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+        return NULL;
+    }
+
+    p_VspDev = (t_Device *)malloc(sizeof(t_Device));
+    if (!p_VspDev)
+    {
+        REPORT_ERROR(MAJOR, E_NO_MEMORY, ("FM VSP Params!"));
+        return NULL;
+    }
+    memset(p_VspDev, 0, sizeof(t_Device));
+    p_VspDev->h_UserPriv = (t_Handle)p_Dev;
+    p_Dev->owners++;
+    p_VspDev->id = PTR_TO_UINT(param.id);
+
+    _fml_dbg("Called.\n");
+
+    return NULL;
+}
+
+t_Error FM_VSP_Init(t_Handle h_FmVsp)
+{
+    t_Device *p_Dev = NULL;
+    t_Device *p_VspDev = (t_Device *)h_FmVsp;
+    ioc_fm_obj_t id;
+
+    SANITY_CHECK_RETURN_ERROR(p_VspDev, E_INVALID_HANDLE);
+
+    _fml_dbg("Calling...\n");
+
+    p_Dev = (t_Device*)p_VspDev->h_UserPriv;
+    id.obj = UINT_TO_PTR(p_VspDev->id);
+
+    if (ioctl(p_Dev->fd, FM_IOC_VSP_INIT, &id))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+
+t_Error FM_VSP_Free(t_Handle h_FmVsp)
+{
+    t_Device *p_Dev = NULL;
+    t_Device *p_VspDev = (t_Device *)h_FmVsp;
+    ioc_fm_obj_t id;
+
+    SANITY_CHECK_RETURN_ERROR(p_VspDev, E_INVALID_HANDLE);
+
+    _fml_dbg("Calling...\n");
+
+    p_Dev = (t_Device*)p_VspDev->h_UserPriv;
+    id.obj = UINT_TO_PTR(p_VspDev->id);
+
+    if (ioctl(p_Dev->fd, FM_IOC_VSP_FREE, &id))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    p_Dev->owners--;
+    free(p_VspDev);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+#endif
 
 #ifdef P1023
 void Platform_is_P1023()
