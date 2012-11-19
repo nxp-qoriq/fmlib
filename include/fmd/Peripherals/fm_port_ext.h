@@ -217,6 +217,38 @@ typedef struct t_FmPortRateLimit {
 } t_FmPortRateLimit;
 
 /**************************************************************************//**
+ @Function      FM_PORT_ConfigBufferPrefixContent
+
+ @Description   Defines the structure, size and content of the application buffer.
+                The prefix will
+                In Tx ports, if 'passPrsResult', the application
+                should set a value to their offsets in the prefix of
+                the FM will save the first 'privDataSize', than,
+                depending on 'passPrsResult' and 'passTimeStamp', copy parse result
+                and timeStamp, and the packet itself (in this order), to the
+                application buffer, and to offset.
+                Calling this routine changes the buffer margins definitions
+                in the internal driver data base from its default
+                configuration: Data size:  [DEFAULT_FM_SP_bufferPrefixContent_privDataSize]
+                               Pass Parser result: [DEFAULT_FM_SP_bufferPrefixContent_passPrsResult].
+                               Pass timestamp: [DEFAULT_FM_SP_bufferPrefixContent_passTimeStamp].
+
+                May be used for all ports
+
+ @Param[in]     h_FmPort                        A handle to a FM Port module.
+ @Param[in,out] p_FmBufferPrefixContent         A structure of parameters describing the
+                                                structure of the buffer.
+                                                Out parameter: Start margin - offset
+                                                of data from start of external buffer.
+
+ @Return        E_OK on success; Error code otherwise.
+
+ @Cautions      Allowed only following FM_PORT_Config() and before FM_PORT_Init().
+*//***************************************************************************/
+t_Error FM_PORT_ConfigBufferPrefixContent(t_Handle                      h_FmPort,
+                                          t_FmBufferPrefixContent       *p_FmBufferPrefixContent);
+
+/**************************************************************************//**
  @Description   Structure for Port id parameters.
                 Fields commented 'IN' are passed by the port module to be used
                 by the FM module.

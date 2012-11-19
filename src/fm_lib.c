@@ -64,7 +64,7 @@
         p = UINT_TO_PTR(p_Dev->id); \
     } while(0)
 
-/*#define FM_LIB_DBG*/
+/* #define FM_LIB_DBG */
 
 #if defined(FM_LIB_DBG)
     #define _fml_dbg(format, arg...) \
@@ -77,7 +77,7 @@
 /* Major and minor are in sync with FMD, respin is for fmlib identification */
 #define FM_LIB_VERSION_MAJOR    18
 #define FM_LIB_VERSION_MINOR     1
-#define FM_LIB_VERSION_RESPIN    0
+#define FM_LIB_VERSION_RESPIN    1
 
 #if (FMD_API_VERSION_MAJOR != FM_LIB_VERSION_MAJOR) || \
     (FMD_API_VERSION_MINOR != FM_LIB_VERSION_MINOR)
@@ -1914,6 +1914,22 @@ t_Error FM_MAC_RemoveHashMacAddr(t_Handle h_FmMac, t_EnetAddr *p_EnetAddr)
 }
 
 #if (DPAA_VERSION >= 11)
+t_Error FM_PORT_ConfigBufferPrefixContent(t_Handle h_FmPort, t_FmBufferPrefixContent *p_Params)
+{
+    t_Device    *p_Dev = (t_Device*) h_FmPort;
+
+    SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, E_OK);
+
+    _fml_dbg("Calling...\n");
+
+    if (ioctl(p_Dev->fd, FM_PORT_IOC_CONFIG_BUFFER_PREFIX_CONTENT, p_Params))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+
 t_Error FM_PORT_VSPAlloc(t_Handle h_FmPort, t_FmPortVSPAllocParams *p_Params)
 {
     t_Device    *p_Dev = (t_Device*) h_FmPort;
@@ -2012,10 +2028,105 @@ t_Error FM_VSP_Free(t_Handle h_FmVsp)
 
     return E_OK;
 }
+
+t_Error FM_VSP_ConfigPoolDepletion(t_Handle h_FmVsp, t_FmBufPoolDepletion *p_BufPoolDepletion)
+{
+    t_Device *p_Dev = NULL;
+    t_Device *p_VspDev = (t_Device *)h_FmVsp;
+    ioc_fm_buf_pool_depletion_params_t params;
+
+    SANITY_CHECK_RETURN_VALUE(p_VspDev, E_INVALID_HANDLE, E_OK);
+
+    _fml_dbg("Calling...\n");
+
+    p_Dev = (t_Device*)p_VspDev->h_UserPriv;
+    params.p_fm_vsp = UINT_TO_PTR(p_VspDev->id);
+    memcpy(&params.fm_buf_pool_depletion, p_BufPoolDepletion, sizeof(*p_BufPoolDepletion));
+
+    if (ioctl(p_Dev->fd, FM_IOC_VSP_CONFIG_POOL_DEPLETION, &params))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+
+t_Error FM_VSP_ConfigBufferPrefixContent(t_Handle h_FmVsp, t_FmBufferPrefixContent *p_FmBufferPrefixContent)
+{
+    t_Device *p_Dev = NULL;
+    t_Device *p_VspDev = (t_Device *)h_FmVsp;
+    ioc_fm_buffer_prefix_content_params_t params;
+
+    SANITY_CHECK_RETURN_VALUE(p_VspDev, E_INVALID_HANDLE, E_OK);
+
+    _fml_dbg("Calling...\n");
+
+    p_Dev = (t_Device*)p_VspDev->h_UserPriv;
+    params.p_fm_vsp = UINT_TO_PTR(p_VspDev->id);
+    memcpy(&params.fm_buffer_prefix_content, p_FmBufferPrefixContent, sizeof(*p_FmBufferPrefixContent));
+
+    if (ioctl(p_Dev->fd, FM_IOC_VSP_CONFIG_BUFFER_PREFIX_CONTENT, &params))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+
+t_Error FM_VSP_ConfigNoScatherGather(t_Handle h_FmVsp, bool noScatherGather)
+{
+    t_Device *p_Dev = NULL;
+    t_Device *p_VspDev = (t_Device *)h_FmVsp;
+    ioc_fm_vsp_config_no_sg_params_t params;
+
+    SANITY_CHECK_RETURN_VALUE(p_VspDev, E_INVALID_HANDLE, E_OK);
+
+    _fml_dbg("Calling...\n");
+
+    p_Dev = (t_Device*)p_VspDev->h_UserPriv;
+    params.p_fm_vsp = UINT_TO_PTR(p_VspDev->id);
+    params.no_sg = noScatherGather;
+
+    if (ioctl(p_Dev->fd, FM_IOC_VSP_CONFIG_NO_SG, &params))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+
+t_FmPrsResult * FM_VSP_GetBufferPrsResult(t_Handle h_FmVsp, char *p_Data)
+{
+    t_Device *p_Dev = NULL;
+    t_Device *p_VspDev = (t_Device *)h_FmVsp;
+    ioc_fm_vsp_prs_result_params_t params;
+
+    SANITY_CHECK_RETURN_VALUE(p_VspDev, E_INVALID_HANDLE, NULL);
+
+    _fml_dbg("Calling...\n");
+
+    p_Dev = (t_Device*)p_VspDev->h_UserPriv;
+    params.p_fm_vsp = UINT_TO_PTR(p_VspDev->id);
+    params.p_data = p_Data;
+
+    if (ioctl(p_Dev->fd, FM_IOC_VSP_GET_BUFFER_PRS_RESULT, &params))
+    {
+        REPORT_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+        return NULL;
+    }
+
+    _fml_dbg("Called.\n");
+
+    return params.p_data;
+}
 #endif
 
 #ifdef P1023
 void Platform_is_P1023()
+{
+}
+#elif defined B4860 || defined T4240
+void Platform_is_B4860_T4240()
 {
 }
 #else
