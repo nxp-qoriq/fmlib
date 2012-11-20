@@ -410,6 +410,13 @@ typedef struct t_FmCtrlCodeRevisionInfo {
 } t_FmCtrlCodeRevisionInfo;
 
 /**************************************************************************//**
+ @Description   A Structure for obtaining FM controller monitor values
+*//***************************************************************************/
+typedef struct t_FmCtrlMon {
+    uint8_t percentCnt[1];          /**< Percentage value */
+} t_FmCtrlMon;
+
+/**************************************************************************//**
  @Function      FM_SetPortsBandwidth
 
  @Description   Sets relative weights between ports when accessing common resources.
@@ -486,6 +493,73 @@ uint32_t  FM_GetCounter(t_Handle h_Fm, e_FmCounters counter);
 t_Error  FM_ModifyCounter(t_Handle h_Fm, e_FmCounters counter, uint32_t val);
 
 /**************************************************************************//**
+ @Function      FM_CtrlMonStart
+
+ @Description   Start monitoring utilization of all available FM controllers.
+
+                In order to obtain FM controllers utilization the following sequence
+                should be used:
+                -# FM_CtrlMonStart()
+                -# FM_CtrlMonStop()
+                -# FM_CtrlMonGetCounters() - issued for each FM controller
+
+ @Param[in]     h_Fm            A handle to an FM Module.
+
+ @Return        E_OK on success; Error code otherwise.
+
+ @Cautions      Allowed only following FM_Init().
+                This routine should NOT be called from guest-partition
+                (i.e. guestId != NCSW_MASTER_ID).
+*//***************************************************************************/
+t_Error FM_CtrlMonStart(t_Handle h_Fm);
+
+/**************************************************************************//**
+ @Function      FM_CtrlMonStop
+
+ @Description   Stop monitoring utilization of all available FM controllers.
+
+                In order to obtain FM controllers utilization the following sequence
+                should be used:
+                -# FM_CtrlMonStart()
+                -# FM_CtrlMonStop()
+                -# FM_CtrlMonGetCounters() - issued for each FM controller
+
+ @Param[in]     h_Fm            A handle to an FM Module.
+
+ @Return        E_OK on success; Error code otherwise.
+
+ @Cautions      Allowed only following FM_Init().
+                This routine should NOT be called from guest-partition
+                (i.e. guestId != NCSW_MASTER_ID).
+*//***************************************************************************/
+t_Error FM_CtrlMonStop(t_Handle h_Fm);
+
+/**************************************************************************//**
+ @Function      FM_CtrlMonGetCounters
+
+ @Description   Obtain FM controller utilization parameters.
+
+                In order to obtain FM controllers utilization the following sequence
+                should be used:
+                -# FM_CtrlMonStart()
+                -# FM_CtrlMonStop()
+                -# FM_CtrlMonGetCounters() - issued for each FM controller
+
+ @Param[in]     h_Fm            A handle to an FM Module.
+ @Param[in]     fmCtrlIndex     FM Controller index for that utilization results
+                                are requested.
+ @Param[in]     p_Mon           Pointer to utilization results structure.
+
+ @Return        E_OK on success; Error code otherwise.
+
+ @Cautions      Allowed only following FM_Init().
+                This routine should NOT be called from guest-partition
+                (i.e. guestId != NCSW_MASTER_ID).
+*//***************************************************************************/
+t_Error FM_CtrlMonGetCounters(t_Handle h_Fm, uint8_t fmCtrlIndex, t_FmCtrlMon *p_Mon);
+
+
+/**************************************************************************//*
  @Function      FM_ForceIntr
 
  @Description   Causes an interrupt event on the requested source.

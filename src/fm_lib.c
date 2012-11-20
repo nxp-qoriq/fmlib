@@ -2121,6 +2121,58 @@ t_FmPrsResult * FM_VSP_GetBufferPrsResult(t_Handle h_FmVsp, char *p_Data)
 }
 #endif
 
+t_Error FM_CtrlMonStart(t_Handle h_Fm)
+{
+    t_Device    *p_Dev = (t_Device*) h_Fm;
+
+    SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
+
+    _fml_dbg("Calling...\n");
+
+    if (ioctl(p_Dev->fd, FM_IOC_CTRL_MON_START))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+
+t_Error FM_CtrlMonStop(t_Handle h_Fm)
+{
+    t_Device    *p_Dev = (t_Device*) h_Fm;
+
+    SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
+
+    _fml_dbg("Calling...\n");
+
+    if (ioctl(p_Dev->fd, FM_IOC_CTRL_MON_START))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+
+t_Error FM_CtrlMonGetCounters(t_Handle h_Fm, uint8_t fmCtrlIndex, t_FmCtrlMon *p_Mon)
+{
+    t_Device    *p_Dev = (t_Device*) h_Fm;
+    ioc_fm_ctrl_mon_counters_params_t param;
+
+    SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
+
+    _fml_dbg("Calling...\n");
+
+    param.fm_ctrl_index = fmCtrlIndex;
+    param.p_mon = (fm_ctrl_mon_t *)p_Mon;
+
+    if (ioctl(p_Dev->fd, FM_IOC_CTRL_MON_START, &param))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+
 #ifdef P1023
 void Platform_is_P1023()
 {
