@@ -1545,10 +1545,13 @@ t_Error FM_PORT_SetPCD(t_Handle h_FmPort, t_FmPortPcdParams *p_FmPortPcd)
         params.pcd_support == e_IOC_FM_PORT_PCD_SUPPORT_PRS_AND_KG_AND_CC_AND_PLCR ||
         params.pcd_support == e_IOC_FM_PORT_PCD_SUPPORT_PRS_AND_KG_AND_PLCR){
 
-        if (params.p_plcr_params && params.p_plcr_params->plcr_profile_id)
+        if (params.p_plcr_params)
+        {
+            if (params.p_plcr_params->plcr_profile_id)
                 DEV_TO_ID(params.p_plcr_params->plcr_profile_id);
-        else 
-            XX_Print("fmlib warning (%s): Policer not set !\n", __func__);
+            else 
+                XX_Print("fmlib warning (%s): Policer not set !\n", __func__);
+        }
     }
 
     if (params.p_ip_reassembly_manip)
