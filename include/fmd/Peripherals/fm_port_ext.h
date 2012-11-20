@@ -917,6 +917,36 @@ t_Error FM_MAC_AddHashMacAddr(t_Handle h_FmMac, t_EnetAddr *p_EnetAddr);
 *//***************************************************************************/
 t_Error FM_MAC_RemoveHashMacAddr(t_Handle h_FmMac, t_EnetAddr *p_EnetAddr);
 
+
+/**************************************************************************//**
+ @Function      FM_MAC_SetTxPauseFrames
+
+ @Description   Enable/Disable transmission of Pause-Frames.
+                The routine changes the default configuration:
+                pause-time - [0xf000]
+                threshold-time - [0]
+
+ @Param[in]     h_FmMac       -  A handle to a FM MAC Module.
+ @Param[in]     priority      -  the PFC class of service; use 'FM_MAC_NO_PFC'
+                                 to indicate legacy pause support (i.e. no PFC).
+ @Param[in]     pauseTime     -  Pause quanta value used with transmitted pause frames.
+                                 Each quanta represents a 512 bit-times;
+                                 Note that '0' as an input here will be used as disabling the
+                                 transmission of the pause-frames.
+ @Param[in]     threshTime    -  Pause Threshold equanta value used by the MAC to retransmit pause frame.
+                                 if the situation causing a pause frame to be sent didn't finish when the timer
+                                 reached the threshold quanta, the MAC will retransmit the pause frame.
+                                 Each quanta represents a 512 bit-times.
+
+ @Return        E_OK on success; Error code otherwise.
+
+ @Cautions      Allowed only following FM_MAC_Init().
+                PFC is supported only on new mEMAC; i.e. in MACs that don't have
+                PFC support (10G-MAC and dTSEC), user should use 'FM_MAC_NO_PFC'
+                in the 'priority' field.
+*//***************************************************************************/
+t_Error FM_MAC_SetTxPauseFrames(t_Handle h_FmMac, uint8_t  priority, uint16_t pauseTime, uint16_t threshTime);
+
 /**************************************************************************//**
  @Function      FM_PORT_GetMacHandle
 

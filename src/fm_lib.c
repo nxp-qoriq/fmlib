@@ -1913,6 +1913,27 @@ t_Error FM_MAC_RemoveHashMacAddr(t_Handle h_FmMac, t_EnetAddr *p_EnetAddr)
     return E_OK;
 }
 
+t_Error FM_MAC_SetTxPauseFrames(t_Handle h_FmMac, uint8_t  priority, uint16_t pauseTime, uint16_t threshTime)
+{
+    t_Device    *p_Dev = (t_Device *)h_FmMac;
+    ioc_fm_port_tx_pause_frames_params_t param;
+
+    SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, E_OK);
+
+    _fml_dbg("Calling...\n");
+
+    param.priority = priority;
+    param.pause_time = pauseTime;
+    param.thresh_time = threshTime;
+
+    if (ioctl(p_Dev->fd, FM_PORT_IOC_SET_TX_PAUSE_FRAMES, &param))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+
 #if (DPAA_VERSION >= 11)
 t_Error FM_PORT_ConfigBufferPrefixContent(t_Handle h_FmPort, t_FmBufferPrefixContent *p_Params)
 {
