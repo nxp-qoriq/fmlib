@@ -1940,7 +1940,7 @@ t_Handle FM_VSP_Config(t_FmVspParams *p_FmVspParams)
     _fml_dbg("Calling...\n");
 
     memcpy(&param, p_FmVspParams, sizeof(param));
-    param.h_Fm = UINT_TO_PTR(p_Dev->id);
+    param.p_fm = UINT_TO_PTR(p_Dev->id);
     param.id = NULL;
 
     if (ioctl(p_Dev->fd, FM_IOC_VSP_CONFIG, &param))
