@@ -556,6 +556,17 @@ t_Handle FM_PCD_KgSchemeSet (t_Handle h_FmPcd, t_FmPcdKgSchemeParams *p_Scheme)
     memcpy(&params, p_Scheme, sizeof(t_FmPcdKgSchemeParams));
     params.id = NULL;
 
+    if (params.modify)
+    {
+        if (params.scm_id.scheme_id)
+            DEV_TO_ID(params.scm_id.scheme_id);
+        else
+        {
+            REPORT_ERROR(MINOR, E_INVALID_HANDLE, NO_MSG);
+            return NULL;
+        }
+    }
+
     /* correct h_NetEnv param from scheme */
     if (params.net_env_params.net_env_id)
         DEV_TO_ID(params.net_env_params.net_env_id);
