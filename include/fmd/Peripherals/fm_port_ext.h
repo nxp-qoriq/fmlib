@@ -954,18 +954,14 @@ t_Error FM_MAC_SetTxPauseFrames(t_Handle h_FmMac, uint8_t  priority, uint16_t pa
 
  @Param[in]     h_FmPort        A handle to a FM Port module.
 
- @Return        E_OK on success; Error code otherwise.
-
- @Cautions      Allowed only following FM_MAC_Init().
- @Cautions      Since there is no way to know upfront whether or not the port
-                has a valid MAC device attached to it, we simply (and silently)
-                substitute the very port's handle to the MAC handle,
-                deferring the check until the first FM_MAC_*() API call.
+                This macro hides the fact that the MAC related functions use
+                a FMan port handle in fmlib, in order to mantain a logical
+                separation in userspace application between the port and MAC
+                handle. This is done as the IOCTLs are performed on the port
+                file descriptor. There is no separate MAC character device node
+                to perform IOCTLs upon.
 *//***************************************************************************/
-static inline
-t_Handle FM_PORT_GetMacHandle(t_Handle h_FmPort) {
-    return h_FmPort;
-}
+#define FM_PORT_GetMacHandle(h_FmPort) (h_FmPort)
 
 /** @} */ /* end of lnx_usr_FM_PORT_runtime_data_grp group */
 /** @} */ /* end of lnx_usr_FM_PORT_grp group */
