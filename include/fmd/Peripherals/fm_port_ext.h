@@ -948,6 +948,67 @@ t_Error FM_MAC_RemoveHashMacAddr(t_Handle h_FmMac, t_EnetAddr *p_EnetAddr);
 t_Error FM_MAC_SetTxPauseFrames(t_Handle h_FmMac, uint8_t  priority, uint16_t pauseTime, uint16_t threshTime);
 
 /**************************************************************************//**
+ @Description   FM MAC statistics rfc3635
+*//***************************************************************************/
+typedef struct t_FmMacStatistics {
+/* RMON */
+    uint64_t  eStatPkts64;             /**< r-10G tr-DT 64 byte frame counter */
+    uint64_t  eStatPkts65to127;        /**< r-10G 65 to 127 byte frame counter */
+    uint64_t  eStatPkts128to255;       /**< r-10G 128 to 255 byte frame counter */
+    uint64_t  eStatPkts256to511;       /**< r-10G 256 to 511 byte frame counter */
+    uint64_t  eStatPkts512to1023;      /**< r-10G 512 to 1023 byte frame counter */
+    uint64_t  eStatPkts1024to1518;     /**< r-10G 1024 to 1518 byte frame counter */
+    uint64_t  eStatPkts1519to1522;     /**< r-10G 1519 to 1522 byte good frame count */
+/* */
+    uint64_t  eStatFragments;          /**< Total number of packets that were less than 64 octets long with a wrong CRC.*/
+    uint64_t  eStatJabbers;            /**< Total number of packets longer than valid maximum length octets */
+    uint64_t  eStatsDropEvents;        /**< number of dropped packets due to internal errors of the MAC Client (during recieve). */
+    uint64_t  eStatCRCAlignErrors;     /**< Incremented when frames of correct length but with CRC error are received.*/
+    uint64_t  eStatUndersizePkts;      /**< Incremented for frames under 64 bytes with a valid FCS and otherwise well formed;
+                                            This count does not include range length errors */
+    uint64_t  eStatOversizePkts;       /**< Incremented for frames which exceed 1518 (non VLAN) or 1522 (VLAN) and contains
+                                            a valid FCS and otherwise well formed */
+/* Pause */
+    uint64_t  teStatPause;             /**< Pause MAC Control received */
+    uint64_t  reStatPause;             /**< Pause MAC Control sent */
+/* MIB II */
+    uint64_t  ifInOctets;              /**< Total number of byte received. */
+    uint64_t  ifInPkts;                /**< Total number of packets received.*/
+    uint64_t  ifInMcastPkts;           /**< Total number of multicast frame received*/
+    uint64_t  ifInBcastPkts;           /**< Total number of broadcast frame received */
+    uint64_t  ifInDiscards;            /**< Frames received, but discarded due to problems within the MAC RX. */
+    uint64_t  ifInErrors;              /**< Number of frames received with error:
+                                               - FIFO Overflow Error
+                                               - CRC Error
+                                               - Frame Too Long Error
+                                               - Alignment Error
+                                               - The dedicated Error Code (0xfe, not a code error) was received */
+    uint64_t  ifOutOctets;             /**< Total number of byte sent. */
+    uint64_t  ifOutPkts;               /**< Total number of packets sent .*/
+    uint64_t  ifOutMcastPkts;          /**< Total number of multicast frame sent */
+    uint64_t  ifOutBcastPkts;          /**< Total number of multicast frame sent */
+    uint64_t  ifOutDiscards;           /**< Frames received, but discarded due to problems within the MAC TX N/A!.*/
+    uint64_t  ifOutErrors;             /**< Number of frames transmitted with error:
+                                               - FIFO Overflow Error
+                                               - FIFO Underflow Error
+                                               - Other */
+} t_FmMacStatistics;
+
+/**************************************************************************//**
+ @Function      FM_MAC_GetStatistics
+
+ @Description   get all statistics counters
+
+ @Param[in]     h_FmMac       -  A handle to a FM MAC Module.
+ @Param[in]     p_Statistics  -  Structure to be populated with statistics
+
+ @Return        E_OK on success; Error code otherwise.
+
+ @Cautions      Allowed only following FM_Init().
+*//***************************************************************************/
+t_Error FM_MAC_GetStatistics(t_Handle h_FmMac, t_FmMacStatistics *p_Statistics);
+
+/**************************************************************************//**
  @Function      FM_PORT_GetMacHandle
 
  @Description   Convenience operator for getting the MAC handle for a given port.

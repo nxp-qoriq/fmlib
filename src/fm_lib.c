@@ -1945,6 +1945,26 @@ t_Error FM_MAC_SetTxPauseFrames(t_Handle h_FmMac, uint8_t  priority, uint16_t pa
     return E_OK;
 }
 
+t_Error FM_MAC_GetStatistics (t_Handle h_FmMac, t_FmMacStatistics *p_Statistics)
+{
+    t_Device    *p_Dev = (t_Device *)h_FmMac;
+    ioc_fm_port_mac_statistics_t *param;
+
+    param = (ioc_fm_port_mac_statistics_t *)p_Statistics;
+
+    SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, E_OK);
+    SANITY_CHECK_RETURN_VALUE(param, E_INVALID_HANDLE, E_OK);
+
+    _fml_dbg("Calling...\n");
+
+    if (ioctl(p_Dev->fd, FM_PORT_IOC_GET_MAC_STATISTICS, param))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+
 #if (DPAA_VERSION >= 11)
 t_Error FM_PORT_ConfigBufferPrefixContent(t_Handle h_FmPort, t_FmBufferPrefixContent *p_Params)
 {
