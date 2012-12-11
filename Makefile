@@ -130,7 +130,7 @@ install-%: %.a
 	@(echo "Installing...")
 	@($(INSTALL) -d $(DESTDIR)$(LIB_DEST_DIR))
 	@($(INSTALL) $< $(DESTDIR)$(LIB_DEST_DIR))
-	@(ln -s $(DESTDIR)$(LIB_DEST_DIR)/$< $(DESTDIR)$(LIB_DEST_DIR)/libfm.a)
+	@(ln -s $< $(DESTDIR)$(LIB_DEST_DIR)/libfm.a)
 	@(cp -r -p ./include $(DESTDIR)$(PREFIX))
 	@($(INSTALL) -d $(DESTDIR)$(PREFIX)/share/doc/fm-lib)
 	@($(INSTALL) $(FM_LIB_DOCFILES) $(DESTDIR)$(PREFIX)/share/doc/fm-lib)
