@@ -2033,7 +2033,7 @@ t_Handle FM_VSP_Config(t_FmVspParams *p_FmVspParams)
 
     _fml_dbg("Called.\n");
 
-    return NULL;
+    return (t_Handle)p_VspDev;
 }
 
 t_Error FM_VSP_Init(t_Handle h_FmVsp)
