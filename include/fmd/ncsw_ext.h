@@ -96,7 +96,8 @@
 
 #define KILOBYTE            0x400UL                 /* 1024 */
 #define MEGABYTE            (KILOBYTE * KILOBYTE)   /* 1024*1024 */
-#define GIGABYTE            (KILOBYTE * MEGABYTE)   /* 1024*1024*1024 */
+#define GIGABYTE            ((uint64_t)(KILOBYTE * MEGABYTE))   /* 1024*1024*1024 */
+#define TERABYTE            ((uint64_t)(KILOBYTE * GIGABYTE))   /* 1024*1024*1024*1024 */
 
 #undef  NO_IRQ
 #define NO_IRQ              (-1)

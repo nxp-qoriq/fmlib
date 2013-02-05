@@ -105,7 +105,7 @@ typedef enum e_DpaaFDFormatType {
 #define DPAA_FD_GET_OFFSET(fd)        ((((t_DpaaFD *)fd)->length & DPAA_FD_OFFSET_MASK) >> (31-11))     /**< Macro to get FD OFFSET field */
 #define DPAA_FD_GET_LENGTH(fd)        (((t_DpaaFD *)fd)->length & DPAA_FD_LENGTH_MASK)                  /**< Macro to get FD LENGTH field */
 #define DPAA_FD_GET_STATUS(fd)        ((t_DpaaFD *)fd)->status                                          /**< Macro to get FD STATUS field */
-#define DPAA_FD_GET_ADDR(fd)          XX_PhysToVirt(DPAA_FD_GET_PHYS_ADDR(fd))
+#define DPAA_FD_GET_ADDR(fd)          XX_PhysToVirt(DPAA_FD_GET_PHYS_ADDR(fd))                          /**< Macro to get FD ADDR (virtual) */
 
 #define DPAA_FD_SET_DD(fd,val)        (((t_DpaaFD *)fd)->id = ((((t_DpaaFD *)fd)->id & ~DPAA_FD_DD_MASK) | (((val) << (31-1)) & DPAA_FD_DD_MASK )))      /**< Macro to set FD DD field */
                                                                                                         /**< Macro to set FD PID field or LIODN offset*/

@@ -30,13 +30,14 @@
  * this software, even if advised of the possibility of such damage.
  */
 
-/**************************************************************************//**
- @File          fm_ext.h
 
- @Description   FM Application Programming Interface.
+/**************************************************************************//**
+ @File          fm_vsp_ext.h
+
+ @Description   FM Virtual Storage-Profile ...
 *//***************************************************************************/
-#ifndef __FM_VSP_EXT
-#define __FM_VSP_EXT
+#ifndef __FM_VSP_EXT_H
+#define __FM_VSP_EXT_H
 
 #include "std_ext.h"
 #include "error_ext.h"
@@ -45,15 +46,16 @@
 
 
 /**************************************************************************//**
- @Group         lnx_usr_FM_grp Frame Manager API
 
- @Description   FM API functions, definitions and enums.
+ @Group         FM_grp Frame Manager API
+
+ @Description   FM API functions, definitions and enums
 
  @{
 *//***************************************************************************/
 
 /**************************************************************************//**
- @Group         lnx_usr_FM_VSP_grp FM Virtual-Storage-Profile
+ @Group         FM_VSP_grp FM Virtual-Storage-Profile
 
  @Description   FM Virtual-Storage-Profile API
 
@@ -61,7 +63,7 @@
 *//***************************************************************************/
 
 /**************************************************************************//**
- @Group         lnx_usr_FM_VSP_init_grp FM VSP Initialization Unit
+ @Group         FM_VSP_init_grp FM VSP Initialization Unit
 
  @Description   FM VSP initialization API.
 
@@ -130,7 +132,7 @@ t_Error FM_VSP_Free(t_Handle h_FmVsp);
 
 
 /**************************************************************************//**
- @Group         lnx_usr_FM_VSP_adv_config_grp  FM VSP Advanced Configuration Unit
+ @Group         FM_VSP_adv_config_grp  FM VSP Advanced Configuration Unit
 
  @Description   FM VSP advanced configuration functions.
 
@@ -301,8 +303,8 @@ t_Error FM_VSP_ConfigPoolDepletion(t_Handle h_FmVsp, t_FmBufPoolDepletion *p_Buf
 *//***************************************************************************/
 t_Error FM_VSP_ConfigBackupPools(t_Handle h_FmVsp, t_FmBackupBmPools *p_BackupBmPools);
 
-/** @} */ /* end of lnx_usr_FM_VSP_adv_config_grp group */
-/** @} */ /* end of lnx_usr_FM_VSP_init_grp group */
+/** @} */ /* end of FM_VSP_adv_config_grp group */
+/** @} */ /* end of FM_VSP_init_grp group */
 
 
 /**************************************************************************//**
@@ -399,9 +401,9 @@ uint64_t * FM_VSP_GetBufferTimeStamp(t_Handle h_FmVsp, char *p_Data);
 uint8_t * FM_VSP_GetBufferHashResult(t_Handle h_FmVsp, char *p_Data);
 
 
-/** @} */ /* end of lnx_usr_FM_VSP_control_grp group */
-/** @} */ /* end of lnx_usr_FM_VSP_grp group */
-/** @} */ /* end of lnx_usr_FM_grp group */
+/** @} */ /* end of FM_VSP_control_grp group */
+/** @} */ /* end of FM_VSP_grp group */
+/** @} */ /* end of FM_grp group */
 
 
-#endif /* __FM_VSP_EXT */
+#endif /* __FM_VSP_EXT_H */

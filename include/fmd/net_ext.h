@@ -194,6 +194,14 @@ typedef uint8_t headerFieldUdp_t;
 
 #define NET_HEADER_FIELD_UDP_PORT_SIZE                  2
 
+typedef uint8_t headerFieldUdpLite_t;
+
+#define NET_HEADER_FIELD_UDP_LITE_PORT_SRC              (1)
+#define NET_HEADER_FIELD_UDP_LITE_PORT_DST              (NET_HEADER_FIELD_UDP_LITE_PORT_SRC << 1)
+#define NET_HEADER_FIELD_UDP_LITE_ALL_FIELDS            ((NET_HEADER_FIELD_UDP_LITE_PORT_SRC << 2) - 1)
+
+#define NET_HEADER_FIELD_UDP_LITE_PORT_SIZE             2
+
 typedef uint8_t headerFieldUdpEncapEsp_t;
 
 #define NET_HEADER_FIELD_UDP_ENCAP_ESP_PORT_SRC         (1)
@@ -380,6 +388,7 @@ typedef enum {
     HEADER_TYPE_IP,
     HEADER_TYPE_TCP,
     HEADER_TYPE_UDP,
+    HEADER_TYPE_UDP_LITE,
     HEADER_TYPE_IPHC,
     HEADER_TYPE_SCTP,
     HEADER_TYPE_SCTP_CHUNK_DATA,
