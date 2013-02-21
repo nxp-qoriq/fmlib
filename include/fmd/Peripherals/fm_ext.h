@@ -30,6 +30,7 @@
  * this software, even if advised of the possibility of such damage.
  */
 
+
 /**************************************************************************//**
  @File          fm_ext.h
 
@@ -81,7 +82,6 @@ typedef enum e_FmPortType {
 } e_FmPortType;
 
 /**************************************************************************//**
-/**************************************************************************//**
  @Description   Parse results memory layout
 *//***************************************************************************/
 typedef _Packed struct t_FmPrsResult {
@@ -92,7 +92,7 @@ typedef _Packed struct t_FmPrsResult {
     volatile uint8_t     l4r;                /**< Layer 4 result */
     volatile uint8_t     cplan;              /**< Classification plan id */
     volatile uint16_t    nxthdr;             /**< Next Header  */
-    volatile uint16_t    cksum;              /**< running-sum */
+    volatile uint16_t    cksum;              /**< Running-sum */
     volatile uint16_t    flags_frag_off;     /**< Flags & fragment-offset field of the last IP-header */
     volatile uint8_t     route_type;         /**< Routing type field of a IPv6 routing extension header */
     volatile uint8_t     rhp_ip_valid;       /**< Routing Extension Header Present; last bit is IP valid */
@@ -109,6 +109,17 @@ typedef _Packed struct t_FmPrsResult {
     volatile uint8_t     l4_off;             /**< Layer 4 offset */
     volatile uint8_t     nxthdr_off;         /**< Parser end point */
 } _PackedType t_FmPrsResult;
+
+/**************************************************************************//**
+ @Collection   FM Parser results
+*//***************************************************************************/
+#define FM_PR_L2_VLAN_STACK         0x00000100  /**< Parse Result: VLAN stack */
+#define FM_PR_L2_ETHERNET           0x00008000  /**< Parse Result: Ethernet*/
+#define FM_PR_L2_VLAN               0x00004000  /**< Parse Result: VLAN */
+#define FM_PR_L2_LLC_SNAP           0x00002000  /**< Parse Result: LLC_SNAP */
+#define FM_PR_L2_MPLS               0x00001000  /**< Parse Result: MPLS */
+#define FM_PR_L2_PPPoE              0x00000800  /**< Parse Result: PPPoE */
+/* @} */
 
 /**************************************************************************//**
  @Collection   FM Frame descriptor macros

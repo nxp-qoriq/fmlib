@@ -48,6 +48,7 @@
 #include "fm_ext.h"
 #include "fm_pcd_ext.h"
 #include "fm_port_ext.h"
+#include "fm_mac_ext.h"
 #if (DPAA_VERSION >= 11)
 #include "fm_vsp_ext.h"
 #endif
