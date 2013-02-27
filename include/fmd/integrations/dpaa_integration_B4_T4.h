@@ -263,7 +263,6 @@ typedef enum
 
 /* FM erratas */
 //#define FM_TX_ECC_FRMS_ERRATA_10GMAC_A004
-#define FM_BAD_VLAN_DETECT_ERRATA_10GMAC_A010
 
 #define FM_RX_PREAM_4_ERRATA_DTSEC_A001
 #define FM_MAGIC_PACKET_UNRECOGNIZED_ERRATA_DTSEC2              /* No implementation, Out of LLD scope */
