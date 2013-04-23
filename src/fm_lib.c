@@ -76,9 +76,9 @@
 #endif
 
 /* Major and minor are in sync with FMD, respin is for fmlib identification */
-#define FM_LIB_VERSION_MAJOR    18
-#define FM_LIB_VERSION_MINOR     1
-#define FM_LIB_VERSION_RESPIN    1
+#define FM_LIB_VERSION_MAJOR    21
+#define FM_LIB_VERSION_MINOR     0
+#define FM_LIB_VERSION_RESPIN    0
 
 #if (FMD_API_VERSION_MAJOR != FM_LIB_VERSION_MAJOR) || \
     (FMD_API_VERSION_MINOR != FM_LIB_VERSION_MINOR)
@@ -315,7 +315,7 @@ void FM_PCD_Close(t_Handle h_FmPcd)
     close(p_Dev->fd);
 
     if (p_Dev->owners) {
-        XX_Print("Trying to delete a pcd handler that has modules bound to (owners:%u)!!!", 
+        XX_Print("Trying to delete a pcd handler that has modules bound to (owners:%u)!!!",
             p_Dev->owners);
         return;
     }
@@ -573,10 +573,10 @@ t_Handle FM_PCD_KgSchemeSet (t_Handle h_FmPcd, t_FmPcdKgSchemeParams *p_Scheme)
         DEV_TO_ID(params.net_env_params.net_env_id);
 
     /* correct next engine params handlers: cc*/
-    if (params.next_engine == e_IOC_FM_PCD_CC && 
+    if (params.next_engine == e_IOC_FM_PCD_CC &&
         params.kg_next_engine_params.cc.tree_id)
             DEV_TO_ID(params.kg_next_engine_params.cc.tree_id);
-    
+
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_KG_SCHEME_SET, &params))
     {
         REPORT_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
@@ -656,7 +656,7 @@ t_Handle FM_PCD_CcRootBuild(t_Handle h_FmPcd, t_FmPcdCcTreeParams *p_PcdTreePara
 
             /*TODO params.fm_pcd_cc_group_params[i].next_engine_per_entries_in_grp[j].manip_id*/
         }
-    
+
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_CC_ROOT_BUILD, &params))
     {
         REPORT_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
@@ -731,6 +731,12 @@ t_Handle FM_PCD_MatchTableSet(t_Handle h_FmPcd, t_FmPcdCcNodeParams *p_CcNodePar
 
         if (params.keys_params.key_params[i].cc_next_engine_params.manip_id)
             DEV_TO_ID(params.keys_params.key_params[i].cc_next_engine_params.manip_id);
+
+#if (DPAA_VERSION >= 11)
+        if (params.keys_params.key_params[i].cc_next_engine_params.next_engine == e_IOC_FM_PCD_FR &&
+            params.keys_params.key_params[i].cc_next_engine_params.params.fr_params.frm_replic_id)
+            DEV_TO_ID(params.keys_params.key_params[i].cc_next_engine_params.params.fr_params.frm_replic_id);
+#endif /* DPAA_VERSION >= 11 */
     }
 
     if (params.keys_params.cc_next_engine_params_for_miss.next_engine == e_IOC_FM_PCD_CC &&
@@ -825,15 +831,12 @@ t_Error FM_PCD_MatchTableModifyNextEngine(t_Handle                  h_CcNode,
                                           t_FmPcdCcNextEngineParams *p_FmPcdCcNextEngineParams)
 {
     t_Device *p_Dev = (t_Device*) h_CcNode;
-    t_Device *p_PcdDev = NULL;
     ioc_fm_pcd_cc_node_modify_next_engine_params_t  params;
 
     ASSERT_COND(sizeof(t_FmPcdCcNextEngineParams) == sizeof(ioc_fm_pcd_cc_next_engine_params_t));
     SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
 
     _fml_dbg("Calling...\n");
-
-    p_PcdDev = (t_Device *)p_Dev->h_UserPriv;
 
     params.id = UINT_TO_PTR(p_Dev->id);
     params.key_indx = keyIndex;
@@ -1121,7 +1124,7 @@ t_Handle FM_PCD_PlcrProfileSet(t_Handle h_FmPcd, t_FmPcdPlcrProfileParams *p_Pro
             (ioc_fm_pcd_port_params_t*) (((t_Device*) p_Profile->id.newParams.h_FmPort)->h_UserPriv);
     }
 
-    /* correct paramsOnGreen.h_Profile, paramsOnYellow.h_Profile, paramsOnRed.h_Profile 
+    /* correct paramsOnGreen.h_Profile, paramsOnYellow.h_Profile, paramsOnRed.h_Profile
      * if next engine is policer... that means that FM_PCD_PlcrProfileSet was called */
     if (params.next_engine_on_green == e_IOC_FM_PCD_PLCR && params.params_on_green.p_profile)
         DEV_TO_ID(params.params_on_green.p_profile);
@@ -1529,7 +1532,7 @@ t_Error FM_PORT_SetPCD(t_Handle h_FmPort, t_FmPortPcdParams *p_FmPortPcd)
 
         if (params.p_cc_params && params.p_cc_params->cc_tree_id)
             DEV_TO_ID(params.p_cc_params->cc_tree_id);
-        else 
+        else
             XX_Print("fmlib warning (%s): Coarse Clasification not set ! \n", __func__);
     }
 
@@ -1545,7 +1548,7 @@ t_Error FM_PORT_SetPCD(t_Handle h_FmPort, t_FmPortPcdParams *p_FmPortPcd)
                     DEV_TO_ID(params.p_kg_params->scheme_ids[i]);
                 else
                     XX_Print("fmlib warning (%s): Scheme:%u not set!\n", __func__, i);
-                
+
             if (params.p_kg_params && params.p_kg_params->direct_scheme)
                 DEV_TO_ID(params.p_kg_params->direct_scheme_id);
         } else
@@ -1561,7 +1564,7 @@ t_Error FM_PORT_SetPCD(t_Handle h_FmPort, t_FmPortPcdParams *p_FmPortPcd)
         {
             if (params.p_plcr_params->plcr_profile_id)
                 DEV_TO_ID(params.p_plcr_params->plcr_profile_id);
-            else 
+            else
                 XX_Print("fmlib warning (%s): Policer not set !\n", __func__);
         }
     }

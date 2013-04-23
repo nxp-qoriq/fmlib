@@ -1,16 +1,16 @@
-/*
- * Copyright 2008-2012 Freescale Semiconductor, Inc
+/* Copyright (c) 2008-2012 Freescale Semiconductor, Inc
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of Freescale Semiconductor nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of Freescale Semiconductor nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
  *
  * ALTERNATIVELY, this software may be distributed under the terms of the
@@ -18,17 +18,18 @@
  * Foundation, either version 2 of that License or (at your option) any
  * later version.
  *
- * This software is provided by Freescale Semiconductor "as is" and any
- * express or implied warranties, including, but not limited to, the implied
- * warranties of merchantability and fitness for a particular purpose are
- * disclaimed. In no event shall Freescale Semiconductor be liable for any
- * direct, indirect, incidental, special, exemplary, or consequential damages
- * (including, but not limited to, procurement of substitute goods or services;
- * loss of use, data, or profits; or business interruption) however caused and
- * on any theory of liability, whether in contract, strict liability, or tort
- * (including negligence or otherwise) arising in any way out of the use of
- * this software, even if advised of the possibility of such damage.
+ * THIS SOFTWARE IS PROVIDED BY Freescale Semiconductor ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL Freescale Semiconductor BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 
 /**************************************************************************//**
  @File          fm_pcd_ext.h
@@ -64,7 +65,7 @@
                 and the policer global and common registers.
                 In addition, the FM PCD SW module will initialize all required
                 key generator schemes, coarse classification flows, and policer
-                profiles. When a FM module is configured to work with one of these
+                profiles. When FM module is configured to work with one of these
                 entities, it will register to it using the FM PORT API. The PCD
                 module will manage the PCD resources - i.e. resource management of
                 KeyGen schemes, etc.
@@ -273,8 +274,6 @@ typedef struct t_FmPcdParams {
 *//***************************************************************************/
 t_Handle FM_PCD_Config(t_FmPcdParams *p_FmPcdParams);
 
-t_Handle FM_PCD_GetHcDevH(t_Handle h_FmPcd);
-
 /**************************************************************************//**
  @Function      FM_PCD_Init
 
@@ -312,7 +311,7 @@ t_Error FM_PCD_Free(t_Handle h_FmPcd);
 
  @Description   Calling this routine changes the internal driver data base
                 from its default selection of exceptions enabling.
-                [4].
+                [DEFAULT_numOfSharedPlcrProfiles].
 
  @Param[in]     h_FmPcd         FM PCD module descriptor.
  @Param[in]     exception       The exception to be selected.
@@ -347,7 +346,7 @@ t_Error FM_PCD_ConfigHcFramesDataMemory(t_Handle h_FmPcd, uint8_t memId);
 
  @Description   Calling this routine changes the internal driver data base
                 from its default selection of exceptions enablement.
-                [4].
+                [DEFAULT_numOfSharedPlcrProfiles].
 
  @Param[in]     h_FmPcd                     FM PCD module descriptor.
  @Param[in]     numOfSharedPlcrProfiles     Number of profiles to
@@ -362,7 +361,7 @@ t_Error FM_PCD_ConfigPlcrNumOfSharedProfiles(t_Handle h_FmPcd, uint16_t numOfSha
 
  @Description   Calling this routine changes the internal driver data base
                 from its default selection of exceptions enablement.
-                By default auto-refresh is [disabled].
+                By default auto-refresh is [DEFAULT_plcrAutoRefresh].
 
  @Param[in]     h_FmPcd         FM PCD module descriptor.
  @Param[in]     enable          TRUE to enable, FALSE to disable
@@ -379,7 +378,7 @@ t_Error FM_PCD_ConfigPlcrAutoRefreshMode(t_Handle h_FmPcd, bool enable);
 
  @Description   Calling this routine changes the internal data structure for
                 the maximum parsing time from its default value
-                [0].
+                [DEFAULT_MAX_PRS_CYC_LIM].
 
  @Param[in]     h_FmPcd         FM PCD module descriptor.
  @Param[in]     value           0 to disable the mechanism, or new
@@ -1340,7 +1339,6 @@ typedef union u_FmPcdHdrProtocolOpt {
                         NET_HEADER_FIELD_UDP_PORT_SRC
                         NET_HEADER_FIELD_UDP_PORT_DST
 
-
                     HEADER_TYPE_UDP_LITE: - relevant only if FM_CAPWAP_SUPPORT define
                         NET_HEADER_FIELD_UDP_LITE_PORT_SRC
                         NET_HEADER_FIELD_UDP_LITE_PORT_DST
@@ -1935,6 +1933,8 @@ typedef struct t_FmPcdHashTableParams {
     uint16_t                    maxNumOfKeys;               /**< Maximum Number Of Keys that will (ever) be used in this Hash-table */
     e_FmPcdCcStatsMode          statisticsMode;             /**< If not e_FM_PCD_CC_STATS_MODE_NONE, the required structures for the
                                                                  requested statistics mode will be allocated according to maxNumOfKeys. */
+    uint8_t                     kgHashShift;                /**< KG-Hash-shift as it was configured in the KG-scheme
+                                                                 that leads to this hash-table. */
     uint16_t                    hashResMask;                /**< Mask that will be used on the hash-result;
                                                                  The number-of-sets for this hash will be calculated
                                                                  as (2^(number of bits set in 'hashResMask'));
@@ -2284,7 +2284,8 @@ typedef struct t_FmPcdManipReassemIpParams {
                                                                  In the case numOfFramesPerHashEntry == e_FM_PCD_MANIP_EIGHT_WAYS_HASH,
                                                                  maxNumFramesInProcess has to be in the range of 8 - 2048. */
     e_FmPcdManipReassemTimeOutMode  timeOutMode;            /**< Expiration delay initialized by Reassembly process */
-    uint32_t                        fqidForTimeOutFrames;   /**< FQID in which time out frames will enqueue during Time Out Process  */
+    uint32_t                        fqidForTimeOutFrames;   /**< FQID in which time out frames will enqueue during Time Out Process;
+                                                                 Recommended value for this field is 0; in this way timed-out frames will be discarded */
     uint32_t                        timeoutThresholdForReassmProcess;
                                                             /**< Represents the time interval in microseconds which defines
                                                                  if opened frame (at least one fragment was processed but not all the fragments)is found as too old*/
@@ -2581,6 +2582,10 @@ typedef struct t_FmPcdManipReassemIpStats {
     uint32_t        externalBufferBusy;         /**< Counts the number of times external buffer busy occurred */
     uint32_t        sgFragments;                /**< Counts the number of Scatter/Gather fragments */
     uint32_t        dmaSemaphoreDepletion;      /**< Counts the number of failed attempts to allocate a DMA semaphore */
+#if (DPAA_VERSION >= 11)
+    uint32_t        nonConsistentSp;            /**< Counts the number of Non Consistent Storage Profile events for
+                                                     successfully reassembled frames */
+#endif /* (DPAA_VERSION >= 11) */
     struct {
         uint32_t    successfullyReassembled;    /**< Counts the number of successfully reassembled frames */
         uint32_t    validFragments;             /**< Counts the total number of valid fragments that
@@ -3585,6 +3590,8 @@ t_Handle FM_PCD_StatisticsSetNode(t_Handle h_FmPcd, t_FmPcdStatsParams *p_FmPcds
 #define FM_PCD_MAX_NUM_OF_INTERCHANGABLE_HDRS   FM_PCD_MAX_NUM_OF_INTERCHANGEABLE_HDRS
 #define e_FM_PCD_MANIP_ONE_WAYS_HASH            e_FM_PCD_MANIP_ONE_WAY_HASH
 #define e_FM_PCD_MANIP_TOW_WAYS_HASH            e_FM_PCD_MANIP_TWO_WAYS_HASH
+
+#define e_FM_PCD_MANIP_FRAGMENT_PACKECT         e_FM_PCD_MANIP_FRAGMENT_PACKET /* Feb13 */
 
 #define FM_PCD_SetNetEnvCharacteristics(_pcd, _params)  \
     FM_PCD_NetEnvCharacteristicsSet(_pcd, _params)
