@@ -64,7 +64,7 @@ LIB_DEST_DIR?=$(PREFIX)/lib
 FM_LIB_DOCFILES=COPYING INSTALL README
 
 # Don't touch these!
-FM_IOCTL_INC?=$(KERNEL_SRC)/include/linux/fmd
+FM_IOCTL_INC?=$(KERNEL_SRC)/include/uapi/linux/fmd
 FM_LIB_INC?=./include/fmd
 FM_LIB_SRCDIR=./src
 FM_LIB_INCLUDE:=$(FM_IOCTL_INC) \
