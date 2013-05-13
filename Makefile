@@ -64,7 +64,8 @@ LIB_DEST_DIR?=$(PREFIX)/lib
 FM_LIB_DOCFILES=COPYING INSTALL README
 
 # Don't touch these!
-FM_IOCTL_INC?=$(KERNEL_SRC)/include/linux/fmd
+FM_LIB_YOCTO_STAGING=$(KERNEL_SRC)/include/linux/fmd
+FM_IOCTL_INC?=$(KERNEL_SRC)/include/uapi/linux/fmd
 FM_LIB_INC?=./include/fmd
 FM_LIB_SRCDIR=./src
 FM_LIB_INCLUDE:=$(FM_IOCTL_INC) \
@@ -72,7 +73,10 @@ FM_LIB_INCLUDE:=$(FM_IOCTL_INC) \
 		$(FM_IOCTL_INC)/integrations \
 		$(FM_LIB_INC) \
 		$(FM_LIB_INC)/Peripherals \
-		$(FM_LIB_INC)/integrations
+		$(FM_LIB_INC)/integrations \
+		$(FM_LIB_YOCTO_STAGING) \
+		$(FM_LIB_YOCTO_STAGING)/Peripherals \
+		$(FM_LIB_YOCTO_STAGING)/integrations
 
 # These flags need to be passed to the compiler in any circumstance:
 EXTRA_CFLAGS=-DNCSW_LINUX -fPIC -shared -mlongcall
@@ -115,9 +119,9 @@ all: libfm-ppc32e5500.a libfm-ppc64e5500.a libfm-ppce500mc.a \
 
 libfm-ppc32e5500.o libfm-ppc64e5500.o libfm-ppce500mc.o libfm-ppce500v2.o \
 		libfm-ppc32e6500.o libfm-ppc64e6500.o: \
-		$(FM_LIB_SRCDIR)/fm_lib.c $(addsuffix /*.h,$(FM_LIB_INCLUDE))
+		$(FM_LIB_SRCDIR)/fm_lib.c $(wildcard $(addsuffix /*.h,$(FM_LIB_INCLUDE)))
 	@(echo "(CC)  $@")
-	@(echo $(CC) $(CFLAGS) $(addprefix -I,$(FM_LIB_INCLUDE)) -c -o $@ $< > .$@.cmd)
+	@(echo "$(CC) $(CFLAGS) $(addprefix -I,$(FM_LIB_INCLUDE)) -c -o $@ $<" > .$@.cmd)
 	@($(CC) $(CFLAGS) $(addprefix -I,$(FM_LIB_INCLUDE)) -c -o $@ $<)
 
 archive: all .version
