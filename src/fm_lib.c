@@ -77,7 +77,7 @@
 
 /* Major and minor are in sync with FMD, respin is for fmlib identification */
 #define FM_LIB_VERSION_MAJOR    21
-#define FM_LIB_VERSION_MINOR     0
+#define FM_LIB_VERSION_MINOR     1 
 #define FM_LIB_VERSION_RESPIN    0
 
 #if (FMD_API_VERSION_MAJOR != FM_LIB_VERSION_MAJOR) || \
