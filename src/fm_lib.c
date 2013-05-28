@@ -2201,7 +2201,7 @@ t_Error FM_CtrlMonStop(t_Handle h_Fm)
 
     _fml_dbg("Calling...\n");
 
-    if (ioctl(p_Dev->fd, FM_IOC_CTRL_MON_START))
+    if (ioctl(p_Dev->fd, FM_IOC_CTRL_MON_STOP))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
     _fml_dbg("Called.\n");
@@ -2221,7 +2221,7 @@ t_Error FM_CtrlMonGetCounters(t_Handle h_Fm, uint8_t fmCtrlIndex, t_FmCtrlMon *p
     param.fm_ctrl_index = fmCtrlIndex;
     param.p_mon = (fm_ctrl_mon_t *)p_Mon;
 
-    if (ioctl(p_Dev->fd, FM_IOC_CTRL_MON_START, &param))
+    if (ioctl(p_Dev->fd, FM_IOC_CTRL_MON_GET_COUNTERS, &param))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
     _fml_dbg("Called.\n");
