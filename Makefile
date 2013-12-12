@@ -101,14 +101,8 @@ libfm-ppce500mc.o:  CFLAGS?=-m32 -mhard-float -mcpu=e500mc $(LOCAL_CFLAGS)
 libfm-ppc32e5500.o: CFLAGS?=-m32 -mhard-float -mcpu=e5500  $(LOCAL_CFLAGS)
 libfm-ppc64e5500.o: CFLAGS?=-m64 -mhard-float -mcpu=e5500  $(LOCAL_CFLAGS)
 libfm-ppce500v2.o:  CFLAGS?=-m32 -msoft-float -mcpu=8548   $(LOCAL_CFLAGS)
-# TODO: replace when compiler support is added:
-#{
-libfm-ppc32e6500.o: CFLAGS?=-m32 -mhard-float -mcpu=e5500  $(LOCAL_CFLAGS)
-libfm-ppc64e6500.o: CFLAGS?=-m64 -mhard-float -mcpu=e5500  $(LOCAL_CFLAGS)
-#} with {
-#libfm-ppc32e6500.o: CFLAGS?=-m32 -mhard-float -mcpu=e6500  $(LOCAL_CFLAGS)
-#libfm-ppc64e6500.o: CFLAGS?=-m64 -mhard-float -mcpu=e6500  $(LOCAL_CFLAGS)
-#}
+libfm-ppc32e6500.o: CFLAGS?=-m32 -mhard-float -mcpu=e6500  $(LOCAL_CFLAGS)
+libfm-ppc64e6500.o: CFLAGS?=-m64 -mhard-float -mcpu=e6500  $(LOCAL_CFLAGS)
 libfm-ppce500v2.o:  CFLAGS?=-m32 -msoft-float -mcpu=8548   $(LOCAL_CFLAGS)
 
 CFLAGS+=$(EXTRA_CFLAGS) -isystem $(KERNEL_SRC)/include
