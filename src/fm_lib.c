@@ -72,7 +72,7 @@
         printf("fmlib [%s:%u] - " format, \
             __func__, __LINE__, ##arg)
 #else
-#   define _fml_dbg(arg...)
+    #define _fml_dbg(arg...)
 #endif
 
 /* Major and minor are in sync with FMD, respin is for fmlib identification */
@@ -750,6 +750,13 @@ t_Handle FM_PCD_MatchTableSet(t_Handle h_FmPcd, t_FmPcdCcNodeParams *p_CcNodePar
     if (params.keys_params.cc_next_engine_params_for_miss.manip_id)
         DEV_TO_ID(params.keys_params.cc_next_engine_params_for_miss.manip_id);
 
+#if (DPAA_VERSION >= 11)
+    if (params.keys_params.cc_next_engine_params_for_miss.next_engine == e_IOC_FM_PCD_FR &&
+        params.keys_params.cc_next_engine_params_for_miss.params.fr_params.frm_replic_id)
+            DEV_TO_ID(params.keys_params.cc_next_engine_params_for_miss.params.fr_params.frm_replic_id);
+
+#endif /* DPAA_VERSION >= 11 */
+
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_MATCH_TABLE_SET, &params))
     {
         REPORT_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
@@ -968,6 +975,24 @@ t_Handle FM_PCD_HashTableSet(t_Handle h_FmPcd, t_FmPcdHashTableParams *p_Param)
 
     memcpy(&params, p_Param, sizeof(t_FmPcdHashTableParams));
     params.id = NULL;
+
+    if (params.cc_next_engine_params_for_miss.next_engine == e_IOC_FM_PCD_CC &&
+        params.cc_next_engine_params_for_miss.params.cc_params.cc_node_id)
+            DEV_TO_ID(params.cc_next_engine_params_for_miss.params.cc_params.cc_node_id);
+
+    if (params.cc_next_engine_params_for_miss.next_engine == e_IOC_FM_PCD_KG &&
+        params.cc_next_engine_params_for_miss.params.kg_params.p_direct_scheme)
+            DEV_TO_ID(params.cc_next_engine_params_for_miss.params.kg_params.p_direct_scheme);
+
+    if (params.cc_next_engine_params_for_miss.manip_id)
+        DEV_TO_ID(params.cc_next_engine_params_for_miss.manip_id);
+
+#if (DPAA_VERSION >= 11)
+    if (params.cc_next_engine_params_for_miss.next_engine == e_IOC_FM_PCD_FR &&
+        params.cc_next_engine_params_for_miss.params.fr_params.frm_replic_id)
+            DEV_TO_ID(params.cc_next_engine_params_for_miss.params.fr_params.frm_replic_id);
+
+#endif /* DPAA_VERSION >= 11 */
 
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_HASH_TABLE_SET, &params))
     {
