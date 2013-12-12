@@ -1994,7 +1994,6 @@ t_Error FM_MAC_GetStatistics (t_Handle h_FmMac, t_FmMacStatistics *p_Statistics)
     return E_OK;
 }
 
-#if (DPAA_VERSION >= 11)
 t_Error FM_PORT_ConfigBufferPrefixContent(t_Handle h_FmPort, t_FmBufferPrefixContent *p_Params)
 {
     t_Device    *p_Dev = (t_Device*) h_FmPort;
@@ -2010,6 +2009,8 @@ t_Error FM_PORT_ConfigBufferPrefixContent(t_Handle h_FmPort, t_FmBufferPrefixCon
 
     return E_OK;
 }
+
+#if (DPAA_VERSION >= 11)
 
 t_Error FM_PORT_VSPAlloc(t_Handle h_FmPort, t_FmPortVSPAllocParams *p_Params)
 {
