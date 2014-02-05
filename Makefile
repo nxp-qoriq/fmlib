@@ -95,8 +95,11 @@ LOCAL_CFLAGS=-O2 -g0 -Wall \
 libfm-ppce500mc.o: EXTRA_CFLAGS+=-DP4080
 libfm-ppc32e5500.o libfm-ppc64e5500.o: EXTRA_CFLAGS+=-DP5020
 libfm-ppc32e6500.o libfm-ppc64e6500.o: EXTRA_CFLAGS+=-DB4860
+libfm-ppc32e5500-t1040qds.o libfm-ppc64e5500-t1040qds.o: EXTRA_CFLAGS+=-DB4860
 libfm-ppce500v2.o: EXTRA_CFLAGS+=-DP1023
 
+libfm-ppc32e5500-t1040qds.o: CFLAGS?=-m32 -mhard-float -mcpu=e5500  $(LOCAL_CFLAGS)
+libfm-ppc64e5500-t1040qds.o: CFLAGS?=-m64 -mhard-float -mcpu=e5500  $(LOCAL_CFLAGS)
 libfm-ppce500mc.o:  CFLAGS?=-m32 -mhard-float -mcpu=e500mc $(LOCAL_CFLAGS)
 libfm-ppc32e5500.o: CFLAGS?=-m32 -mhard-float -mcpu=e5500  $(LOCAL_CFLAGS)
 libfm-ppc64e5500.o: CFLAGS?=-m64 -mhard-float -mcpu=e5500  $(LOCAL_CFLAGS)
@@ -109,10 +112,12 @@ CFLAGS+=$(EXTRA_CFLAGS) -isystem $(KERNEL_SRC)/include
 
 
 all: libfm-ppc32e5500.a libfm-ppc64e5500.a libfm-ppce500mc.a \
-		libfm-ppce500v2.a libfm-ppc64e6500.a libfm-ppc32e6500.a
+		libfm-ppce500v2.a libfm-ppc64e6500.a libfm-ppc32e6500.a \
+		libfm-ppc32e5500-t1040qds.a libfm-ppc64e5500-t1040qds.a
 
 libfm-ppc32e5500.o libfm-ppc64e5500.o libfm-ppce500mc.o libfm-ppce500v2.o \
-		libfm-ppc32e6500.o libfm-ppc64e6500.o: \
+		libfm-ppc32e6500.o libfm-ppc64e6500.o \
+		libfm-ppc32e5500-t1040qds.o libfm-ppc64e5500-t1040qds.o: \
 		$(FM_LIB_SRCDIR)/fm_lib.c $(wildcard $(addsuffix /*.h,$(FM_LIB_INCLUDE)))
 	@(echo "(CC)  $@")
 	@(echo "$(CC) $(CFLAGS) $(addprefix -I,$(FM_LIB_INCLUDE)) -c -o $@ $<" > .$@.cmd)
@@ -143,12 +148,14 @@ targets help:
 	@(echo "	build library for specific platform <arch>")
 	@(echo)
 	@(echo "The available make libfm-<arch>.a targets are:")
-	@(echo "	libfm-ppce500mc.a	(P2, P3, P4)")
-	@(echo "	libfm-ppc32e5500.a	(P5 - 32b)")
-	@(echo "	libfm-ppc64e5500.a	(P5 - 64b)")
-	@(echo "	libfm-ppc32e6500.a	(B4/T4 - 32b)")
-	@(echo "	libfm-ppc64e6500.a	(B4/T4 - 64b)")
-	@(echo "	libfm-ppce500v2.a	(P1023)")
+	@(echo "	libfm-ppce500mc.a		(P2, P3, P4)")
+	@(echo "	libfm-ppc32e5500.a		(P5 - 32b)")
+	@(echo "	libfm-ppc64e5500.a		(P5 - 64b)")
+	@(echo "	libfm-ppc32e6500.a		(B4/T4 - 32b)")
+	@(echo "	libfm-ppc64e6500.a		(B4/T4 - 64b)")
+	@(echo "	libfm-ppc32e5500-t1040qds.a	(t1040qds - 32b)")
+	@(echo "	libfm-ppc64e5500-t1040qds.a	(t1040qds - 64b)")
+	@(echo "	libfm-ppce500v2.a		(P1023)")
 	@(echo)
 	@(echo "make install-libfm-<arch> (e.g. \"make install-libfm-ppce500mc\"):")
 	@(echo "	install the library and headers to the location specified by DESTDIR, PREFIX")
