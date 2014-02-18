@@ -840,6 +840,15 @@ typedef protocolOpt_t   ipv6ProtocolOpt_t;      /**< IPv6 protocol options. */
                                                      environment with IPV6 header and IPV6_FRAG_1 option;
                                                      in case where fragment found, the fragment-extension offset
                                                      may be found at 'shim2' (in parser-result). */
+#if (DPAA_VERSION >= 11)
+#define CAPWAP_FRAG_1               0x00000008  /**< CAPWAP reassembly option.
+                                                     CAPWAP Reassembly manipulation requires network
+                                                     environment with CAPWAP header and CAPWAP_FRAG_1 option;
+                                                     in case where fragment found, the fragment-extension offset
+                                                     may be found at 'shim2' (in parser-result). */
+#endif /* (DPAA_VERSION >= 11) */
+
+
 /* @} */
 
 #define FM_PCD_MANIP_MAX_HDR_SIZE               256
@@ -1058,7 +1067,9 @@ typedef enum e_FmPcdPlcrRateMode {
 *//***************************************************************************/
 typedef enum e_FmPcdDoneAction {
     e_FM_PCD_ENQ_FRAME = 0,        /**< Enqueue frame */
-    e_FM_PCD_DROP_FRAME            /**< Drop frame */
+    e_FM_PCD_DROP_FRAME            /**< Mark this frame as error frame and continue
+                                        to error flow; 'FM_PORT_FRM_ERR_CLS_DISCARD'
+                                        flag will be set for this frame. */
 } e_FmPcdDoneAction;
 
 /**************************************************************************//**
@@ -1087,9 +1098,9 @@ typedef enum e_FmPcdAction {
 typedef enum e_FmPcdManipHdrInsrtType {
     e_FM_PCD_MANIP_INSRT_GENERIC,                   /**< Insert according to offset & size */
     e_FM_PCD_MANIP_INSRT_BY_HDR,                    /**< Insert according to protocol */
-#ifdef FM_CAPWAP_SUPPORT
+#if ((DPAA_VERSION == 10) && defined(FM_CAPWAP_SUPPORT))
     e_FM_PCD_MANIP_INSRT_BY_TEMPLATE                /**< Insert template to start of frame */
-#endif /* FM_CAPWAP_SUPPORT */
+#endif /* ((DPAA_VERSION == 10) && defined(FM_CAPWAP_SUPPORT)) */
 } e_FmPcdManipHdrInsrtType;
 
 /**************************************************************************//**
@@ -1130,17 +1141,48 @@ typedef enum e_FmPcdManipHdrFieldUpdateVlan {
 } e_FmPcdManipHdrFieldUpdateVlan;
 
 /**************************************************************************//**
- @Description   Enumeration type for selecting specific L2 fields removal
+ @Description   Enumeration type for selecting specific L2 header insertion
 *//***************************************************************************/
 typedef enum e_FmPcdManipHdrInsrtSpecificL2 {
     e_FM_PCD_MANIP_HDR_INSRT_MPLS                   /**< Insert MPLS header (Unlimited MPLS labels) */
 } e_FmPcdManipHdrInsrtSpecificL2;
 
+#if (DPAA_VERSION >= 11)
+/**************************************************************************//**
+ @Description   Enumeration type for selecting QoS mapping mode
+
+                Note: In all cases except 'e_FM_PCD_MANIP_HDR_QOS_MAPPING_NONE'
+                User should instruct the port to read the parser-result
+*//***************************************************************************/
+typedef enum e_FmPcdManipHdrQosMappingeMode {
+    e_FM_PCD_MANIP_HDR_QOS_MAPPING_NONE = 0,   /**< No mapping, QoS field will not be changed */
+    e_FM_PCD_MANIP_HDR_QOS_MAPPING_AS_IS, /**< QoS field will be overwritten by the last byte in the parser-result. */
+} e_FmPcdManipHdrQosMappingeMode;
+
+/**************************************************************************//**
+ @Description   Enumeration type for selecting QoS source
+
+                Note: In all cases except 'e_FM_PCD_MANIP_HDR_QOS_SRC_NONE'
+                User should left room for the parser-result on input/output buffer
+                and instruct the port to read/write the parser-result to the buffer (RPD should be set)
+*//***************************************************************************/
+typedef enum e_FmPcdManipHdrQosSrc {
+    e_FM_PCD_MANIP_HDR_QOS_SRC_NONE = 0,        /**< TODO */
+    e_FM_PCD_MANIP_HDR_QOS_SRC_USER_DEFINED,    /**< QoS will be taken from the last byte in the parser-result. */
+} e_FmPcdManipHdrQosSrc;
+#endif /* (DPAA_VERSION >= 11) */
+
 /**************************************************************************//**
  @Description   Enumeration type for selecting type of header insertion
 *//***************************************************************************/
 typedef enum e_FmPcdManipHdrInsrtByHdrType {
-    e_FM_PCD_MANIP_INSRT_BY_HDR_SPECIFIC_L2         /**< Specific L2 fields insertion */
+    e_FM_PCD_MANIP_INSRT_BY_HDR_SPECIFIC_L2,        /**< Specific L2 fields insertion */
+#if (DPAA_VERSION >= 11)
+    e_FM_PCD_MANIP_INSRT_BY_HDR_IP,                 /**< IP insertion */
+    e_FM_PCD_MANIP_INSRT_BY_HDR_UDP,                /**< UDP insertion */
+    e_FM_PCD_MANIP_INSRT_BY_HDR_UDP_LITE,             /**< UDP lite insertion */
+    e_FM_PCD_MANIP_INSRT_BY_HDR_CAPWAP                 /**< CAPWAP insertion */
+#endif /* (DPAA_VERSION >= 11) */
 } e_FmPcdManipHdrInsrtByHdrType;
 
 /**************************************************************************//**
@@ -1163,9 +1205,12 @@ typedef enum e_FmPcdManipHdrCustomIpReplace {
 *//***************************************************************************/
 typedef enum e_FmPcdManipHdrRmvByHdrType {
     e_FM_PCD_MANIP_RMV_BY_HDR_SPECIFIC_L2 = 0,      /**< Specific L2 fields removal */
-#ifdef FM_CAPWAP_SUPPORT
+#if (DPAA_VERSION >= 11)
+    e_FM_PCD_MANIP_RMV_BY_HDR_CAPWAP,                  /**< CAPWAP removal */
+#endif /* (DPAA_VERSION >= 11) */
+#if (DPAA_VERSION >= 11) || ((DPAA_VERSION == 10) && defined(FM_CAPWAP_SUPPORT))
     e_FM_PCD_MANIP_RMV_BY_HDR_FROM_START,           /**< Locate from data that is not the header */
-#endif /* FM_CAPWAP_SUPPORT */
+#endif /* (DPAA_VERSION >= 11) || ((DPAA_VERSION == 10) && defined(FM_CAPWAP_SUPPORT)) */
 } e_FmPcdManipHdrRmvByHdrType;
 
 /**************************************************************************//**
@@ -1191,14 +1236,14 @@ typedef enum e_FmPcdManipReassemWaysNumber {
     e_FM_PCD_MANIP_EIGHT_WAYS_HASH      /**< Eight ways hash */
 } e_FmPcdManipReassemWaysNumber;
 
-#ifdef FM_CAPWAP_SUPPORT
+#if ((DPAA_VERSION == 10) && defined(FM_CAPWAP_SUPPORT))
 /**************************************************************************//**
  @Description   Enumeration type for selecting type of statistics mode
 *//***************************************************************************/
 typedef enum e_FmPcdStatsType {
     e_FM_PCD_STATS_PER_FLOWID = 0       /**< Flow ID is used as index for getting statistics */
 } e_FmPcdStatsType;
-#endif /* FM_CAPWAP_SUPPORT */
+#endif /* ((DPAA_VERSION == 10) && defined(FM_CAPWAP_SUPPORT)) */
 
 /**************************************************************************//**
  @Description   Enumeration type for selecting manipulation type
@@ -1241,7 +1286,10 @@ typedef enum e_FmPcdManipDontFragAction {
  @Description   Enumeration type for selecting type of special offload manipulation
 *//***************************************************************************/
 typedef enum e_FmPcdManipSpecialOffloadType {
-    e_FM_PCD_MANIP_SPECIAL_OFFLOAD_IPSEC    /**< IPSec offload manipulation */
+    e_FM_PCD_MANIP_SPECIAL_OFFLOAD_IPSEC,    /**< IPSec offload manipulation */
+#if (DPAA_VERSION >= 11)
+    e_FM_PCD_MANIP_SPECIAL_OFFLOAD_CAPWAP    /**< CAPWAP offload manipulation */
+#endif /* (DPAA_VERSION >= 11) */
 } e_FmPcdManipSpecialOffloadType;
 
 
@@ -2070,15 +2118,14 @@ typedef struct t_FmPcdPlcrProfileParams {
 /**************************************************************************//**
  @Description   Parameters for selecting a location for requested manipulation
 *//***************************************************************************/
-typedef struct t_FmManipHdrInfo
-{
+typedef struct t_FmManipHdrInfo {
     e_NetHeaderType                     hdr;            /**< Header selection */
     e_FmPcdHdrIndex                     hdrIndex;       /**< Relevant only for MPLS, VLAN and tunneled IP. Otherwise should be cleared. */
     bool                                byField;        /**< TRUE if the location of manipulation is according to some field in the specific header*/
-    t_FmPcdFields                       fullField;      /**< Relevant only when byField = TRUE: Extract field */
+    t_FmPcdFields                       field;          /**< Relevant only when byField = TRUE - the specific field */
 } t_FmManipHdrInfo;
 
-#ifdef FM_CAPWAP_SUPPORT
+#if ((DPAA_VERSION == 10) && defined(FM_CAPWAP_SUPPORT))
 /**************************************************************************//**
  @Description   Parameters for defining an insertion manipulation
                 of type e_FM_PCD_MANIP_INSRT_TO_START_OF_FRAME_TEMPLATE
@@ -2168,8 +2215,8 @@ typedef struct t_FmPcdManipFragOrReasmParams {
                                                                  relevant if 'frag' = FALSE, 'hdr' = HEADER_TYPE_CAPWAP */
     } u;
 } t_FmPcdManipFragOrReasmParams;
+#endif /* ((DPAA_VERSION == 10) && defined(FM_CAPWAP_SUPPORT)) */
 
-#endif /* FM_CAPWAP_SUPPORT */
 
 /**************************************************************************//**
  @Description   Parameters for defining header removal by header type
@@ -2177,13 +2224,16 @@ typedef struct t_FmPcdManipFragOrReasmParams {
 typedef struct t_FmPcdManipHdrRmvByHdrParams {
     e_FmPcdManipHdrRmvByHdrType         type;           /**< Selection of header removal location */
     union {
-#ifdef FM_CAPWAP_SUPPORT
+#if ((DPAA_VERSION == 10) && defined(FM_CAPWAP_SUPPORT))
         struct {
             bool                        include;        /**< If FALSE, remove until the specified header (not including the header);
                                                              If TRUE, remove also the specified header. */
             t_FmManipHdrInfo            hdrInfo;
         } fromStartByHdr;                               /**< Relevant when type = e_FM_PCD_MANIP_RMV_BY_HDR_FROM_START */
-#endif /* FM_CAPWAP_SUPPORT */
+#endif /* (DPAA_VERSION >= 11) || ... */
+#if (DPAA_VERSION >= 11)
+        t_FmManipHdrInfo                hdrInfo;        /**< Relevant when type = e_FM_PCD_MANIP_RMV_BY_HDR_FROM_START */
+#endif /* (DPAA_VERSION >= 11) */
         e_FmPcdManipHdrRmvSpecificL2    specificL2;     /**< Relevant when type = e_FM_PCD_MANIP_BY_HDR_SPECIFIC_L2;
                                                              Defines which L2 headers to remove. */
     } u;
@@ -2298,6 +2348,18 @@ typedef struct t_FmPcdManipSpecialOffloadIPSecParams {
                                                      corresponding SA. */
 } t_FmPcdManipSpecialOffloadIPSecParams;
 
+#if (DPAA_VERSION >= 11)
+/**************************************************************************//**
+ @Description   structure for defining CAPWAP manipulation
+*//***************************************************************************/
+typedef struct t_FmPcdManipSpecialOffloadCapwapParams {
+    bool                    dtls;   /**< TRUE if continue to SEC DTLS encryption */
+    e_FmPcdManipHdrQosSrc   qosSrc; /**< TODO */
+} t_FmPcdManipSpecialOffloadCapwapParams;
+
+#endif /* (DPAA_VERSION >= 11) */
+
+
 /**************************************************************************//**
  @Description   Parameters for defining special offload manipulation
 *//***************************************************************************/
@@ -2307,8 +2369,21 @@ typedef struct t_FmPcdManipSpecialOffloadParams {
     {
         t_FmPcdManipSpecialOffloadIPSecParams   ipsec;      /**< Parameters for IPSec; Relevant when
                                                                  type = e_FM_PCD_MANIP_SPECIAL_OFFLOAD_IPSEC */
+#if (DPAA_VERSION >= 11)
+        t_FmPcdManipSpecialOffloadCapwapParams  capwap;     /**< Parameters for CAPWAP; Relevant when
+                                                                 type = e_FM_PCD_MANIP_SPECIAL_OFFLOAD_CAPWAP */
+#endif /* (DPAA_VERSION >= 11) */
     } u;
 } t_FmPcdManipSpecialOffloadParams;
+
+/**************************************************************************//**
+ @Description   Parameters for defining insertion manipulation
+*//***************************************************************************/
+typedef struct t_FmPcdManipHdrInsrt {
+    uint8_t size;           /**< size of inserted section */
+    uint8_t *p_Data;        /**< data to be inserted */
+} t_FmPcdManipHdrInsrt;
+
 
 /**************************************************************************//**
  @Description   Parameters for defining generic removal manipulation
@@ -2452,6 +2527,20 @@ typedef struct t_FmPcdManipHdrInsrtSpecificL2Params {
     uint8_t                         *p_Data;        /**< data to be inserted */
 } t_FmPcdManipHdrInsrtSpecificL2Params;
 
+#if (DPAA_VERSION >= 11)
+/**************************************************************************//**
+ @Description   Parameters for defining IP insertion manipulation
+*//***************************************************************************/
+typedef struct t_FmPcdManipHdrInsrtIpParams {
+    bool    calcL4Checksum; /**< Calculate L4 checksum. */
+    e_FmPcdManipHdrQosMappingeMode   mappingMode; /**< TODO */
+    uint8_t lastPidOffset;     /**< the offset of the last Protocol within
+                                 the inserted header */
+    uint16_t  id;           /**< 16 bit New IP ID */
+    t_FmPcdManipHdrInsrt insrt; /**< size and data to be inserted. */
+} t_FmPcdManipHdrInsrtIpParams;
+#endif /* (DPAA_VERSION >= 11) */
+
 /**************************************************************************//**
  @Description   Parameters for defining header insertion manipulation by header type
 *//***************************************************************************/
@@ -2459,9 +2548,15 @@ typedef struct t_FmPcdManipHdrInsrtByHdrParams {
     e_FmPcdManipHdrInsrtByHdrType               type;   /**< Selects manipulation type */
     union {
 
-       t_FmPcdManipHdrInsrtSpecificL2Params     specificL2Params;
-                                                        /**< Used when type = e_FM_PCD_MANIP_INSRT_BY_HDR_SPECIFIC_L2:
-                                                             Selects which L2 headers to remove */
+        t_FmPcdManipHdrInsrtSpecificL2Params    specificL2Params;
+                                                             /**< Used when type = e_FM_PCD_MANIP_INSRT_BY_HDR_SPECIFIC_L2:
+                                                              Selects which L2 headers to insert */
+#if (DPAA_VERSION >= 11)
+        t_FmPcdManipHdrInsrtIpParams            ipParams;  /**< Used when type = e_FM_PCD_MANIP_INSRT_BY_HDR_IP */
+        t_FmPcdManipHdrInsrt                    insrt;     /**< Used when type is one of e_FM_PCD_MANIP_INSRT_BY_HDR_UDP,
+                                                                e_FM_PCD_MANIP_INSRT_BY_HDR_UDP_LITE, or
+                                                                e_FM_PCD_MANIP_INSRT_BY_HDR_CAPWAP */
+#endif /* (DPAA_VERSION >= 11) */
     } u;
 } t_FmPcdManipHdrInsrtByHdrParams;
 
@@ -2475,10 +2570,10 @@ typedef struct t_FmPcdManipHdrInsrtParams {
                                                                  relevant if 'type' = e_FM_PCD_MANIP_INSRT_BY_HDR */
         t_FmPcdManipHdrInsrtGenericParams       generic;    /**< Parameters for defining generic header insertion manipulation,
                                                                  relevant if 'type' = e_FM_PCD_MANIP_INSRT_GENERIC */
-#ifdef FM_CAPWAP_SUPPORT
+#if ((DPAA_VERSION == 10) && defined(FM_CAPWAP_SUPPORT))
         t_FmPcdManipHdrInsrtByTemplateParams    byTemplate; /**< Parameters for defining header insertion manipulation by template,
                                                                  relevant if 'type' = e_FM_PCD_MANIP_INSRT_BY_TEMPLATE */
-#endif /* FM_CAPWAP_SUPPORT */
+#endif /* ((DPAA_VERSION == 10) && defined(FM_CAPWAP_SUPPORT)) */
     } u;
 } t_FmPcdManipHdrInsrtParams;
 
@@ -2553,11 +2648,11 @@ typedef struct t_FmPcdManipParams {
                                                                      Handle to another (previously defined) manipulation node;
                                                                      Allows concatenation of manipulation actions;
                                                                      This parameter is optional and may be NULL. */
-#ifdef FM_CAPWAP_SUPPORT
+#if ((DPAA_VERSION == 10) && defined(FM_CAPWAP_SUPPORT))
     bool                                    fragOrReasm;        /**< TRUE, if defined fragmentation/reassembly manipulation */
     t_FmPcdManipFragOrReasmParams           fragOrReasmParams;  /**< Parameters for fragmentation/reassembly manipulation,
                                                                      relevant if fragOrReasm = TRUE */
-#endif /* FM_CAPWAP_SUPPORT */
+#endif /* ((DPAA_VERSION == 10) && defined(FM_CAPWAP_SUPPORT)) */
 } t_FmPcdManipParams;
 
 /**************************************************************************//**
@@ -2642,15 +2737,14 @@ typedef struct t_FmPcdFrmReplicGroupParams {
 } t_FmPcdFrmReplicGroupParams;
 #endif /* (DPAA_VERSION >= 11) */
 
-#ifdef FM_CAPWAP_SUPPORT
+#if ((DPAA_VERSION == 10) && defined(FM_CAPWAP_SUPPORT))
 /**************************************************************************//**
  @Description   structure for defining statistics node
 *//***************************************************************************/
 typedef struct t_FmPcdStatsParams {
     e_FmPcdStatsType    type;   /**< type of statistics node */
 } t_FmPcdStatsParams;
-#endif /* FM_CAPWAP_SUPPORT */
-
+#endif /* ((DPAA_VERSION == 10) && defined(FM_CAPWAP_SUPPORT)) */
 
 /**************************************************************************//**
  @Function      FM_PCD_NetEnvCharacteristicsSet
@@ -2932,7 +3026,12 @@ t_Error FM_PCD_MatchTableDelete(t_Handle h_CcNode);
 
  @Return        E_OK on success; Error code otherwise.
 
- @Cautions      Allowed only following FM_PCD_MatchTableSet().
+ @Cautions      Allowed only following FM_PCD_MatchTableSet();
+                Not relevant in the case the node is of type 'INDEXED_LOOKUP'.
+                When configuring nextEngine = e_FM_PCD_CC, note that
+                p_FmPcdCcNextEngineParams->ccParams.h_CcNode must be different
+                from the currently changed table.
+
 *//***************************************************************************/
 t_Error FM_PCD_MatchTableModifyMissNextEngine(t_Handle                  h_CcNode,
                                               t_FmPcdCcNextEngineParams *p_FmPcdCcNextEngineParams);
@@ -2990,6 +3089,10 @@ t_Error FM_PCD_MatchTableAddKey(t_Handle            h_CcNode,
  @Return        E_OK on success; Error code otherwise.
 
  @Cautions      Allowed only following FM_PCD_MatchTableSet().
+                When configuring nextEngine = e_FM_PCD_CC, note that
+                p_FmPcdCcNextEngineParams->ccParams.h_CcNode must be different
+                from the currently changed table.
+
 *//***************************************************************************/
 t_Error FM_PCD_MatchTableModifyNextEngine(t_Handle                  h_CcNode,
                                           uint16_t                  keyIndex,
@@ -3011,6 +3114,9 @@ t_Error FM_PCD_MatchTableModifyNextEngine(t_Handle                  h_CcNode,
 
  @Cautions      Allowed only following FM_PCD_MatchTableSet() was called for this
                 node and the nodes that lead to it.
+                When configuring nextEngine = e_FM_PCD_CC, note that
+                p_FmPcdCcNextEngineParams->ccParams.h_CcNode must be different
+                from the currently changed table.
 *//***************************************************************************/
 t_Error FM_PCD_MatchTableModifyKeyAndNextEngine(t_Handle            h_CcNode,
                                                 uint16_t            keyIndex,
@@ -3080,6 +3186,9 @@ t_Error FM_PCD_MatchTableFindNRemoveKey(t_Handle h_CcNode,
  @Return        E_OK on success; Error code otherwise.
 
  @Cautions      Allowed only following FM_PCD_MatchTableSet().
+                When configuring nextEngine = e_FM_PCD_CC, note that
+                p_FmPcdCcNextEngineParams->ccParams.h_CcNode must be different
+                from the currently changed table.
 *//***************************************************************************/
 t_Error FM_PCD_MatchTableFindNModifyNextEngine(t_Handle                  h_CcNode,
                                                uint8_t                   keySize,
@@ -3106,6 +3215,9 @@ t_Error FM_PCD_MatchTableFindNModifyNextEngine(t_Handle                  h_CcNod
 
  @Cautions      Allowed only following FM_PCD_MatchTableSet() was called for this
                 node and the nodes that lead to it.
+                When configuring nextEngine = e_FM_PCD_CC, note that
+                p_FmPcdCcNextEngineParams->ccParams.h_CcNode must be different
+                from the currently changed table.
 *//***************************************************************************/
 t_Error FM_PCD_MatchTableFindNModifyKeyAndNextEngine(t_Handle            h_CcNode,
                                                      uint8_t             keySize,
@@ -3365,6 +3477,9 @@ t_Error FM_PCD_HashTableRemoveKey(t_Handle h_HashTbl,
  @Return        E_OK on success; Error code otherwise.
 
  @Cautions      Allowed only following FM_PCD_HashTableSet().
+                When configuring nextEngine = e_FM_PCD_CC, note that
+                p_FmPcdCcNextEngineParams->ccParams.h_CcNode must be different
+                from the currently changed table.
 *//***************************************************************************/
 t_Error FM_PCD_HashTableModifyNextEngine(t_Handle                  h_HashTbl,
                                          uint8_t                   keySize,
@@ -3383,6 +3498,9 @@ t_Error FM_PCD_HashTableModifyNextEngine(t_Handle                  h_HashTbl,
  @Return        E_OK on success; Error code otherwise.
 
  @Cautions      Allowed only following FM_PCD_HashTableSet().
+                When configuring nextEngine = e_FM_PCD_CC, note that
+                p_FmPcdCcNextEngineParams->ccParams.h_CcNode must be different
+                from the currently changed table.
 *//***************************************************************************/
 t_Error FM_PCD_HashTableModifyMissNextEngine(t_Handle                  h_HashTbl,
                                              t_FmPcdCcNextEngineParams *p_FmPcdCcNextEngineParams);
@@ -3554,7 +3672,7 @@ t_Error FM_PCD_FrmReplicRemoveMember(t_Handle h_FrmReplicGroup,
                                      uint16_t memberIndex);
 #endif /* (DPAA_VERSION >= 11) */
 
-#ifdef FM_CAPWAP_SUPPORT
+#if ((DPAA_VERSION == 10) && defined(FM_CAPWAP_SUPPORT))
 /**************************************************************************//**
  @Function      FM_PCD_StatisticsSetNode
 
@@ -3568,7 +3686,7 @@ t_Error FM_PCD_FrmReplicRemoveMember(t_Handle h_FrmReplicGroup,
  @Cautions      Allowed only following FM_PCD_Init().
 *//***************************************************************************/
 t_Handle FM_PCD_StatisticsSetNode(t_Handle h_FmPcd, t_FmPcdStatsParams *p_FmPcdstatsParams);
-#endif /* FM_CAPWAP_SUPPORT */
+#endif /* ((DPAA_VERSION == 10) && defined(FM_CAPWAP_SUPPORT)) */
 
 /** @} */ /* end of FM_PCD_Runtime_build_grp group */
 /** @} */ /* end of FM_PCD_Runtime_grp group */

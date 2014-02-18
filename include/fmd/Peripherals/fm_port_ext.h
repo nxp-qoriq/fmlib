@@ -45,7 +45,6 @@
 #include "fm_ext.h"
 #include "net_ext.h"
 
-
 /**************************************************************************//**
 
  @Group         FM_grp Frame Manager API
@@ -101,8 +100,8 @@ typedef enum e_FmPortPcdSupport {
     , e_FM_PORT_PCD_SUPPORT_PRS_AND_KG_AND_PLCR     /**< Use Parser, Keygen and Policer */
     , e_FM_PORT_PCD_SUPPORT_PRS_AND_CC              /**< Use Parser and Coarse Classification */
     , e_FM_PORT_PCD_SUPPORT_PRS_AND_CC_AND_PLCR     /**< Use Parser and Coarse Classification and Policer */
-#ifdef FM_CAPWAP_SUPPORT
     , e_FM_PORT_PCD_SUPPORT_CC_ONLY                 /**< Use only Coarse Classification */
+#ifdef FM_CAPWAP_SUPPORT
     , e_FM_PORT_PCD_SUPPORT_CC_AND_KG               /**< Use Coarse Classification,and Keygen */
     , e_FM_PORT_PCD_SUPPORT_CC_AND_KG_AND_PLCR      /**< Use Coarse Classification, Keygen and Policer */
 #endif /* FM_CAPWAP_SUPPORT */
@@ -1096,7 +1095,7 @@ t_Error FM_PORT_ConfigTxFifoMinFillLevel(t_Handle h_FmPort, uint32_t minFillLeve
                 from its default configuration: 1G ports: [1],
                 10G port: [4]
 
-                May be used for Tx ports only
+                May be used for Tx/OP ports only
 
  @Param[in]     h_FmPort            A handle to a FM Port module.
  @Param[in]     deqPipelineDepth    New value
@@ -1427,6 +1426,8 @@ t_Error FM_PORT_Enable(t_Handle h_FmPort);
  @Return        E_OK on success; Error code otherwise.
 
  @Cautions      Allowed only following FM_PORT_Init().
+                If rate limit is set on a port that need to send PFC frames,
+                it might violate the stop transmit timing.
 *//***************************************************************************/
 t_Error FM_PORT_SetRateLimit(t_Handle h_FmPort, t_FmPortRateLimit *p_RateLimit);
 
@@ -1445,6 +1446,24 @@ t_Error FM_PORT_SetRateLimit(t_Handle h_FmPort, t_FmPortRateLimit *p_RateLimit);
  @Cautions      Allowed only following FM_PORT_Init().
 *//***************************************************************************/
 t_Error FM_PORT_DeleteRateLimit(t_Handle h_FmPort);
+
+/**************************************************************************//**
+ @Function      FM_PORT_SetPfcPrioritiesMappingToQmanWQ
+
+ @Description   Calling this routine maps each PFC received priority to the transmit WQ.
+                This WQ will be blocked upon receiving a PFC frame with this priority.
+
+                May be used for Tx ports only.
+
+ @Param[in]     h_FmPort        A handle to a FM Port module.
+ @Param[in]     prio            PFC priority (0-7).
+ @Param[in]     wq              Work Queue (0-7).
+
+ @Return        E_OK on success; Error code otherwise.
+
+ @Cautions      Allowed only following FM_PORT_Init().
+*//***************************************************************************/
+t_Error FM_PORT_SetPfcPrioritiesMappingToQmanWQ(t_Handle h_FmPort, uint8_t prio, uint8_t wq);
 
 /**************************************************************************//**
  @Function      FM_PORT_SetStatisticsCounters
