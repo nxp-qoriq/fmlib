@@ -1,16 +1,16 @@
-/*
- * Copyright 2008-2012 Freescale Semiconductor, Inc
+/* Copyright (c) 2008-2012 Freescale Semiconductor, Inc.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of Freescale Semiconductor nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of Freescale Semiconductor nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
  *
  * ALTERNATIVELY, this software may be distributed under the terms of the
@@ -18,16 +18,16 @@
  * Foundation, either version 2 of that License or (at your option) any
  * later version.
  *
- * This software is provided by Freescale Semiconductor "as is" and any
- * express or implied warranties, including, but not limited to, the implied
- * warranties of merchantability and fitness for a particular purpose are
- * disclaimed. In no event shall Freescale Semiconductor be liable for any
- * direct, indirect, incidental, special, exemplary, or consequential damages
- * (including, but not limited to, procurement of substitute goods or services;
- * loss of use, data, or profits; or business interruption) however caused and
- * on any theory of liability, whether in contract, strict liability, or tort
- * (including negligence or otherwise) arising in any way out of the use of
- * this software, even if advised of the possibility of such damage.
+ * THIS SOFTWARE IS PROVIDED BY Freescale Semiconductor ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL Freescale Semiconductor BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 
@@ -44,6 +44,7 @@
 #include "fm_pcd_ext.h"
 #include "fm_ext.h"
 #include "net_ext.h"
+
 
 /**************************************************************************//**
 
@@ -135,7 +136,7 @@ typedef uint32_t    fmPortFrameErrSelect_t;                         /**< typedef
 #define FM_PORT_FRM_ERR_IPRE                    (FM_FD_ERR_IPR & ~FM_FD_IPR)        /**< IPR error */
 #define FM_PORT_FRM_ERR_IPR_NCSP                (FM_FD_ERR_IPR_NCSP & ~FM_FD_IPR)   /**< IPR non-consistent-sp */
 
-#define FM_PORT_FRM_ERR_IPFE                    0 /**< Obsolete; will be removed in the future */
+#define FM_PORT_FRM_ERR_IPFE                    0                                   /**< Obsolete; will be removed in the future */
 
 #ifdef FM_CAPWAP_SUPPORT
 #define FM_PORT_FRM_ERR_CRE                     FM_FD_ERR_CRE
@@ -146,7 +147,7 @@ typedef uint32_t    fmPortFrameErrSelect_t;                         /**< typedef
                                                                                      error (SGMII and TBI modes), FIFO parity error. PHY
                                                                                      Sequence error, PHY error control character detected. */
 #define FM_PORT_FRM_ERR_SIZE                    FM_FD_ERR_SIZE                  /**< Frame too long OR Frame size exceeds max_length_frame  */
-#define FM_PORT_FRM_ERR_CLS_DISCARD             FM_FD_ERR_CLS_DISCARD           /**< classification discard */
+#define FM_PORT_FRM_ERR_CLS_DISCARD             FM_FD_ERR_CLS_DISCARD           /**< indicates a classifier "drop" operation */
 #define FM_PORT_FRM_ERR_EXTRACTION              FM_FD_ERR_EXTRACTION            /**< Extract Out of Frame */
 #define FM_PORT_FRM_ERR_NO_SCHEME               FM_FD_ERR_NO_SCHEME             /**< No Scheme Selected */
 #define FM_PORT_FRM_ERR_KEYSIZE_OVERFLOW        FM_FD_ERR_KEYSIZE_OVERFLOW      /**< Keysize Overflow */
@@ -158,7 +159,7 @@ typedef uint32_t    fmPortFrameErrSelect_t;                         /**< typedef
 #define FM_PORT_FRM_ERR_PRS_ILL_INSTRUCT        FM_FD_ERR_PRS_ILL_INSTRUCT      /**< Invalid Soft Parser instruction */
 #define FM_PORT_FRM_ERR_PRS_HDR_ERR             FM_FD_ERR_PRS_HDR_ERR           /**< Header error was identified during parsing */
 #define FM_PORT_FRM_ERR_BLOCK_LIMIT_EXCEEDED    FM_FD_ERR_BLOCK_LIMIT_EXCEEDED  /**< Frame parsed beyind 256 first bytes */
-#define FM_PORT_FRM_ERR_PROCESS_TIMEOUT         0x00000001       /**< FPM Frame Processing Timeout Exceeded */
+#define FM_PORT_FRM_ERR_PROCESS_TIMEOUT         0x00000001                      /**< FPM Frame Processing Timeout Exceeded */
 /* @} */
 
 
@@ -435,6 +436,45 @@ typedef struct t_FmPortPerformanceCnt {
 } t_FmPortPerformanceCnt;
 
 
+/**************************************************************************//**
+ @Description   A structure for defining the sizes of the Deep Sleep
+                the Auto Response tables
+*//***************************************************************************/
+typedef struct t_FmPortDsarTablesSizes
+{
+    uint16_t   maxNumOfArpEntries;
+    uint16_t   maxNumOfEchoIpv4Entries;
+    uint16_t   maxNumOfNdpEntries;
+    uint16_t   maxNumOfEchoIpv6Entries;
+    uint16_t   maxNumOfSnmpIPV4Entries;
+    uint16_t   maxNumOfSnmpIPV6Entries;
+    uint16_t   maxNumOfSnmpOidEntries;
+    uint16_t   maxNumOfSnmpOidChar; /* total amount of character needed for the snmp table */
+
+    uint16_t   maxNumOfIpProtFiltering;
+    uint16_t   maxNumOfTcpPortFiltering;
+    uint16_t   maxNumOfUdpPortFiltering;
+} t_FmPortDsarTablesSizes;
+
+
+/**************************************************************************//**
+ @Function      FM_PORT_ConfigDsarSupport
+
+ @Description   This function will allocate the amount of MURAM needed for
+                this max number of entries for Deep Sleep Auto Response.
+                it will calculate all needed MURAM for autoresponse including
+                necesary common stuff.
+
+
+ @Param[in]     h_FmPort    A handle to a FM Port module.
+ @Param[in]     params      A pointer to a structure containing the maximum
+                            sizes of the auto response tables
+
+ @Return        E_OK on success; Error code otherwise.
+
+ @Cautions      Allowed only following FM_PORT_Config() and before FM_PORT_Init().
+*//***************************************************************************/
+t_Error FM_PORT_ConfigDsarSupport(t_Handle h_FmPortRx, t_FmPortDsarTablesSizes *params);
 
 /**************************************************************************//**
  @Function      FM_PORT_ConfigNumOfOpenDmas
@@ -503,8 +543,8 @@ t_Error FM_PORT_ConfigSizeOfFifo(t_Handle h_FmPort, t_FmPortRsrc *p_SizeOfFifo);
 
  @Description   Calling this routine changes the dequeue priority in the
                 internal driver data base from its default configuration
-                1G: [FALSE]
-                10G: [TRUE]
+                1G: [DEFAULT_PORT_deqHighPriority_1G]
+                10G: [DEFAULT_PORT_deqHighPriority_10G]
 
                 May be used for Non-Rx ports only
 
@@ -522,7 +562,7 @@ t_Error FM_PORT_ConfigDeqHighPriority(t_Handle h_FmPort, bool highPri);
 
  @Description   Calling this routine changes the dequeue type parameter in the
                 internal driver data base from its default configuration
-                [e_FM_PORT_DEQ_TYPE1].
+                [DEFAULT_PORT_deqType].
 
                 May be used for Non-Rx ports only
 
@@ -540,7 +580,7 @@ t_Error FM_PORT_ConfigDeqType(t_Handle h_FmPort, e_FmPortDeqType deqType);
 
  @Description   Calling this routine changes the dequeue prefetch option parameter in the
                 internal driver data base from its default configuration
-                [e_FM_PORT_DEQ_FULL_PREFETCH]
+                [DEFAULT_PORT_deqPrefetchOption]
                 Note: Available for some chips only
 
                 May be used for Non-Rx ports only
@@ -559,8 +599,8 @@ t_Error FM_PORT_ConfigDeqPrefetchOption(t_Handle h_FmPort, e_FmPortDeqPrefetchOp
 
  @Description   Calling this routine changes the dequeue byte count parameter in
                 the internal driver data base from its default configuration
-                1G:[0x400].
-                10G:[0x1400].
+                1G:[DEFAULT_PORT_deqByteCnt_1G].
+                10G:[DEFAULT_PORT_deqByteCnt_10G].
 
                 May be used for Non-Rx ports only
 
@@ -586,9 +626,9 @@ t_Error FM_PORT_ConfigDeqByteCnt(t_Handle h_FmPort, uint16_t deqByteCnt);
                 application buffer, and to offset.
                 Calling this routine changes the buffer margins definitions
                 in the internal driver data base from its default
-                configuration: Data size:  [DEFAULT_FM_SP_bufferPrefixContent_privDataSize]
-                               Pass Parser result: [DEFAULT_FM_SP_bufferPrefixContent_passPrsResult].
-                               Pass timestamp: [DEFAULT_FM_SP_bufferPrefixContent_passTimeStamp].
+                configuration: Data size:  [DEFAULT_PORT_bufferPrefixContent_privDataSize]
+                               Pass Parser result: [DEFAULT_PORT_bufferPrefixContent_passPrsResult].
+                               Pass timestamp: [DEFAULT_PORT_bufferPrefixContent_passTimeStamp].
 
                 May be used for all ports
 
@@ -610,7 +650,7 @@ t_Error FM_PORT_ConfigBufferPrefixContent(t_Handle                      h_FmPort
 
  @Description   Calling this routine changes the number of checksum bytes to ignore
                 parameter in the internal driver data base from its default configuration
-                [0]
+                [DEFAULT_PORT_cheksumLastBytesIgnore]
 
                 May be used by Tx & Rx ports only
 
@@ -628,7 +668,7 @@ t_Error FM_PORT_ConfigCheksumLastBytesIgnore(t_Handle h_FmPort, uint8_t cheksumL
 
  @Description   Calling this routine changes the number of bytes to cut from a
                 frame's end parameter in the internal driver data base
-                from its default configuration [4]
+                from its default configuration [DEFAULT_PORT_cutBytesFromEnd]
                 Note that if the result of (frame length before chop - cutBytesFromEnd) is
                 less than 14 bytes, the chop operation is not executed.
 
@@ -729,7 +769,7 @@ t_Error FM_PORT_ConfigBackupPools(t_Handle h_FmPort, t_FmBackupBmPools *p_FmPort
 
  @Description   Calling this routine changes the error frames destination parameter
                 in the internal driver data base from its default configuration:
-                override = [FALSE]
+                override = [DEFAULT_PORT_frmDiscardOverride]
 
                 May be used for Rx and OP ports only
 
@@ -748,7 +788,7 @@ t_Error FM_PORT_ConfigFrmDiscardOverride(t_Handle h_FmPort, bool override);
 
  @Description   Calling this routine changes the behaviour on error parameter
                 in the internal driver data base from its default configuration:
-                [FM_PORT_FRM_ERR_CLS_DISCARD].
+                [DEFAULT_PORT_errorsToDiscard].
                 If a requested error was previously defined as "ErrorsToEnqueue" it's
                 definition will change and the frame will be discarded.
                 Errors that were not defined either as "ErrorsToEnqueue" nor as
@@ -770,7 +810,7 @@ t_Error FM_PORT_ConfigErrorsToDiscard(t_Handle h_FmPort, fmPortFrameErrSelect_t 
 
  @Description   Calling this routine changes the DMA swap data aparameter
                 in the internal driver data base from its default
-                configuration  [DEFAULT_FM_SP_dmaSwapData]
+                configuration  [DEFAULT_PORT_dmaSwapData]
 
                 May be used for all port types
 
@@ -788,7 +828,7 @@ t_Error FM_PORT_ConfigDmaSwapData(t_Handle h_FmPort, e_FmDmaSwapOption swapData)
 
  @Description   Calling this routine changes the internal context cache
                 attribute parameter in the internal driver data base
-                from its default configuration  [DEFAULT_FM_SP_dmaIntContextCacheAttr]
+                from its default configuration  [DEFAULT_PORT_dmaIntContextCacheAttr]
 
                 May be used for all port types
 
@@ -806,7 +846,7 @@ t_Error FM_PORT_ConfigDmaIcCacheAttr(t_Handle h_FmPort, e_FmDmaCacheOption intCo
 
  @Description   Calling this routine changes the header cache
                 attribute parameter in the internal driver data base
-                from its default configuration  [DEFAULT_FM_SP_dmaHeaderCacheAttr]
+                from its default configuration  [DEFAULT_PORT_dmaHeaderCacheAttr]
 
                 May be used for all port types
 
@@ -824,7 +864,7 @@ t_Error FM_PORT_ConfigDmaHdrAttr(t_Handle h_FmPort, e_FmDmaCacheOption headerCac
 
  @Description   Calling this routine changes the scatter gather cache
                 attribute parameter in the internal driver data base
-                from its default configuration  [DEFAULT_FM_SP_dmaScatterGatherCacheAttr]
+                from its default configuration  [DEFAULT_PORT_dmaScatterGatherCacheAttr]
 
                 May be used for all port types
 
@@ -842,7 +882,7 @@ t_Error FM_PORT_ConfigDmaScatterGatherAttr(t_Handle h_FmPort, e_FmDmaCacheOption
 
  @Description   Calling this routine changes the write optimization
                 parameter in the internal driver data base
-                from its default configuration:  By default optimize = [DEFAULT_FM_SP_dmaWriteOptimize].
+                from its default configuration:  By default optimize = [DEFAULT_PORT_dmaWriteOptimize].
                 Note:
 
                 1. For head optimization, data alignment must be >= 16 (supported by default).
@@ -850,7 +890,6 @@ t_Error FM_PORT_ConfigDmaScatterGatherAttr(t_Handle h_FmPort, e_FmDmaCacheOption
                 3. For tail optimization, note that the optimization is performed by extending the write transaction
                 of the frame payload at the tail as needed to achieve optimal bus transfers, so that the last write
                 is extended to be on 16/64 bytes aligned block (chip dependent).
-
 
                 Relevant for non-Tx port types
 
@@ -884,7 +923,7 @@ t_Error FM_PORT_ConfigNoScatherGather(t_Handle h_FmPort, bool noScatherGather);
 
  @Description   Calling this routine changes the internal default color parameter
                 in the internal driver data base
-                from its default configuration  [e_FM_PORT_COLOR_GREEN]
+                from its default configuration  [DEFAULT_PORT_color]
 
                 May be used for all port types
 
@@ -902,7 +941,7 @@ t_Error FM_PORT_ConfigDfltColor(t_Handle h_FmPort, e_FmPortColor color);
 
  @Description   Calling this routine changes the synchronization attribute parameter
                 in the internal driver data base from its default configuration:
-                syncReq = [TRUE]
+                syncReq = [DEFAULT_PORT_syncReq]
 
                 May be used for all port types
 
@@ -921,7 +960,7 @@ t_Error FM_PORT_ConfigSyncReq(t_Handle h_FmPort, bool syncReq);
  @Description   This routine is relevant for Rx ports that are routed to OP port.
                 It changes the internal context reuse option in the internal
                 driver data base from its default configuration:
-                reuse = [FALSE]
+                reuse = [DEFAULT_PORT_forwardIntContextReuse]
 
                 May be used for Rx ports only
 
@@ -987,7 +1026,7 @@ t_Error FM_PORT_ConfigIMMaxRxBufLength(t_Handle h_FmPort, uint16_t newVal);
  @Function      FM_PORT_ConfigIMRxBdRingLength
 
  @Description   Changes the receive BD ring length from its default
-                configuration:[128]
+                configuration:[DEFAULT_PORT_rxBdRingLength]
 
  @Param[in]     h_FmPort        A handle to a FM Port module.
  @Param[in]     newVal          The desired BD ring length.
@@ -1003,7 +1042,7 @@ t_Error FM_PORT_ConfigIMRxBdRingLength(t_Handle h_FmPort, uint16_t newVal);
  @Function      FM_PORT_ConfigIMTxBdRingLength
 
  @Description   Changes the transmit BD ring length from its default
-                configuration:[16]
+                configuration:[DEFAULT_PORT_txBdRingLength]
 
  @Param[in]     h_FmPort        A handle to a FM Port module.
  @Param[in]     newVal          The desired BD ring length.
@@ -1022,7 +1061,7 @@ t_Error FM_PORT_ConfigIMTxBdRingLength(t_Handle h_FmPort, uint16_t newVal);
                 data structures (e.g. BD rings).
                 Calling this routine changes the internal driver data base
                 from its default configuration
-                [0, MEMORY_ATTR_CACHEABLE].
+                [DEFAULT_PORT_ImfwExtStructsMemId, DEFAULT_PORT_ImfwExtStructsMemAttr].
 
  @Param[in]     h_FmPort        A handle to a FM Port module.
  @Param[in]     memId           Memory partition ID.
@@ -1052,7 +1091,7 @@ t_Error FM_PORT_ConfigIMPolling(t_Handle h_FmPort);
  @Function      FM_PORT_ConfigMaxFrameLength
 
  @Description   Changes the definition of the max size of frame that should be
-                transmitted/received on this port from its default value [9600].
+                transmitted/received on this port from its default value [DEFAULT_PORT_maxFrameLength].
                 This parameter is used for confirmation of the minimum Fifo
                 size calculations and only for Tx ports or ports working in
                 independent mode. This should be larger than the maximum possible
@@ -1073,7 +1112,7 @@ t_Error FM_PORT_ConfigMaxFrameLength(t_Handle h_FmPort, uint16_t length);
 
  @Description   Calling this routine changes the fifo minimum
                 fill level parameter in the internal driver data base
-                from its default configuration  [0]
+                from its default configuration  [DEFAULT_PORT_txFifoMinFillLevel]
 
                 May be used for Tx ports only
 
@@ -1092,8 +1131,9 @@ t_Error FM_PORT_ConfigTxFifoMinFillLevel(t_Handle h_FmPort, uint32_t minFillLeve
  @Description   Calling this routine changes the fifo dequeue
                 pipeline depth parameter in the internal driver data base
 
-                from its default configuration: 1G ports: [1],
-                10G port: [4]
+                from its default configuration: 1G ports: [DEFAULT_PORT_fifoDeqPipelineDepth_1G],
+                10G port: [DEFAULT_PORT_fifoDeqPipelineDepth_10G],
+                OP port: [DEFAULT_PORT_fifoDeqPipelineDepth_OH]
 
                 May be used for Tx/OP ports only
 
@@ -1111,7 +1151,7 @@ t_Error FM_PORT_ConfigFifoDeqPipelineDepth(t_Handle h_FmPort, uint8_t deqPipelin
 
  @Description   Calling this routine changes the fifo low comfort level
                 parameter in internal driver data base
-                from its default configuration [5]
+                from its default configuration [DEFAULT_PORT_txFifoLowComfLevel]
 
                 May be used for Tx ports only
 
@@ -1129,7 +1169,7 @@ t_Error FM_PORT_ConfigTxFifoLowComfLevel(t_Handle h_FmPort, uint32_t fifoLowComf
 
  @Description   Calling this routine changes the threshold of the FIFO
                 fill level parameter in the internal driver data base
-                from its default configuration [BMI_MAX_FIFO_SIZE]
+                from its default configuration [DEFAULT_PORT_rxFifoThreshold]
 
                 If the total number of buffers which are
                 currently in use and associated with the
@@ -1153,7 +1193,7 @@ t_Error FM_PORT_ConfigRxFifoThreshold(t_Handle h_FmPort, uint32_t fifoThreshold)
 
  @Description   Calling this routine changes the priority elevation level
                 parameter in the internal driver data base from its default
-                configuration  [BMI_MAX_FIFO_SIZE]
+                configuration  [DEFAULT_PORT_rxFifoPriElevationLevel]
 
                 If the total number of buffers which are currently in use and
                 associated with the specific RX port exceed the amount specified
@@ -1276,6 +1316,256 @@ typedef struct t_FmPortCongestionGrps {
 #endif /* (DPAA_VERSION >= 11) */
 } t_FmPortCongestionGrps;
 
+/**************************************************************************//**
+ @Description   Structure for Deep Sleep Auto Response ARP Entry
+*//***************************************************************************/
+typedef struct t_FmPortDsarArpEntry
+{
+    uint32_t  ipAddress;
+    uint8_t   mac[6];
+    bool      isVlan;
+    uint16_t  vid;
+} t_FmPortDsarArpEntry;
+
+/**************************************************************************//**
+ @Description   Structure for Deep Sleep Auto Response ARP info
+*//***************************************************************************/
+typedef struct t_FmPortDsarArpInfo
+{
+    uint8_t           tableSize;
+    t_FmPortDsarArpEntry *p_AutoResTable;
+    bool              enableConflictDetection; /* when TRUE Conflict Detection will be checked and wake the host if needed */
+} t_FmPortDsarArpInfo;
+
+/**************************************************************************//**
+ @Description   Structure for Deep Sleep Auto Response NDP Entry
+*//***************************************************************************/
+typedef struct t_FmPortDsarNdpEntry
+{
+    uint32_t  ipAddress[4];
+    uint8_t   mac[6];
+    bool      isVlan;
+    uint16_t  vid;
+} t_FmPortDsarNdpEntry;
+
+/**************************************************************************//**
+ @Description   Structure for Deep Sleep Auto Response NDP info
+*//***************************************************************************/
+typedef struct t_FmPortDsarNdpInfo
+{
+    uint32_t              multicastGroup;
+
+    uint8_t               tableSizeAssigned;
+    t_FmPortDsarNdpEntry  *p_AutoResTableAssigned; /* This list refer to solicitation IP addresses.
+                                                                 Note that all IP adresses must be from the same multicast group.
+                                                                 This will be checked and if not operation will fail. */
+    uint8_t               tableSizeTmp;
+    t_FmPortDsarNdpEntry  *p_AutoResTableTmp;      /* This list refer to temp IP addresses.
+                                                             Note that all temp IP adresses must be from the same multicast group.
+                                                             This will be checked and if not operation will fail. */
+
+    bool                  enableConflictDetection; /* when TRUE Conflict Detection will be checked and wake the host if needed */
+
+} t_FmPortDsarNdpInfo;
+
+/**************************************************************************//**
+ @Description   Structure for Deep Sleep Auto Response ICMPV4 info
+*//***************************************************************************/
+typedef struct t_FmPortDsarEchoIpv4Info
+{
+    uint8_t            tableSize;
+    t_FmPortDsarArpEntry  *p_AutoResTable;
+} t_FmPortDsarEchoIpv4Info;
+
+/**************************************************************************//**
+ @Description   Structure for Deep Sleep Auto Response ICMPV6 info
+*//***************************************************************************/
+typedef struct t_FmPortDsarEchoIpv6Info
+{
+    uint8_t            tableSize;
+    t_FmPortDsarNdpEntry  *p_AutoResTable;
+} t_FmPortDsarEchoIpv6Info;
+
+/**************************************************************************//**
+@Description    Deep Sleep Auto Response SNMP OIDs table entry
+
+*//***************************************************************************/
+typedef struct {
+    uint16_t oidSize;     /**< Size in octets of the OID. */
+    uint16_t resSize;     /**< Size in octets of the value that is attached to the OID. */
+    uint8_t *p_Oid;       /**< Pointer to the OID. OID is encoded in BER but type and length are excluded. */
+    uint64_t resValOrPtr; /**< Value (for up to 4 octets) or pointer to the Value. Encoded in BER. */
+} t_FmPortDsarOidsEntry;
+
+/**************************************************************************//**
+ @Description   Deep Sleep Auto Response SNMP IPv4 Addresses Table Entry
+                Refer to the FMan Controller spec for more details.
+*//***************************************************************************/
+typedef struct
+{
+    uint32_t ipv4Addr; /*!< 32 bit IPv4 Address. */
+    bool      isVlan;
+    uint16_t vid;   /*!< 12 bits VLAN ID. The 4 left-most bits should be cleared                      */
+                       /*!< This field should be 0x0000 for an entry with no VLAN tag or a null VLAN ID. */
+} t_FmPortDsarSnmpIpv4AddrTblEntry;
+
+/**************************************************************************//**
+ @Description   Deep Sleep Auto Response SNMP IPv6 Addresses Table Entry
+                Refer to the FMan Controller spec for more details.
+*//***************************************************************************/
+typedef struct
+{
+    uint32_t ipv6Addr[4];  /*!< 4 * 32 bit IPv6 Address.                                                     */
+    bool      isVlan;
+    uint16_t vid;       /*!< 12 bits VLAN ID. The 4 left-most bits should be cleared                      */
+                           /*!< This field should be 0x0000 for an entry with no VLAN tag or a null VLAN ID. */
+} t_FmPortDsarSnmpIpv6AddrTblEntry;
+
+/**************************************************************************//**
+ @Description   Deep Sleep Auto Response SNMP Descriptor
+
+*//***************************************************************************/
+typedef struct
+{
+    uint16_t control;                          /**< Control bits [0-15]. */
+    uint16_t maxSnmpMsgLength;                 /**< Maximal allowed SNMP message length. */
+    uint16_t numOfIpv4Addresses;               /**< Number of entries in IPv4 addresses table. */
+    uint16_t numOfIpv6Addresses;               /**< Number of entries in IPv6 addresses table. */
+    t_FmPortDsarSnmpIpv4AddrTblEntry *p_Ipv4AddrTbl; /**< Pointer to IPv4 addresses table. */
+    t_FmPortDsarSnmpIpv6AddrTblEntry *p_Ipv6AddrTbl; /**< Pointer to IPv6 addresses table. */
+    uint8_t *p_RdOnlyCommunityStr;             /**< Pointer to the Read Only Community String. */
+    uint8_t *p_RdWrCommunityStr;               /**< Pointer to the Read Write Community String. */
+    t_FmPortDsarOidsEntry *p_OidsTbl;                 /**< Pointer to OIDs table. */
+    uint32_t oidsTblSize;                      /**< Number of entries in OIDs table. */
+} t_FmPortDsarSnmpInfo;
+
+/**************************************************************************//**
+ @Description   Structure for Deep Sleep Auto Response filtering Entry
+*//***************************************************************************/
+typedef struct t_FmPortDsarFilteringEntry
+{
+    uint16_t    srcPort;
+    uint16_t    dstPort;
+    uint16_t    srcPortMask;
+    uint16_t    dstPortMask;
+} t_FmPortDsarFilteringEntry;
+
+/**************************************************************************//**
+ @Description   Structure for Deep Sleep Auto Response filtering info
+*//***************************************************************************/
+typedef struct t_FmPortDsarFilteringInfo
+{
+    /* IP protocol filtering parameters */
+    uint8_t     ipProtTableSize;
+    uint8_t     *p_IpProtTablePtr;
+    bool        ipProtDropOnHit;  /* when TRUE, hit in the table will cause the packet to be droped,
+                                         miss will pass the packet to UDP/TCP filters if needed and if not
+                                         to the classification tree. If the classification tree will pass
+                                         the packet to a queue it will cause a wake interupt.
+                                         When FALSE it the other way around. */
+    /* UDP port filtering parameters */
+    uint8_t     udpPortsTableSize;
+    t_FmPortDsarFilteringEntry *p_UdpPortsTablePtr;
+    bool        udpPortDropOnHit; /* when TRUE, hit in the table will cause the packet to be droped,
+                                         miss will pass the packet to classification tree.
+                                         If the classification tree will pass the packet to a queue it
+                                         will cause a wake interupt.
+                                         When FALSE it the other way around. */
+    /* TCP port filtering parameters */
+    uint16_t    tcpFlagsMask;
+    uint8_t     tcpPortsTableSize;
+    t_FmPortDsarFilteringEntry *p_TcpPortsTablePtr;
+    bool        tcpPortDropOnHit; /* when TRUE, hit in the table will cause the packet to be droped,
+                                         miss will pass the packet to classification tree.
+                                         If the classification tree will pass the packet to a queue it
+                                         will cause a wake interupt.
+                                         When FALSE it the other way around. */
+} t_FmPortDsarFilteringInfo;
+
+/**************************************************************************//**
+ @Description   Structure for Deep Sleep Auto Response parameters
+*//***************************************************************************/
+typedef struct t_FmPortDsarParams
+{
+    t_Handle                  h_FmPortTx;
+    t_FmPortDsarArpInfo       *p_AutoResArpInfo;
+    t_FmPortDsarEchoIpv4Info  *p_AutoResEchoIpv4Info;
+    t_FmPortDsarNdpInfo       *p_AutoResNdpInfo;
+    t_FmPortDsarEchoIpv6Info  *p_AutoResEchoIpv6Info;
+    t_FmPortDsarSnmpInfo      *p_AutoResSnmpInfo;
+    t_FmPortDsarFilteringInfo *p_AutoResFilteringInfo;
+} t_FmPortDsarParams;
+
+/**************************************************************************//**
+ @Function      FM_PORT_EnterDsar
+
+ @Description   Enter Deep Sleep Auto Response mode.
+                This function write the apropriate values to in the relevant
+                tables in the MURAM. It then set the Tx port in independent
+                mode as needed and redirect the receive flow to go through the
+                Dsar Fman-ctrl code
+
+                Calling this routine invalidates the descriptor.
+
+ @Param[in]     h_FmPortRx - FM PORT module descriptor
+ @Param[in]     params - Auto Response parameters
+
+ @Return        E_OK on success; Error code otherwise.
+
+ @Cautions      Allowed only following FM_PORT_Init().
+*//***************************************************************************/
+t_Error FM_PORT_EnterDsar(t_Handle h_FmPortRx, t_FmPortDsarParams *params);
+
+/**************************************************************************//**
+ @Function      FM_PORT_ExitDsar
+
+ @Description   Exit Deep Sleep Auto Response mode.
+                This function reverse the AR mode and put the ports back into
+                their original wake mode
+
+ @Param[in]     h_FmPortRx - FM PORT Rx module descriptor
+ @Param[in]     h_FmPortTx - FM PORT Tx module descriptor
+
+ @Return        E_OK on success; Error code otherwise.
+
+ @Cautions      Allowed only following FM_PORT_EnterDsar().
+*//***************************************************************************/
+void FM_PORT_ExitDsar(t_Handle h_FmPortRx, t_Handle h_FmPortTx);
+
+/**************************************************************************//**
+ @Function      FM_PORT_IsInDsar
+
+ @Description   This function returns TRUE if the port was set as Auto Response
+                and FALSE if not. Once Exit AR mode it will return FALSE as well
+                until re-enabled once more.
+
+ @Param[in]     h_FmPort - FM PORT module descriptor
+
+ @Return        E_OK on success; Error code otherwise.
+*//***************************************************************************/
+bool FM_PORT_IsInDsar(t_Handle h_FmPort);
+
+typedef struct t_FmPortDsarStats
+{
+    uint32_t arpArCnt;
+    uint32_t echoIcmpv4ArCnt;
+    uint32_t ndpArCnt;
+    uint32_t echoIcmpv6ArCnt;
+    uint32_t snmpGetCnt;
+    uint32_t snmpGetNextCnt;
+} t_FmPortDsarStats;
+
+/**************************************************************************//**
+ @Function      FM_PORT_GetDsarStats
+
+ @Description   Return statistics for Deep Sleep Auto Response
+
+ @Param[in]     h_FmPortRx - FM PORT module descriptor
+ @Param[out]    stats - structure containing the statistics counters
+
+ @Return        E_OK on success; Error code otherwise.
+*//***************************************************************************/
+t_Error FM_PORT_GetDsarStats(t_Handle h_FmPortRx, t_FmPortDsarStats *stats);
 
 #if (defined(DEBUG_ERRORS) && (DEBUG_ERRORS > 0))
 /**************************************************************************//**
@@ -1504,7 +1794,7 @@ t_Error FM_PORT_SetFrameQueueCounters(t_Handle h_FmPort, bool enable);
 
  @Description   User may call this routine to so the driver will analyze if the
                 basic performance parameters are correct and also the driver may
-                suggest of improvments; The basic parameters are FIFO sizes, number
+                suggest of improvements; The basic parameters are FIFO sizes, number
                 of DMAs and number of TNUMs for the port.
 
                 May be used for all port types
@@ -1612,7 +1902,6 @@ t_Error FM_PORT_ModifyAllocBufCounter(t_Handle h_FmPort,  uint8_t poolId, uint32
                 groups to be considered relevant to this port.
 
                 May be used for Rx, or RX+OP ports only (depending on chip)
-                (Not implemented yet in fm-lib!)
 
  @Param[in]     h_FmPort            A handle to a FM Port module.
  @Param[in]     p_CongestionGrps    A pointer to an array of congestion groups
@@ -1635,7 +1924,6 @@ t_Error FM_PORT_AddCongestionGrps(t_Handle h_FmPort, t_FmPortCongestionGrps *p_C
                 groups to be considered relevant to this port.
 
                 May be used for Rx, or RX+OP ports only (depending on chip)
-                (Not implemented yet in fm-lib!)
 
  @Param[in]     h_FmPort            A handle to a FM Port module.
  @Param[in]     p_CongestionGrps    A pointer to an array of congestion groups
@@ -1681,8 +1969,7 @@ t_Error FM_PORT_ReleaseStalled(t_Handle h_FmPort);
 
  @Description   This routine is relevant for Rx ports (1G and 10G). The routine
                 set/clear the L3/L4 checksum verification (on RX side).
-                Note that this takes effect only if hw-parser is enabled!
-                (Not implemented yet in fm-lib!)
+                Note that this takes affect only if hw-parser is enabled!
 
  @Param[in]     h_FmPort        A handle to a FM Port module.
  @Param[in]     l4Checksum      boolean indicates whether to do L3/L4 checksum
@@ -1910,13 +2197,7 @@ typedef struct t_FmPortPcdKgParams {
  @Description   struct for defining policer parameters
 *//***************************************************************************/
 typedef struct t_FmPortPcdPlcrParams {
-    t_Handle                h_Profile;          /**< Selected profile handle; Relevant for one of
-                                                     following cases:
-                                                     e_FM_PORT_PCD_SUPPORT_PLCR_ONLY or
-                                                     e_FM_PORT_PCD_SUPPORT_PRS_AND_PLCR were selected,
-                                                     or if any flow uses a KG scheme were policer
-                                                     profile is not generated
-                                                     (bypassPlcrProfileGeneration selected) */
+    t_Handle                h_Profile;          /**< Selected profile handle */
 } t_FmPortPcdPlcrParams;
 
 /**************************************************************************//**
@@ -1929,8 +2210,17 @@ typedef struct t_FmPortPcdParams {
     t_FmPortPcdPrsParams    *p_PrsParams;       /**< Parser parameters for this port */
     t_FmPortPcdCcParams     *p_CcParams;        /**< Coarse classification parameters for this port */
     t_FmPortPcdKgParams     *p_KgParams;        /**< Keygen parameters for this port */
-    t_FmPortPcdPlcrParams   *p_PlcrParams;      /**< Policer parameters for this port */
-    t_Handle                h_IpReassemblyManip;/**< IP Reassembly manipulation */
+    t_FmPortPcdPlcrParams   *p_PlcrParams;      /**< Policer parameters for this port; Relevant for one of
+                                                     following cases:
+                                                     e_FM_PORT_PCD_SUPPORT_PLCR_ONLY or
+                                                     e_FM_PORT_PCD_SUPPORT_PRS_AND_PLCR were selected,
+                                                     or if any flow uses a KG scheme were policer
+                                                     profile is not generated
+                                                     ('bypassPlcrProfileGeneration selected'). */
+    t_Handle                h_IpReassemblyManip;    /**< IP Reassembly manipulation */
+#if (DPAA_VERSION >= 11)
+    t_Handle                h_CapwapReassemblyManip;/**< CAPWAP Reassembly manipulation */
+#endif /* (DPAA_VERSION >= 11) */
 } t_FmPortPcdParams;
 
 /**************************************************************************//**
@@ -1948,7 +2238,7 @@ typedef struct t_FmPcdPrsStart {
  @Description   struct for defining external buffer margins
 *//***************************************************************************/
 typedef struct t_FmPortVSPAllocParams {
-    uint8_t     numOfProfiles;          /**< Number of Virtual Storage Profiles */
+    uint8_t     numOfProfiles;          /**< Number of Virtual Storage Profiles; must be a power of 2 */
     uint8_t     dfltRelativeId;         /**< The default Virtual-Storage-Profile-id dedicated to Rx/OP port
                                              The same default Virtual-Storage-Profile-id will be for coupled Tx port
                                              if relevant function called for Rx port */
@@ -2075,7 +2365,7 @@ t_Error FM_PORT_PcdPlcrFreeProfiles(t_Handle h_FmPort);
  @Return        E_OK on success; Error code otherwise.
 
  @Cautions      Allowed only following FM_PORT_Init(), and before FM_PORT_SetPCD()
-                and also before FM_PORT_Enable() (i.e. the port should be disabled).
+                and also before FM_PORT_Enable(); i.e. the port should be disabled.
 *//***************************************************************************/
 t_Error FM_PORT_VSPAlloc(t_Handle h_FmPort, t_FmPortVSPAllocParams *p_Params);
 #endif /* (DPAA_VERSION >= 11) */
@@ -2183,6 +2473,19 @@ t_Error FM_PORT_PcdKgUnbindSchemes (t_Handle h_FmPort, t_FmPcdPortSchemesParams 
 *//***************************************************************************/
 t_Error FM_PORT_PcdPrsModifyStartOffset (t_Handle h_FmPort, t_FmPcdPrsStart *p_FmPcdPrsStart);
 
+/**************************************************************************//**
+ @Function      FM_PORT_GetIPv4OptionsCount
+
+ @Description   TODO
+
+ @Param[in]     h_FmPort            A handle to a FM Port module.
+ @Param[out]    p_Ipv4OptionsCount  will hold the counter value
+
+ @Return        E_OK on success; Error code otherwise.
+
+ @Cautions      Allowed only following FM_PORT_Init()
+*//***************************************************************************/
+t_Error FM_PORT_GetIPv4OptionsCount(t_Handle h_FmPort, uint32_t *p_Ipv4OptionsCount);
 
 /** @} */ /* end of FM_PORT_pcd_runtime_control_grp group */
 /** @} */ /* end of FM_PORT_runtime_control_grp group */
