@@ -1597,6 +1597,11 @@ t_Error FM_PORT_SetPCD(t_Handle h_FmPort, t_FmPortPcdParams *p_FmPortPcd)
     if (params.p_ip_reassembly_manip)
         DEV_TO_ID(params.p_ip_reassembly_manip);
 
+#if (DPAA_VERSION >= 11)
+    if (params.p_capwap_reassembly_manip)
+	DEV_TO_ID(params.p_capwap_reassembly_manip);
+#endif
+
     if (ioctl(p_Dev->fd, FM_PORT_IOC_SET_PCD, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
