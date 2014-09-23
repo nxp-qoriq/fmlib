@@ -334,6 +334,10 @@ int ERROR_DYNAMIC_LEVEL = ERROR_GLOBAL_LEVEL;
 #define RETURN_ERROR(_level, _err, _vmsg) \
         return ERROR_CODE(_err)
 
+#ifndef REPORT_EVENTS
+#define REPORT_EVENTS 1
+#endif
+
 #if (REPORT_EVENTS > 0)
 
 #define REPORT_EVENT(_ev, _appId, _flg, _vmsg) \
