@@ -459,6 +459,9 @@ typedef struct t_FmPcdPrsSwParams {
                                                              numOfLabels entries */
 } t_FmPcdPrsSwParams;
 
+t_Handle FM_PCD_Open( t_FmPcdParams *p_FmPcdParams );
+void FM_PCD_Close(t_Handle h_FmPcd);
+
 
 /**************************************************************************//**
  @Function      FM_PCD_Enable

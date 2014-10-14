@@ -335,6 +335,10 @@ t_Error FM_PORT_Init(t_Handle h_FmPort);
 *//***************************************************************************/
 t_Error FM_PORT_Free(t_Handle h_FmPort);
 
+t_Handle FM_PORT_Open(t_FmPortParams *p_FmPortParams);
+void FM_PORT_Close(t_Handle h_FmPort);
+
+
 
 /**************************************************************************//**
  @Group         FM_PORT_advanced_init_grp    FM Port Advanced Configuration Unit
