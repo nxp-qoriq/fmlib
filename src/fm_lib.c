@@ -824,7 +824,11 @@ t_Error FM_PCD_CcRootModifyNextEngine(t_Handle                  h_CcTree,
     params.grp_indx = grpId;
     params.indx = index;
     memcpy(&params.cc_next_engine_params, p_FmPcdCcNextEngineParams, sizeof(t_FmPcdCcNextEngineParams));
+    if (p_FmPcdCcNextEngineParams->nextEngine == e_FM_PCD_CC) {
+        t_Device *p_NextDev = (t_Device*) p_FmPcdCcNextEngineParams->params.ccParams.h_CcNode;
 
+        params.cc_next_engine_params.params.cc_params.cc_node_id = UINT_TO_PTR(p_NextDev->id);
+    }
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_CC_ROOT_MODIFY_NEXT_ENGINE, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
@@ -848,7 +852,11 @@ t_Error FM_PCD_MatchTableModifyNextEngine(t_Handle                  h_CcNode,
     params.id = UINT_TO_PTR(p_Dev->id);
     params.key_indx = keyIndex;
     memcpy(&params.cc_next_engine_params, p_FmPcdCcNextEngineParams, sizeof(t_FmPcdCcNextEngineParams));
+    if (p_FmPcdCcNextEngineParams->nextEngine == e_FM_PCD_CC) {
+        t_Device *p_NextDev = (t_Device*) p_FmPcdCcNextEngineParams->params.ccParams.h_CcNode;
 
+        params.cc_next_engine_params.params.cc_params.cc_node_id = UINT_TO_PTR(p_NextDev->id);
+    }
     if (ioctl(p_Dev->fd, FM_PCD_IOC_MATCH_TABLE_MODIFY_NEXT_ENGINE, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
@@ -873,7 +881,11 @@ t_Error FM_PCD_MatchTableModifyMissNextEngine(t_Handle                  h_CcNode
 
     params.id = UINT_TO_PTR(p_Dev->id);
     memcpy(&params.cc_next_engine_params, p_FmPcdCcNextEngineParams, sizeof(t_FmPcdCcNextEngineParams));
+    if (p_FmPcdCcNextEngineParams->nextEngine == e_FM_PCD_CC) {
+        t_Device *p_NextDev = (t_Device*) p_FmPcdCcNextEngineParams->params.ccParams.h_CcNode;
 
+        params.cc_next_engine_params.params.cc_params.cc_node_id = UINT_TO_PTR(p_NextDev->id);
+    }
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_MATCH_TABLE_MODIFY_MISS_NEXT_ENGINE, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
@@ -902,7 +914,11 @@ t_Error FM_PCD_MatchTableAddKey(t_Handle            h_CcNode,
     params.key_indx = keyIndex;
     params.key_size = keySize;
     memcpy(&params.key_params, p_KeyParams, sizeof(t_FmPcdCcKeyParams));
+    if (p_KeyParams->ccNextEngineParams.nextEngine == e_FM_PCD_CC) {
+        t_Device *p_NextDev = (t_Device*) p_KeyParams->ccNextEngineParams.params.ccParams.h_CcNode;
 
+        params.key_params.cc_next_engine_params.params.cc_params.cc_node_id = UINT_TO_PTR(p_NextDev->id);
+    }
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_MATCH_TABLE_ADD_KEY, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
@@ -954,7 +970,11 @@ t_Error FM_PCD_MatchTableModifyKeyAndNextEngine(t_Handle            h_CcNode,
     params.key_indx = keyIndex;
     params.key_size = keySize;
     memcpy(&params.key_params, p_KeyParams, sizeof(t_FmPcdCcKeyParams));
+    if (p_KeyParams->ccNextEngineParams.nextEngine == e_FM_PCD_CC) {
+        t_Device *p_NextDev = (t_Device*) p_KeyParams->ccNextEngineParams.params.ccParams.h_CcNode;
 
+        params.key_params.cc_next_engine_params.params.cc_params.cc_node_id = UINT_TO_PTR(p_NextDev->id);
+    }
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_MATCH_TABLE_MODIFY_KEY_AND_NEXT_ENGINE, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
@@ -1057,7 +1077,11 @@ t_Error FM_PCD_HashTableAddKey(t_Handle            h_HashTbl,
     params.p_hash_tbl = UINT_TO_PTR(p_Dev->id);
     params.key_size = keySize;
     memcpy(&params.key_params, p_KeyParams, sizeof(t_FmPcdCcKeyParams));
+    if (p_KeyParams->ccNextEngineParams.nextEngine == e_FM_PCD_CC) {
+        t_Device *p_NextDev = (t_Device*) p_KeyParams->ccNextEngineParams.params.ccParams.h_CcNode;
 
+        params.key_params.cc_next_engine_params.params.cc_params.cc_node_id = UINT_TO_PTR(p_NextDev->id);
+    }
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_HASH_TABLE_ADD_KEY, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
@@ -1889,7 +1913,11 @@ t_Error FM_PCD_FrmReplicAddMember(t_Handle h_ReplicGroup,
     params.member.h_replic_group = UINT_TO_PTR(p_Dev->id);
     params.member.member_index = memberIndex;
     memcpy(&params.next_engine_params, p_MemberParams, sizeof(*p_MemberParams));
+    if (p_MemberParams->nextEngine == e_FM_PCD_CC) {
+        t_Device *p_NextDev = (t_Device*) p_MemberParams->params.ccParams.h_CcNode;
 
+        params.next_engine_params.params.cc_params.cc_node_id = UINT_TO_PTR(p_NextDev->id);
+    }
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_FRM_REPLIC_MEMBER_ADD, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
