@@ -40,6 +40,8 @@
 
 #ifdef P1023
 #include "dpaa_integration_P1023.h"
+#elif defined LS1043
+#include "dpaa_integration_LS1043.h"
 #elif defined B4860 || defined T4240
 #include "dpaa_integration_B4_T4.h"
 #else

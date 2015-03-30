@@ -43,7 +43,7 @@
 #include "part_integration_ext.h"
 
 
-#if !(defined(P1023) || defined(P2041) || defined(P3041) || defined(P4080) || defined(P5020) || defined(P5040) || defined(B4860) || defined(T4240))
+#if !(defined(P1023) || defined(P2041) || defined(P3041) || defined(P4080) || defined(P5020) || defined(P5040) || defined(B4860) || defined(T4240) || defined(LS1043))
 #error "unable to proceed without chip-definition"
 #endif
 

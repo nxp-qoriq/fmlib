@@ -79,12 +79,12 @@ FM_LIB_INCLUDE:=$(FM_IOCTL_INC) \
 		$(FM_LIB_YOCTO_STAGING)/integrations
 
 # These flags need to be passed to the compiler in any circumstance:
-EXTRA_CFLAGS=-DNCSW_LINUX -fPIC -shared -mlongcall
+EXTRA_CFLAGS=-DNCSW_LINUX -fPIC -shared
 
 # CFLAGS to use during out-of-Yocto (i.e. "local") build:
 LOCAL_CFLAGS=-O2 -g0 -Wall \
 	     -fexpensive-optimizations -frename-registers \
-	     -fomit-frame-pointer -maix-struct-return \
+	     -fomit-frame-pointer \
 	     -D__STDC_LIMIT_MACROS $(EXTRA_CFLAGS)
 
 
@@ -92,32 +92,16 @@ LOCAL_CFLAGS=-O2 -g0 -Wall \
 	@(echo "(AR) $(@)")
 	@($(AR) rcsv $@ $^)
 
-libfm-ppce500mc.o: EXTRA_CFLAGS+=-DP4080
-libfm-ppc32e5500.o libfm-ppc64e5500.o: EXTRA_CFLAGS+=-DP5020
-libfm-ppc32e6500.o libfm-ppc64e6500.o: EXTRA_CFLAGS+=-DB4860
-libfm-ppc32e5500-fmv3.o libfm-ppc64e5500-fmv3.o: EXTRA_CFLAGS+=-DB4860
-libfm-ppce500v2.o: EXTRA_CFLAGS+=-DP1023
+libfm-arm64a53.o: EXTRA_CFLAGS+=-DLS1043
 
-libfm-ppc32e5500-fmv3.o: CFLAGS?=-m32 -mhard-float -mcpu=e5500  $(LOCAL_CFLAGS)
-libfm-ppc64e5500-fmv3.o: CFLAGS?=-m64 -mhard-float -mcpu=e5500  $(LOCAL_CFLAGS)
-libfm-ppce500mc.o:  CFLAGS?=-m32 -mhard-float -mcpu=e500mc $(LOCAL_CFLAGS)
-libfm-ppc32e5500.o: CFLAGS?=-m32 -mhard-float -mcpu=e5500  $(LOCAL_CFLAGS)
-libfm-ppc64e5500.o: CFLAGS?=-m64 -mhard-float -mcpu=e5500  $(LOCAL_CFLAGS)
-libfm-ppce500v2.o:  CFLAGS?=-m32 -msoft-float -mcpu=8548   $(LOCAL_CFLAGS)
-libfm-ppc32e6500.o: CFLAGS?=-m32 -mhard-float -mcpu=e6500  $(LOCAL_CFLAGS)
-libfm-ppc64e6500.o: CFLAGS?=-m64 -mhard-float -mcpu=e6500  $(LOCAL_CFLAGS)
-libfm-ppce500v2.o:  CFLAGS?=-m32 -msoft-float -mcpu=8548   $(LOCAL_CFLAGS)
+libfm-arm64a53.o: CFLAGS?=-mcpu=cortex-a53  $(LOCAL_CFLAGS)
 
 CFLAGS+=$(EXTRA_CFLAGS) -isystem $(KERNEL_SRC)/include
 
 
-all: libfm-ppc32e5500.a libfm-ppc64e5500.a libfm-ppce500mc.a \
-		libfm-ppce500v2.a libfm-ppc64e6500.a libfm-ppc32e6500.a \
-		libfm-ppc32e5500-fmv3.a libfm-ppc64e5500-fmv3.a
+all: libfm-arm64a53.a
 
-libfm-ppc32e5500.o libfm-ppc64e5500.o libfm-ppce500mc.o libfm-ppce500v2.o \
-		libfm-ppc32e6500.o libfm-ppc64e6500.o \
-		libfm-ppc32e5500-fmv3.o libfm-ppc64e5500-fmv3.o: \
+libfm-arm64a53.o: \
 		$(FM_LIB_SRCDIR)/fm_lib.c $(wildcard $(addsuffix /*.h,$(FM_LIB_INCLUDE)))
 	@(echo "(CC)  $@")
 	@(echo "$(CC) $(CFLAGS) $(addprefix -I,$(FM_LIB_INCLUDE)) -c -o $@ $<" > .$@.cmd)
@@ -148,14 +132,7 @@ targets help:
 	@(echo "	build library for specific platform <arch>")
 	@(echo)
 	@(echo "The available make libfm-<arch>.a targets are:")
-	@(echo "	libfm-ppce500mc.a		(P2, P3, P4)")
-	@(echo "	libfm-ppc32e5500.a		(P5 - 32b)")
-	@(echo "	libfm-ppc64e5500.a		(P5 - 64b)")
-	@(echo "	libfm-ppc32e6500.a		(B4/T4 - 32b)")
-	@(echo "	libfm-ppc64e6500.a		(B4/T4 - 64b)")
-	@(echo "	libfm-ppc32e5500-fmv3.a		(t1040 - 32b)")
-	@(echo "	libfm-ppc64e5500-fmv3.a		(t1040 - 64b)")
-	@(echo "	libfm-ppce500v2.a		(P1023)")
+	@(echo "	libfm-arm64a53.a	(ls1043 - 64b)")
 	@(echo)
 	@(echo "make install-libfm-<arch> (e.g. \"make install-libfm-ppce500mc\"):")
 	@(echo "	install the library and headers to the location specified by DESTDIR, PREFIX")
