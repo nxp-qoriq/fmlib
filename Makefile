@@ -39,7 +39,7 @@
 # install-<arch> targets for each platform that it's currently configured for.
 
 # Set this as appropriate for local builds
-CROSS_COMPILE?=powerpc-linux-gnu-
+CROSS_COMPILE?=aarch64-linux-gnu-
 
 # You must set KERNEL_SRC or the <DESTDIR, PREFIX> pair
 # before invoking this Makefile as standalone
