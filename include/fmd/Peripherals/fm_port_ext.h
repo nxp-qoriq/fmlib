@@ -1298,6 +1298,25 @@ typedef enum e_FmPortCounters {
     e_FM_PORT_COUNTERS_DEQ_CONFIRM                  /**< QMI counter */
 } e_FmPortCounters;
 
+typedef struct t_FmPortBmiStats {
+    uint32_t cntCycle;
+    uint32_t cntTaskUtil;
+    uint32_t cntQueueUtil;
+    uint32_t cntDmaUtil;
+    uint32_t cntFifoUtil;
+    uint32_t cntRxPauseActivation;
+    uint32_t cntFrame;
+    uint32_t cntDiscardFrame;
+    uint32_t cntDeallocBuf;
+    uint32_t cntRxBadFrame;
+    uint32_t cntRxLargeFrame;
+    uint32_t cntRxFilterFrame;
+    uint32_t cntRxListDmaErr;
+    uint32_t cntRxOutOfBuffersDiscard;
+    uint32_t cntWredDiscard;
+    uint32_t cntLengthErr;
+    uint32_t cntUnsupportedFormat;
+} t_FmPortBmiStats;
 
 /**************************************************************************//**
  @Description   Structure for Port id parameters.

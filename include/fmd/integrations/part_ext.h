@@ -43,10 +43,6 @@
 #include "part_integration_ext.h"
 
 
-#if !(defined(P1023) || defined(P2041) || defined(P3041) || defined(P4080) || defined(P5020) || defined(P5040) || defined(B4860) || defined(T4240) || defined(LS1043))
-#error "unable to proceed without chip-definition"
-#endif
-
 
 /**************************************************************************//*
  @Description   Part data structure - must be contained in any integration
@@ -62,8 +58,10 @@ typedef struct t_Part
 
 #ifdef P1023
 #include "part_P1023.h"
-#elif defined B4860 || defined T4240
+#elif defined FMAN_V3H
 #include "part_B4_T4.h"
+#elif defined FMAN_V3L
+#include "part_FMAN_V3L.h"
 #else
 #include "part_P3_P4_P5.h"
 #endif
