@@ -592,7 +592,9 @@ t_Handle FM_PCD_KgSchemeSet (t_Handle h_FmPcd, t_FmPcdKgSchemeParams *p_Scheme)
 
     memset(p_Dev, 0, sizeof(t_Device));
     p_Dev->h_UserPriv = (t_Handle)p_PcdDev;
-    p_PcdDev->owners++;
+    /* increase owners only if a new scheme is created */
+    if (params.modify == FALSE)
+	    p_PcdDev->owners++;
     p_Dev->id = PTR_TO_UINT(params.id);
 
     _fml_dbg("Called.\n");
@@ -798,6 +800,58 @@ t_Error FM_PCD_MatchTableDelete(t_Handle h_CcNode)
 
     p_PcdDev->owners--;
     free(p_Dev);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+
+t_Error FM_PCD_MatchTableGetKeyStatistics(t_Handle                  h_CcNode,
+                                          uint16_t                  keyIndex,
+                                          t_FmPcdCcKeyStatistics    *p_KeyStatistics)
+{
+    t_Device *p_Dev = (t_Device*) h_CcNode;
+    ioc_fm_pcd_cc_tbl_get_stats_t params;
+    t_Device *p_PcdDev = NULL;
+
+    ASSERT_COND(sizeof(t_FmPcdCcKeyStatistics) == sizeof(ioc_fm_pcd_cc_key_statistics_t));
+    SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
+
+    _fml_dbg("Calling...\n");
+
+    p_PcdDev = (t_Device *)p_Dev->h_UserPriv;
+
+    params.id = UINT_TO_PTR(p_Dev->id);
+    params.key_index = keyIndex;
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_MATCH_TABLE_GET_KEY_STAT, &params))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    memcpy(p_KeyStatistics, &params.statistics, sizeof(t_FmPcdCcKeyStatistics));
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+
+t_Error FM_PCD_MatchTableGetMissStatistics(t_Handle                  h_CcNode,
+                                           t_FmPcdCcKeyStatistics    *p_MissStatistics)
+{
+    t_Device *p_Dev = (t_Device*) h_CcNode;
+    ioc_fm_pcd_cc_tbl_get_stats_t params;
+    t_Device *p_PcdDev = NULL;
+
+    ASSERT_COND(sizeof(t_FmPcdCcKeyStatistics) == sizeof(ioc_fm_pcd_cc_key_statistics_t));
+    SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
+
+    _fml_dbg("Calling...\n");
+
+    p_PcdDev = (t_Device *)p_Dev->h_UserPriv;
+
+    params.id = UINT_TO_PTR(p_Dev->id);
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_MATCH_TABLE_GET_MISS_STAT, &params))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    memcpy(p_MissStatistics, &params.statistics, sizeof(t_FmPcdCcKeyStatistics));
 
     _fml_dbg("Called.\n");
 
@@ -1164,6 +1218,30 @@ t_Error FM_PCD_MatchTableModifyKey(t_Handle h_CcNode,
     return E_OK;
 }
 
+t_Error FM_PCD_HashTableGetMissStatistics(t_Handle                  h_CcNode,
+                                          t_FmPcdCcKeyStatistics    *p_MissStatistics)
+{
+    t_Device *p_Dev = (t_Device*) h_CcNode;
+    ioc_fm_pcd_cc_tbl_get_stats_t params;
+    t_Device *p_PcdDev = NULL;
+
+    ASSERT_COND(sizeof(t_FmPcdCcKeyStatistics) == sizeof(ioc_fm_pcd_cc_key_statistics_t));
+    SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
+
+    _fml_dbg("Calling...\n");
+
+    p_PcdDev = (t_Device*)p_Dev->h_UserPriv;
+
+    params.id = UINT_TO_PTR(p_Dev->id);
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_HASH_TABLE_GET_MISS_STAT, &params))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    memcpy(p_MissStatistics, &params.statistics, sizeof(t_FmPcdCcKeyStatistics));
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
 
 t_Handle FM_PCD_PlcrProfileSet(t_Handle h_FmPcd, t_FmPcdPlcrProfileParams *p_Profile)
 {
@@ -2052,6 +2130,26 @@ t_Error FM_MAC_GetStatistics (t_Handle h_FmMac, t_FmMacStatistics *p_Statistics)
     return E_OK;
 }
 
+t_Error FM_PORT_GetBmiCounters (t_Handle h_FmPort, t_FmPortBmiStats *p_BmiStats)
+{
+    t_Device    *p_Dev = (t_Device*) h_FmPort;
+    ioc_fm_port_bmi_stats_t *param;
+
+    param = (ioc_fm_port_bmi_stats_t *)p_BmiStats;
+
+    SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, E_OK);
+    SANITY_CHECK_RETURN_VALUE(param, E_INVALID_HANDLE, E_OK);
+
+    _fml_dbg("Calling...\n");
+
+    if (ioctl(p_Dev->fd, FM_PORT_IOC_GET_BMI_COUNTERS, param))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+
 t_Error FM_PORT_ConfigBufferPrefixContent(t_Handle h_FmPort, t_FmBufferPrefixContent *p_Params)
 {
     t_Device    *p_Dev = (t_Device*) h_FmPort;
@@ -2317,8 +2415,12 @@ t_Error FM_CtrlMonGetCounters(t_Handle h_Fm, uint8_t fmCtrlIndex, t_FmCtrlMon *p
 void Platform_is_P1023()
 {
 }
-#elif defined B4860 || defined T4240
-void Platform_is_B4860_T4240()
+#elif defined FMAN_V3H
+void Platform_is_FMAN_V3H()
+{
+}
+#elif defined FMAN_V3L
+void Platform_is_FMAN_V3L()
 {
 }
 #else

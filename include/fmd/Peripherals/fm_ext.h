@@ -424,7 +424,7 @@ typedef struct t_FmCtrlCodeRevisionInfo {
  @Description   A Structure for obtaining FM controller monitor values
 *//***************************************************************************/
 typedef struct t_FmCtrlMon {
-    uint8_t percentCnt[1];          /**< Percentage value */
+    uint8_t percentCnt[2];          /**< Percentage value */
 } t_FmCtrlMon;
 
 /**************************************************************************//**
