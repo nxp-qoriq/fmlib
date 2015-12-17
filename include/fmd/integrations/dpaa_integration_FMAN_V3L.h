@@ -223,6 +223,8 @@ typedef enum
 #define FM_PCD_PLCR_NUM_ENTRIES         256                 /**< Total number of policer profiles */
 #define FM_PCD_KG_NUM_OF_SCHEMES        32                  /**< Total number of KG schemes */
 #define FM_PCD_MAX_NUM_OF_CLS_PLANS     256                 /**< Number of classification plan entries. */
+#define FM_PCD_PRS_SW_PATCHES_SIZE      0x00000600          /**< Number of bytes saved for patches */
+#define FM_PCD_SW_PRS_SIZE              0x00000800          /**< Total size of SW parser area */
 
 /* RTC defines */
 #define FM_RTC_NUM_OF_ALARMS            2                   /**< RTC number of alarms */
@@ -243,6 +245,7 @@ typedef enum
 /* BMI defines */
 #define BMI_MAX_NUM_OF_TASKS            64
 #define BMI_MAX_NUM_OF_DMAS             32
+
 #define BMI_MAX_FIFO_SIZE               (FM_MURAM_SIZE)
 #define PORT_MAX_WEIGHT                 16
 

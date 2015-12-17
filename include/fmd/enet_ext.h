@@ -1,16 +1,16 @@
-/*
- * Copyright 2008-2012 Freescale Semiconductor, Inc
+/* Copyright (c) 2008-2012 Freescale Semiconductor, Inc
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of Freescale Semiconductor nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of Freescale Semiconductor nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
  *
  * ALTERNATIVELY, this software may be distributed under the terms of the
@@ -18,17 +18,18 @@
  * Foundation, either version 2 of that License or (at your option) any
  * later version.
  *
- * This software is provided by Freescale Semiconductor "as is" and any
- * express or implied warranties, including, but not limited to, the implied
- * warranties of merchantability and fitness for a particular purpose are
- * disclaimed. In no event shall Freescale Semiconductor be liable for any
- * direct, indirect, incidental, special, exemplary, or consequential damages
- * (including, but not limited to, procurement of substitute goods or services;
- * loss of use, data, or profits; or business interruption) however caused and
- * on any theory of liability, whether in contract, strict liability, or tort
- * (including negligence or otherwise) arising in any way out of the use of
- * this software, even if advised of the possibility of such damage.
+ * THIS SOFTWARE IS PROVIDED BY Freescale Semiconductor ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL Freescale Semiconductor BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 
 /**************************************************************************//**
  @File          enet_ext.h
@@ -103,6 +104,7 @@ typedef enum e_EnetSpeed
     e_ENET_SPEED_10     = E_ENET_SPEED_10,       /**< 10 Mbps */
     e_ENET_SPEED_100    = E_ENET_SPEED_100,      /**< 100 Mbps */
     e_ENET_SPEED_1000   = E_ENET_SPEED_1000,     /**< 1000 Mbps = 1 Gbps */
+    e_ENET_SPEED_2500   = E_ENET_SPEED_2500,     /**< 2500 Mbps = 2.5 Gbps */
     e_ENET_SPEED_10000  = E_ENET_SPEED_10000     /**< 10000 Mbps = 10 Gbps */
 } e_EnetSpeed;
 
@@ -133,6 +135,7 @@ typedef enum e_EnetMode
     e_ENET_MODE_SGMII_1000        = (e_ENET_IF_SGMII | e_ENET_SPEED_1000),
                                         /**< 1000 Mbps SGMII with auto-negotiation between MAC and
                                              SGMII phy according to Cisco SGMII specification */
+    e_ENET_MODE_SGMII_2500        = (e_ENET_IF_SGMII | e_ENET_SPEED_2500),
     e_ENET_MODE_SGMII_BASEX_10    = (ENET_IF_SGMII_BASEX | e_ENET_IF_SGMII | e_ENET_SPEED_10),
                                         /**< 10 Mbps SGMII with 1000BaseX auto-negotiation between
                                              MAC and SGMII phy or backplane */

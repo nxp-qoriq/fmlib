@@ -1414,10 +1414,11 @@ typedef struct t_FmPortDsarEchoIpv6Info
 
 *//***************************************************************************/
 typedef struct {
-    uint16_t oidSize;     /**< Size in octets of the OID. */
-    uint16_t resSize;     /**< Size in octets of the value that is attached to the OID. */
-    uint8_t *p_Oid;       /**< Pointer to the OID. OID is encoded in BER but type and length are excluded. */
-    uint64_t resValOrPtr; /**< Value (for up to 4 octets) or pointer to the Value. Encoded in BER. */
+	uint16_t     oidSize;
+	uint8_t      *oidVal; /* only the oid string */
+	uint16_t     resSize;
+	uint8_t      *resVal; /* resVal will be the entire reply,
+				i.e. "Type|Length|Value" */
 } t_FmPortDsarOidsEntry;
 
 /**************************************************************************//**
@@ -1481,16 +1482,16 @@ typedef struct t_FmPortDsarFilteringInfo
     /* IP protocol filtering parameters */
     uint8_t     ipProtTableSize;
     uint8_t     *p_IpProtTablePtr;
-    bool        ipProtDropOnHit;  /* when TRUE, hit in the table will cause the packet to be droped,
-                                         miss will pass the packet to UDP/TCP filters if needed and if not
+    bool        ipProtPassOnHit;  /* when TRUE, miss in the table will cause the packet to be droped,
+                                         hit will pass the packet to UDP/TCP filters if needed and if not
                                          to the classification tree. If the classification tree will pass
                                          the packet to a queue it will cause a wake interupt.
                                          When FALSE it the other way around. */
     /* UDP port filtering parameters */
     uint8_t     udpPortsTableSize;
     t_FmPortDsarFilteringEntry *p_UdpPortsTablePtr;
-    bool        udpPortDropOnHit; /* when TRUE, hit in the table will cause the packet to be droped,
-                                         miss will pass the packet to classification tree.
+    bool        udpPortPassOnHit; /* when TRUE, miss in the table will cause the packet to be droped,
+                                         hit will pass the packet to classification tree.
                                          If the classification tree will pass the packet to a queue it
                                          will cause a wake interupt.
                                          When FALSE it the other way around. */
@@ -1498,8 +1499,8 @@ typedef struct t_FmPortDsarFilteringInfo
     uint16_t    tcpFlagsMask;
     uint8_t     tcpPortsTableSize;
     t_FmPortDsarFilteringEntry *p_TcpPortsTablePtr;
-    bool        tcpPortDropOnHit; /* when TRUE, hit in the table will cause the packet to be droped,
-                                         miss will pass the packet to classification tree.
+    bool        tcpPortPassOnHit; /* when TRUE, miss in the table will cause the packet to be droped,
+                                         hit will pass the packet to classification tree.
                                          If the classification tree will pass the packet to a queue it
                                          will cause a wake interupt.
                                          When FALSE it the other way around. */
@@ -1524,11 +1525,7 @@ typedef struct t_FmPortDsarParams
 
  @Description   Enter Deep Sleep Auto Response mode.
                 This function write the apropriate values to in the relevant
-                tables in the MURAM. It then set the Tx port in independent
-                mode as needed and redirect the receive flow to go through the
-                Dsar Fman-ctrl code
-
-                Calling this routine invalidates the descriptor.
+                tables in the MURAM.
 
  @Param[in]     h_FmPortRx - FM PORT module descriptor
  @Param[in]     params - Auto Response parameters
@@ -1538,6 +1535,23 @@ typedef struct t_FmPortDsarParams
  @Cautions      Allowed only following FM_PORT_Init().
 *//***************************************************************************/
 t_Error FM_PORT_EnterDsar(t_Handle h_FmPortRx, t_FmPortDsarParams *params);
+
+/**************************************************************************//**
+ @Function      FM_PORT_EnterDsarFinal
+
+ @Description   Enter Deep Sleep Auto Response mode.
+                This function sets the Tx port in independent mode as needed
+                and redirect the receive flow to go through the
+                Dsar Fman-ctrl code
+
+ @Param[in]     h_DsarRxPort - FM Rx PORT module descriptor
+ @Param[in]     h_DsarTxPort - FM Tx PORT module descriptor
+
+ @Return        E_OK on success; Error code otherwise.
+
+ @Cautions      Allowed only following FM_PORT_Init().
+*//***************************************************************************/
+t_Error FM_PORT_EnterDsarFinal(t_Handle h_DsarRxPort, t_Handle h_DsarTxPort);
 
 /**************************************************************************//**
  @Function      FM_PORT_ExitDsar
@@ -1851,6 +1865,21 @@ t_Error FM_PORT_AnalyzePerformanceParams(t_Handle h_FmPort);
 t_Error FM_PORT_SetAllocBufCounter(t_Handle h_FmPort, uint8_t poolId, bool enable);
 
 /**************************************************************************//**
+ @Function      FM_PORT_GetBmiCounters
+
+ @Description   Read port's BMI stat counters and place them into
+                a designated structure of counters.
+
+ @Param[in]     h_FmPort    A handle to a FM Port module.
+ @Param[out]    p_BmiStats  counters structure
+
+ @Return        E_OK on success; Error code otherwise.
+
+ @Cautions      Allowed only following FM_PORT_Init().
+*//***************************************************************************/
+t_Error FM_PORT_GetBmiCounters(t_Handle h_FmPort, t_FmPortBmiStats *p_BmiStats);
+
+/**************************************************************************//**
  @Function      FM_PORT_GetCounter
 
  @Description   Reads one of the FM PORT counters.
@@ -2151,7 +2180,12 @@ typedef union u_FmPcdHdrPrsOpts {
  @Description   A structure for defining each header for the parser
 *//***************************************************************************/
 typedef struct t_FmPcdPrsAdditionalHdrParams {
-    e_NetHeaderType         hdr;            /**< Selected header */
+    e_NetHeaderType         hdr;            /**< Selected header; use  HEADER_TYPE_NONE
+                                                 to indicate that sw parser is to run first
+                                                 (before HW parser, and independent of the
+                                                 existence of any protocol), in this case,
+                                                 swPrsEnable must be set, and all other
+                                                 parameters are irrelevant.  */
     bool                    errDisable;     /**< TRUE to disable error indication */
     bool                    swPrsEnable;    /**< Enable jump to SW parser when this
                                                  header is recognized by the HW parser. */
@@ -2478,23 +2512,6 @@ t_Error FM_PORT_PcdKgBindSchemes (t_Handle h_FmPort, t_FmPcdPortSchemesParams *p
  @Cautions      Allowed only following FM_PORT_Init() and FM_PORT_SetPCD().
 *//***************************************************************************/
 t_Error FM_PORT_PcdKgUnbindSchemes (t_Handle h_FmPort, t_FmPcdPortSchemesParams *p_PortScheme);
-
-/**************************************************************************//**
- @Function      FM_PORT_PcdPrsModifyStartOffset
-
- @Description   Runtime change of the parser start offset within the header.
-                The routine may not be called while port
-                receives packets using the PCD functionalities, therefore port must be first detached
-                from the PCD, only than the routine may be called, and than port be attached to PCD again.
- @Param[in]     h_FmPort        A handle to a FM Port module.
- @Param[in]     p_FmPcdPrsStart A structure of parameters for defining the
-                                start point for the parser.
-
- @Return        E_OK on success; Error code otherwise.
-
- @Cautions      Allowed only following FM_PORT_Init(), FM_PORT_SetPCD() and FM_PORT_DetatchPCD().
-*//***************************************************************************/
-t_Error FM_PORT_PcdPrsModifyStartOffset (t_Handle h_FmPort, t_FmPcdPrsStart *p_FmPcdPrsStart);
 
 /**************************************************************************//**
  @Function      FM_PORT_GetIPv4OptionsCount
