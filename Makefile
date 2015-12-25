@@ -96,12 +96,22 @@ libfm-arm64a53.o: EXTRA_CFLAGS+=-DLS1043
 
 libfm-arm64a53.o: CFLAGS?=-mcpu=cortex-a53  $(LOCAL_CFLAGS)
 
+libfm-arm32a53.o: EXTRA_CFLAGS+=-DLS1043
+
+libfm-arm32a53.o: CFLAGS?=-march=armv7-a  $(LOCAL_CFLAGS)
+
 CFLAGS+=$(EXTRA_CFLAGS) -isystem $(KERNEL_SRC)/include
 
 
-all: libfm-arm64a53.a
+all: libfm-arm64a53.a libfm-arm32a53.a
 
 libfm-arm64a53.o: \
+		$(FM_LIB_SRCDIR)/fm_lib.c $(wildcard $(addsuffix /*.h,$(FM_LIB_INCLUDE)))
+	@(echo "(CC)  $@")
+	@(echo "$(CC) $(CFLAGS) $(addprefix -I,$(FM_LIB_INCLUDE)) -c -o $@ $<" > .$@.cmd)
+	@($(CC) $(CFLAGS) $(addprefix -I,$(FM_LIB_INCLUDE)) -c -o $@ $<)
+
+libfm-arm32a53.o: \
 		$(FM_LIB_SRCDIR)/fm_lib.c $(wildcard $(addsuffix /*.h,$(FM_LIB_INCLUDE)))
 	@(echo "(CC)  $@")
 	@(echo "$(CC) $(CFLAGS) $(addprefix -I,$(FM_LIB_INCLUDE)) -c -o $@ $<" > .$@.cmd)
