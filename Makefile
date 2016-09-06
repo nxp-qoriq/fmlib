@@ -97,6 +97,7 @@ libfm-ppc32e6500.o libfm-ppc64e6500.o: EXTRA_CFLAGS+=-DFMAN_V3H -mlongcall
 libfm-ppc32e5500-fmv3l.o libfm-ppc64e5500-fmv3l.o: EXTRA_CFLAGS+=-DFMAN_V3L -mlongcall
 libfm-ppce500v2.o: EXTRA_CFLAGS+=-DP1023 -mlongcall
 libfm-arm32a53.o libfm-arm64a53.o: EXTRA_CFLAGS+=-DLS1043
+libfm-arm32a72.o libfm-arm64a72.o: EXTRA_CFLAGS+=-DLS1043
 
 libfm-ppc32e5500-fmv3l.o: CFLAGS?=-m32 -mhard-float -maix-struct-return -mcpu=e5500  $(LOCAL_CFLAGS)
 libfm-ppc64e5500-fmv3l.o: CFLAGS?=-m64 -mhard-float -maix-struct-return -mcpu=e5500  $(LOCAL_CFLAGS)
@@ -108,6 +109,8 @@ libfm-ppc32e6500.o: CFLAGS?=-m32 -mhard-float -maix-struct-return -mcpu=e6500  $
 libfm-ppc64e6500.o: CFLAGS?=-m64 -mhard-float -maix-struct-return -mcpu=e6500  $(LOCAL_CFLAGS)
 libfm-arm64a53.o:   CFLAGS?=-mcpu=cortex-a53   $(LOCAL_CFLAGS)
 libfm-arm32a53.o:   CFLAGS?=-march=armv7-a   $(LOCAL_CFLAGS)
+libfm-arm64a72.o:   CFLAGS?=-mcpu=cortex-a72   $(LOCAL_CFLAGS)
+libfm-arm32a72.o:   CFLAGS?=-march=armv7-a   $(LOCAL_CFLAGS)
 
 CFLAGS+=$(EXTRA_CFLAGS) -isystem $(KERNEL_SRC)/include
 
@@ -115,12 +118,14 @@ CFLAGS+=$(EXTRA_CFLAGS) -isystem $(KERNEL_SRC)/include
 all: libfm-ppc32e5500.a libfm-ppc64e5500.a libfm-ppce500mc.a \
 		libfm-ppce500v2.a libfm-ppc64e6500.a libfm-ppc32e6500.a \
 		libfm-ppc32e5500-fmv3l.a libfm-ppc64e5500-fmv3l.a \
-		libfm-arm32a53.a libfm-arm64a53.a
+		libfm-arm32a53.a libfm-arm64a53.a \
+		libfm-arm32a72.a libfm-arm64a72.a
 
 libfm-ppc32e5500.o libfm-ppc64e5500.o libfm-ppce500mc.o libfm-ppce500v2.o \
 		libfm-ppc32e6500.o libfm-ppc64e6500.o \
 		libfm-ppc32e5500-fmv3l.o libfm-ppc64e5500-fmv3l.o \
 		libfm-arm32a53.o libfm-arm64a53.o: \
+		libfm-arm32a72.o libfm-arm64a72.o: \
 		$(FM_LIB_SRCDIR)/fm_lib.c $(wildcard $(addsuffix /*.h,$(FM_LIB_INCLUDE)))
 	@(echo "(CC)  $@")
 	@(echo "$(CC) $(CFLAGS) $(addprefix -I,$(FM_LIB_INCLUDE)) -c -o $@ $<" > .$@.cmd)
@@ -161,6 +166,8 @@ targets help:
 	@(echo "	libfm-ppce500v2.a		(P1023)")
 	@(echo "	libfm-arm32a53.a		(LS1043 - 32b)")
 	@(echo "	libfm-arm64a53.a		(LS1043 - 64b)")
+	@(echo "	libfm-arm32a72.a		(LS1046 - 32b)")
+	@(echo "	libfm-arm64a72.a		(LS1046 - 64b)")
 	@(echo)
 	@(echo "make install-libfm-<arch> (e.g. \"make install-libfm-ppce500mc\"):")
 	@(echo "	install the library and headers to the location specified by DESTDIR, PREFIX")
