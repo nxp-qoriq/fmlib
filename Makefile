@@ -124,7 +124,7 @@ all: libfm-ppc32e5500.a libfm-ppc64e5500.a libfm-ppce500mc.a \
 libfm-ppc32e5500.o libfm-ppc64e5500.o libfm-ppce500mc.o libfm-ppce500v2.o \
 		libfm-ppc32e6500.o libfm-ppc64e6500.o \
 		libfm-ppc32e5500-fmv3l.o libfm-ppc64e5500-fmv3l.o \
-		libfm-arm32a53.o libfm-arm64a53.o: \
+		libfm-arm32a53.o libfm-arm64a53.o \
 		libfm-arm32a72.o libfm-arm64a72.o: \
 		$(FM_LIB_SRCDIR)/fm_lib.c $(wildcard $(addsuffix /*.h,$(FM_LIB_INCLUDE)))
 	@(echo "(CC)  $@")
