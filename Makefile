@@ -109,7 +109,7 @@ libfm-ppc32e6500.o: CFLAGS?=-m32 -mhard-float -maix-struct-return -mcpu=e6500  $
 libfm-ppc64e6500.o: CFLAGS?=-m64 -mhard-float -maix-struct-return -mcpu=e6500  $(LOCAL_CFLAGS)
 libfm-arm64a53.o:   CFLAGS?=-mcpu=cortex-a53   $(LOCAL_CFLAGS)
 libfm-arm32a53.o:   CFLAGS?=-march=armv7-a   $(LOCAL_CFLAGS)
-libfm-arm64a72.o:   CFLAGS?=-mcpu=cortex-a72   $(LOCAL_CFLAGS)
+libfm-arm64a72.o:   CFLAGS?=-mcpu=cortex-a57   $(LOCAL_CFLAGS)
 libfm-arm32a72.o:   CFLAGS?=-march=armv7-a   $(LOCAL_CFLAGS)
 
 CFLAGS+=$(EXTRA_CFLAGS) -isystem $(KERNEL_SRC)/include
