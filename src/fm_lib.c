@@ -87,6 +87,61 @@
 
 t_Error FM_GetApiVersion(t_Handle h_Fm, ioc_fm_api_version_t *p_version);
 
+
+/*******************************************************************************
+*  Device functions
+*******************************************************************************/
+
+t_Handle CreateDevice(t_Handle h_UserPriv, t_Handle h_DevId)
+{
+    t_Device *p_UserPrivDev = (t_Device*)h_UserPriv;
+    t_Device *p_Dev = NULL;
+
+    p_Dev = (t_Device *)malloc(sizeof(t_Device));
+    if (!p_Dev)
+    {
+        REPORT_ERROR(MAJOR, E_NO_MEMORY, ("Failed to allocate memory for Device !"));
+        return NULL;
+    }
+
+    memset(p_Dev, 0, sizeof(t_Device));
+    p_Dev->h_UserPriv = h_UserPriv;
+    p_UserPrivDev->owners++;
+    p_Dev->id = PTR_TO_UINT(h_DevId);
+
+    _fml_dbg("Called.\n");
+
+    return (t_Handle) p_Dev;
+}
+
+t_Error ReleaseDevice(t_Handle h_Dev)
+{
+    t_Device *p_Dev = (t_Device*)h_Dev;
+    t_Device *p_UserPrivDev = NULL;
+
+    SANITY_CHECK_RETURN_ERROR(p_Dev, E_INVALID_HANDLE);
+
+    _fml_dbg("Calling...\n");
+
+    p_UserPrivDev =  (t_Device*)p_Dev->h_UserPriv;
+
+    if (p_UserPrivDev->owners > 0)
+    	p_UserPrivDev->owners--;
+    free(p_Dev);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+
+t_Handle GetDeviceId(t_Handle h_Dev)
+{
+	t_Device *p_Dev = (t_Device*)h_Dev;
+
+	return p_Dev->id;
+}
+
+
 /*******************************************************************************
 *  FM FUNCTIONS                                                                *
 *******************************************************************************/
@@ -619,7 +674,8 @@ t_Error FM_PCD_KgSchemeDelete(t_Handle h_Scheme)
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
     }
 
-    p_PcdDev->owners--;
+    if (p_PcdDev->owners > 0)
+    	p_PcdDev->owners--;
     free(p_Dev);
 
     _fml_dbg("Called.\n");

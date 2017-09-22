@@ -434,4 +434,10 @@ typedef struct t_Device {
     uint32_t    owners;
 } t_Device;
 
+
+t_Handle CreateDevice(t_Handle h_UserPriv, t_Handle h_DevId);
+t_Error ReleaseDevice(t_Handle h_Dev);
+t_Handle GetDeviceId(t_Handle h_Dev);
+
+
 #endif /* __NCSW_EXT_H */
