@@ -2216,6 +2216,34 @@ t_Error FM_MAC_GetStatistics (t_Handle h_FmMac, t_FmMacStatistics *p_Statistics)
     return E_OK;
 }
 
+t_Error FM_MAC_GetFrameSizeCounters (t_Handle h_FmMac, t_FmMacFrameSizeCounters *p_FrameSizeCounters, e_CommMode type)
+{
+    t_Device    *p_Dev = (t_Device *)h_FmMac;
+    ioc_fm_port_mac_frame_size_counters_t param;
+
+    SANITY_CHECK_RETURN_VALUE(p_Dev, E_INVALID_HANDLE, E_OK);
+    SANITY_CHECK_RETURN_VALUE(p_FrameSizeCounters, E_INVALID_HANDLE, E_OK);
+
+    _fml_dbg("Calling...\n");
+
+    param.type = type;
+
+    if (ioctl(p_Dev->fd, FM_PORT_IOC_GET_MAC_FRAME_SIZE_COUNTERS, &param))
+        RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+
+    p_FrameSizeCounters->count_pkts_64 = param.count_pkts_64;
+    p_FrameSizeCounters->count_pkts_65_to_127 = param.count_pkts_65_to_127;
+    p_FrameSizeCounters->count_pkts_128_to_255 = param.count_pkts_128_to_255;
+    p_FrameSizeCounters->count_pkts_256_to_511 = param.count_pkts_256_to_511;
+    p_FrameSizeCounters->count_pkts_512_to_1023 = param.count_pkts_512_to_1023;
+    p_FrameSizeCounters->count_pkts_1024_to_1518 = param.count_pkts_1024_to_1518;
+    p_FrameSizeCounters->count_pkts_1519_to_1522 = param.count_pkts_1519_to_1522;
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+
 t_Error FM_PORT_GetBmiCounters (t_Handle h_FmPort, t_FmPortBmiStats *p_BmiStats)
 {
     t_Device    *p_Dev = (t_Device*) h_FmPort;
