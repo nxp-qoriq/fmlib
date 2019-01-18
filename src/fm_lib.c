@@ -731,7 +731,10 @@ t_Handle FM_PCD_CcRootBuild(t_Handle h_FmPcd, t_FmPcdCcTreeParams *p_PcdTreePara
                 params.fm_pcd_cc_group_params[i].next_engine_per_entries_in_grp[j].params.kg_params.p_direct_scheme)
                     DEV_TO_ID(params.fm_pcd_cc_group_params[i].next_engine_per_entries_in_grp[j].params.kg_params.p_direct_scheme);
 
-            /*TODO params.fm_pcd_cc_group_params[i].next_engine_per_entries_in_grp[j].manip_id*/
+            /* Convert hdr manip pointer */
+            if (params.fm_pcd_cc_group_params[i].next_engine_per_entries_in_grp[j].manip_id) {
+            	DEV_TO_ID(params.fm_pcd_cc_group_params[i].next_engine_per_entries_in_grp[j].manip_id);
+            }
         }
 
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_CC_ROOT_BUILD, &params))
@@ -955,21 +958,26 @@ t_Error FM_PCD_CcRootModifyNextEngine(t_Handle                  h_CcTree,
     memcpy(&params.cc_next_engine_params, p_FmPcdCcNextEngineParams, sizeof(t_FmPcdCcNextEngineParams));
     if (p_FmPcdCcNextEngineParams->nextEngine == e_FM_PCD_CC) {
         t_Device *p_NextDev = (t_Device*) p_FmPcdCcNextEngineParams->params.ccParams.h_CcNode;
-
         params.cc_next_engine_params.params.cc_params.cc_node_id = UINT_TO_PTR(p_NextDev->id);
     }
-
 	if (p_FmPcdCcNextEngineParams->nextEngine == e_FM_PCD_KG) {
         t_Device *p_NextDev = (t_Device*) p_FmPcdCcNextEngineParams->params.kgParams.h_DirectScheme;
-
         params.cc_next_engine_params.params.kg_params.p_direct_scheme = UINT_TO_PTR(p_NextDev->id);
     }
+
+#if (DPAA_VERSION >= 11)
+	if (p_FmPcdCcNextEngineParams->nextEngine == e_IOC_FM_PCD_FR) {
+        t_Device *p_NextDev = (t_Device*) p_FmPcdCcNextEngineParams->params.frParams.h_FrmReplic;
+        params.cc_next_engine_params.params.fr_params.frm_replic_id = UINT_TO_PTR(p_NextDev->id);
+    }
+#endif /* DPAA_VERSION >= 11 */
 
 	if (p_FmPcdCcNextEngineParams->h_Manip) {
 		t_Device *p_NextDev = (t_Device*) p_FmPcdCcNextEngineParams->h_Manip;
 		params.cc_next_engine_params.manip_id = UINT_TO_PTR(p_NextDev->id);
 	}
-    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_CC_ROOT_MODIFY_NEXT_ENGINE, &params))
+
+	if (ioctl(p_PcdDev->fd, FM_PCD_IOC_CC_ROOT_MODIFY_NEXT_ENGINE, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
     _fml_dbg("Called.\n");
@@ -1058,9 +1066,24 @@ t_Error FM_PCD_MatchTableAddKey(t_Handle            h_CcNode,
     memcpy(&params.key_params, p_KeyParams, sizeof(t_FmPcdCcKeyParams));
     if (p_KeyParams->ccNextEngineParams.nextEngine == e_FM_PCD_CC) {
         t_Device *p_NextDev = (t_Device*) p_KeyParams->ccNextEngineParams.params.ccParams.h_CcNode;
-
         params.key_params.cc_next_engine_params.params.cc_params.cc_node_id = UINT_TO_PTR(p_NextDev->id);
+    } else if (p_KeyParams->ccNextEngineParams.nextEngine == e_FM_PCD_KG) {
+    	t_Device *p_NextDev = (t_Device*) p_KeyParams->ccNextEngineParams.params.kgParams.h_DirectScheme;
+    	params.key_params.cc_next_engine_params.params.kg_params.p_direct_scheme = UINT_TO_PTR(p_NextDev->id);
     }
+#if (DPAA_VERSION >= 11)
+    else if (p_KeyParams->ccNextEngineParams.nextEngine == e_IOC_FM_PCD_FR) {
+    	t_Device *p_NextDev = (t_Device*) p_KeyParams->ccNextEngineParams.params.frParams.h_FrmReplic;
+    	params.key_params.cc_next_engine_params.params.fr_params.frm_replic_id = UINT_TO_PTR(p_NextDev->id);
+    }
+#endif /* DPAA_VERSION >= 11 */
+
+    /* Convert hdr manip pointer */
+    if (p_KeyParams->ccNextEngineParams.h_Manip) {
+    	t_Device *p_NextDev = (t_Device*) p_KeyParams->ccNextEngineParams.h_Manip;
+    	params.key_params.cc_next_engine_params.manip_id = UINT_TO_PTR(p_NextDev->id);
+    }
+
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_MATCH_TABLE_ADD_KEY, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
@@ -1114,9 +1137,24 @@ t_Error FM_PCD_MatchTableModifyKeyAndNextEngine(t_Handle            h_CcNode,
     memcpy(&params.key_params, p_KeyParams, sizeof(t_FmPcdCcKeyParams));
     if (p_KeyParams->ccNextEngineParams.nextEngine == e_FM_PCD_CC) {
         t_Device *p_NextDev = (t_Device*) p_KeyParams->ccNextEngineParams.params.ccParams.h_CcNode;
-
         params.key_params.cc_next_engine_params.params.cc_params.cc_node_id = UINT_TO_PTR(p_NextDev->id);
+    } else if (p_KeyParams->ccNextEngineParams.nextEngine == e_FM_PCD_KG) {
+    	t_Device *p_NextDev = (t_Device*) p_KeyParams->ccNextEngineParams.params.kgParams.h_DirectScheme;
+    	params.key_params.cc_next_engine_params.params.kg_params.p_direct_scheme = UINT_TO_PTR(p_NextDev->id);
     }
+#if (DPAA_VERSION >= 11)
+    else if (p_KeyParams->ccNextEngineParams.nextEngine == e_IOC_FM_PCD_FR) {
+    	t_Device *p_NextDev = (t_Device*) p_KeyParams->ccNextEngineParams.params.frParams.h_FrmReplic;
+    	params.key_params.cc_next_engine_params.params.fr_params.frm_replic_id = UINT_TO_PTR(p_NextDev->id);
+    }
+#endif /* DPAA_VERSION >= 11 */
+
+    /* Convert hdr manip pointer */
+    if (p_KeyParams->ccNextEngineParams.h_Manip) {
+    	t_Device *p_NextDev = (t_Device*) p_KeyParams->ccNextEngineParams.h_Manip;
+    	params.key_params.cc_next_engine_params.manip_id = UINT_TO_PTR(p_NextDev->id);
+    }
+
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_MATCH_TABLE_MODIFY_KEY_AND_NEXT_ENGINE, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
@@ -2028,6 +2066,7 @@ t_Handle FM_PCD_FrmReplicSetGroup(t_Handle h_FmPcd, t_FmPcdFrmReplicGroupParams 
     t_Device *p_PcdDev = (t_Device*) h_FmPcd;
     t_Device *p_Dev = NULL;
     ioc_fm_pcd_frm_replic_group_params_t params;
+    uint32_t i;
 
     SANITY_CHECK_RETURN_VALUE(p_PcdDev, E_INVALID_HANDLE, NULL);
 
@@ -2035,6 +2074,24 @@ t_Handle FM_PCD_FrmReplicSetGroup(t_Handle h_FmPcd, t_FmPcdFrmReplicGroupParams 
 
     memcpy(&params, p_FrmReplicGroupParam, sizeof(t_FmPcdFrmReplicGroupParams));
     params.id = NULL;
+
+    for (i = 0; i < p_FrmReplicGroupParam->numOfEntries; i++)
+    {
+        if (p_FrmReplicGroupParam->nextEngineParams[i].nextEngine == e_FM_PCD_CC) {
+        	t_Device *p_NextDev = (t_Device*) p_FrmReplicGroupParam->nextEngineParams[i].params.ccParams.h_CcNode;
+        	params.next_engine_params[i].params.cc_params.cc_node_id = UINT_TO_PTR(p_NextDev->id);
+        }
+        else if (p_FrmReplicGroupParam->nextEngineParams[i].nextEngine == e_FM_PCD_KG) {
+        	t_Device *p_NextDev = (t_Device*) p_FrmReplicGroupParam->nextEngineParams[i].params.kgParams.h_DirectScheme;
+        	params.next_engine_params[i].params.kg_params.p_direct_scheme = UINT_TO_PTR(p_NextDev->id);
+        }
+
+        /* Convert hdr manip pointer */
+        if (p_FrmReplicGroupParam->nextEngineParams[i].h_Manip) {
+        	t_Device *p_NextDev = (t_Device*) p_FrmReplicGroupParam->nextEngineParams[i].h_Manip;
+        	params.next_engine_params[i].manip_id = UINT_TO_PTR(p_NextDev->id);
+        }
+    }
 
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_FRM_REPLIC_GROUP_SET, &params))
     {
@@ -2101,9 +2158,19 @@ t_Error FM_PCD_FrmReplicAddMember(t_Handle h_ReplicGroup,
     memcpy(&params.next_engine_params, p_MemberParams, sizeof(*p_MemberParams));
     if (p_MemberParams->nextEngine == e_FM_PCD_CC) {
         t_Device *p_NextDev = (t_Device*) p_MemberParams->params.ccParams.h_CcNode;
-
         params.next_engine_params.params.cc_params.cc_node_id = UINT_TO_PTR(p_NextDev->id);
     }
+    else if (p_MemberParams->nextEngine == e_FM_PCD_KG) {
+        t_Device *p_NextDev = (t_Device*) p_MemberParams->params.kgParams.h_DirectScheme;
+        params.next_engine_params.params.kg_params.p_direct_scheme = UINT_TO_PTR(p_NextDev->id);
+    }
+
+    /* Convert hdr manip pointer */
+    if (p_MemberParams->h_Manip) {
+    	t_Device *p_NextDev = (t_Device*) p_MemberParams->h_Manip;
+    	params.next_engine_params.manip_id = UINT_TO_PTR(p_NextDev->id);
+    }
+
     if (ioctl(p_PcdDev->fd, FM_PCD_IOC_FRM_REPLIC_MEMBER_ADD, &params))
         RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
 
