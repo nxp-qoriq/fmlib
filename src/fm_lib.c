@@ -328,6 +328,12 @@ t_Handle FM_PCD_Open(t_FmPcdParams *p_FmPcdParams)
 
     _fml_dbg("Calling...\n");
 
+    if (!p_FmPcdParams->h_Fm)
+    {
+        REPORT_ERROR(MAJOR, E_NO_DEVICE, ("FM device not available!!"));
+        return NULL;
+    }
+
     p_Dev = (t_Device*) malloc(sizeof(t_Device));
     if (!p_Dev)
     {
@@ -1579,6 +1585,12 @@ t_Handle FM_PORT_Open(t_FmPortParams *p_FmPortParams)
     t_FmPort    *p_FmPort;
 
     _fml_dbg("Calling...\n");
+
+    if (!p_FmPortParams->h_Fm)
+    {
+        REPORT_ERROR(MAJOR, E_NO_DEVICE, ("FM device not available!!"));
+        return NULL;
+    }
 
     p_Dev = (t_Device*) malloc(sizeof(t_Device));
     if (!p_Dev)
