@@ -1,6 +1,7 @@
 /*
  * Copyright 2008-2016 Freescale Semiconductor Inc.
  * Copyright 2017-2018 NXP
+ * Copyright 2021 NXP
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -2969,6 +2970,19 @@ t_Handle FM_PCD_NetEnvCharacteristicsSet(t_Handle h_FmPcd, t_FmPcdNetEnvParams *
  @Return        E_OK on success; Error code otherwise.
 *//***************************************************************************/
 t_Error FM_PCD_NetEnvCharacteristicsDelete(t_Handle h_NetEnv);
+
+/**************************************************************************//**
+ @Function      FM_PCD_AllowHcUsage
+
+ @Description   This routine must be called to temporary allow/deny HC usage
+                This is the way to avoid crash of certain HC operations
+                performed under heavy traffic.
+
+ @Param[in] 	bool     FALSE - Deny HC usage HC, TRUE - Allow HC usage
+
+ @Return        0 on success; Error code otherwise.
+*//***************************************************************************/
+t_Error 	FM_PCD_AllowHcUsage(t_Handle h_FmPcd, bool allow);
 
 /**************************************************************************//**
  @Function      FM_PCD_KgSchemeSet

@@ -1,6 +1,7 @@
 /*
  * Copyright 2008-2016 Freescale Semiconductor Inc.
  * Copyright 2017-2018 NXP
+ * Copyright 2021 NXP
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -596,6 +597,27 @@ t_Error FM_PCD_NetEnvCharacteristicsDelete(t_Handle h_NetEnv)
 
     p_PcdDev->owners--;
     free(p_Dev);
+
+    _fml_dbg("Called.\n");
+
+    return E_OK;
+}
+
+t_Error FM_PCD_AllowHcUsage(t_Handle h_FmPcd, bool allow)
+{
+    t_Device *p_PcdDev = (t_Device*) h_FmPcd;
+    uint8_t allow_hc = 0;
+
+    SANITY_CHECK_RETURN_ERROR(p_PcdDev, E_INVALID_HANDLE);
+
+    _fml_dbg("Calling...\n");
+
+    allow_hc = allow ? 1 : 0;
+
+    if (ioctl(p_PcdDev->fd, FM_PCD_IOC_ALLOW_HC_USAGE, &allow_hc))
+    {
+    	RETURN_ERROR(MINOR, E_INVALID_OPERATION, NO_MSG);
+    }
 
     _fml_dbg("Called.\n");
 
