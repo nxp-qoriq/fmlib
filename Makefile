@@ -58,7 +58,7 @@ INSTALL?=install
 LIB_DEST_DIR?=$(PREFIX)/lib
 
 # Add any collateral files that need to be included in the archive, here:
-FM_LIB_DOCFILES=COPYING INSTALL README
+FM_LIB_DOCFILES=LICENSE INSTALL README
 
 # Don't touch these!
 FM_LIB_YOCTO_STAGING=$(KERNEL_SRC)/include/linux/fmd

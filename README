@@ -30,8 +30,8 @@
 This package contains Frame Manager user space library.
 
 The Frame Manager library provides an API on top of the Frame Manager driver
-ioctl calls, that provides a user space application with a simple way 
+ioctl calls, that provides a user space application with a simple way
 to configure driver parameters and PCD (parse - classify - distribute) rules.
 
-The licensing information for this package is included in the COPYING file.
+The licensing information for this package is included in the LICENSE file.
 
