@@ -136,7 +136,7 @@ t_Handle GetDeviceId(t_Handle h_Dev)
 {
 	t_Device *p_Dev = (t_Device*)h_Dev;
 
-	return p_Dev->id;
+	return UINT_TO_PTR(p_Dev->id);
 }
 
 
