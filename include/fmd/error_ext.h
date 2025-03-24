@@ -326,7 +326,7 @@ int ERROR_DYNAMIC_LEVEL = ERROR_GLOBAL_LEVEL;
 /* No debug/error/event messages at all */
 #define DBG(_level, _vmsg)
 
-#define REPORT_ERROR(_level, _err, _vmsg)
+#define REPORT_ERROR(_level, _err, _vmsg) do {} while (0)
 
 #define RETURN_ERROR(_level, _err, _vmsg) \
         return ERROR_CODE(_err)
