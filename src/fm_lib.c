@@ -478,7 +478,7 @@ t_Error FM_PCD_SetException(t_Handle h_FmPcd, e_FmPcdExceptions exception, bool 
 
     _fml_dbg("Calling...\n");
 
-    params.exception = exception;
+    params.exception = (ioc_fm_pcd_exceptions) exception;
     params.enable = enable;
 
     if (ioctl(p_Dev->fd, FM_PCD_IOC_SET_EXCEPTION, &params))
